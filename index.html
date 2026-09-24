@@ -30,11 +30,12 @@
     .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; }
     .btn-secondary { background-color: var(--secondary-color); }
     .btn-danger { background-color: var(--danger-color); }
-    .btn-warning { background-color: var(--warning-color); }
+    .btn-warning { background-color: var(--warning-color); color: #1a202c; }
     .alert { padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.88rem; display: none; }
     .alert-danger { background-color: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; }
     .alert-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
     .user-info-box { background-color: #ebf8ff; border-left: 4px solid var(--primary-color); padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+    .action-panel { background: #f7fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; margin-bottom: 15px; }
     .hidden { display: none !important; }
     .nav-menu { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
     .nav-btn { padding: 8px 12px; background: #edf2f7; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.82rem; }
@@ -82,45 +83,60 @@
 
       <div id="driver-msg-box" class="alert"></div>
 
-      <div class="form-group">
-        <label for="select-driver-vehicle">Pilih Kenderaan Tugasan:</label>
-        <select id="select-driver-vehicle" class="form-control" onchange="autoFetchLinkedCard()">
-          <option value="">-- Sila Pilih Kenderaan --</option>
-        </select>
-      </div>
-
-      <div style="margin-bottom: 20px; padding: 12px; background: #f7fafc; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9rem;">
-        <p style="margin-bottom: 6px;"><strong>Nombor Kad TNG:</strong> <span id="driver-card-no" style="font-weight: bold; color: var(--primary-color);">-</span></p>
-        <p style="margin-bottom: 6px;"><strong>Baki Semasa:</strong> RM <span id="driver-card-balance">0.00</span></p>
-        <p><strong>Status Kad:</strong> <span id="driver-card-status" style="font-weight: bold;">-</span></p>
-      </div>
-
-      <!-- BORANG PEMULANGAN KAD (HANYA MUNCUL APABILA PERLU PULANG KAD) -->
-      <div id="return-card-form" class="hidden" style="margin-bottom: 15px; padding: 12px; background: #fffaf0; border: 1px solid #feebc8; border-radius: 6px;">
-        <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #c05621;">Borang Pemulangan Kad</h4>
+      <!-- KAWASAN PILIHAN KENDERAAN & KAD -->
+      <div class="action-panel">
         <div class="form-group">
-          <label style="font-size: 0.82rem;">Baki Akhir Semasa Pulang (RM)</label>
-          <input type="number" step="0.01" id="input-return-balance" class="form-control" placeholder="0.00" required>
-        </div>
-        <div class="form-group">
-          <label style="font-size: 0.82rem;">Keadaan Kad</label>
-          <select id="select-card-condition" class="form-control">
-            <option value="BAIK">BAIK (Boleh digunakan)</option>
-            <option value="ROSAK">ROSAK (Calar / Tidak Boleh Dibaca)</option>
+          <label for="select-driver-vehicle"><strong>1. Pilih Kenderaan Tugasan:</strong></label>
+          <select id="select-driver-vehicle" class="form-control" onchange="autoFetchLinkedCard()">
+            <option value="">-- Sila Pilih Kenderaan --</option>
           </select>
         </div>
-        <div class="form-group">
-          <label style="font-size: 0.82rem;">Catatan Pemulangan</label>
-          <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan outstation">
+
+        <div style="padding: 10px; background: #ffffff; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.88rem; margin-top: 10px;">
+          <p style="margin-bottom: 4px;"><strong>Nombor Kad TNG:</strong> <span id="driver-card-no" style="font-weight: bold; color: var(--primary-color);">-</span></p>
+          <p style="margin-bottom: 4px;"><strong>Baki Semasa:</strong> RM <span id="driver-card-balance">0.00</span></p>
+          <p><strong>Status Kad:</strong> <span id="driver-card-status" style="font-weight: bold;">-</span></p>
         </div>
       </div>
 
-      <button id="btn-take-card" class="btn" style="margin-bottom: 10px;" onclick="handleTakeCard()">AMBIL KAD</button>
-      <button id="btn-return-card" class="btn btn-warning" style="margin-bottom: 10px;" onclick="handleReturnCard()">PULANG KAD</button>
-      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="showDriverHistory()">SEJARAH SAYA</button>
-      <button class="btn btn-danger" onclick="handleLogout()">LOG KELUAR</button>
+      <!-- BUTANG MENU TUGASAN PEMANDU (SENTIASA DIPAPARKAN) -->
+      <div style="margin-bottom: 15px;">
+        <button id="btn-take-card" class="btn" style="margin-bottom: 10px; background-color: var(--primary-color);" onclick="handleTakeCard()">
+          📌 AMBIL KAD
+        </button>
 
-      <!-- SEJARAH TRANSACTION PEMANDU -->
+        <!-- BORANG AMBIL / PULANG KAD -->
+        <div id="return-card-form" class="hidden" style="margin-bottom: 10px; padding: 12px; background: #fffaf0; border: 1px solid #feebc8; border-radius: 6px;">
+          <h4 style="font-size: 0.88rem; margin-bottom: 8px; color: #c05621;">Maklumat Pemulangan Kad</h4>
+          <div class="form-group">
+            <label style="font-size: 0.82rem;">Baki Akhir Semasa Pulang (RM)</label>
+            <input type="number" step="0.01" id="input-return-balance" class="form-control" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.82rem;">Keadaan Kad</label>
+            <select id="select-card-condition" class="form-control">
+              <option value="BAIK">BAIK (Boleh digunakan)</option>
+              <option value="ROSAK">ROSAK (Calar / Tidak Boleh Dibaca)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 0.82rem;">Catatan Pemulangan</label>
+            <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan outstation">
+          </div>
+        </div>
+
+        <button id="btn-return-card" class="btn btn-warning" style="margin-bottom: 10px;" onclick="handleReturnCard()">
+          🔄 PULANG KAD
+        </button>
+        <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="showDriverHistory()">
+          📋 SEJARAH SAYA
+        </button>
+        <button class="btn btn-danger" onclick="handleLogout()">
+          🚪 LOG KELUAR
+        </button>
+      </div>
+
+      <!-- SEJARAH TRANSAKSI PEMANDU -->
       <div id="driver-history-box" class="hidden" style="margin-top: 20px;">
         <h3 style="font-size: 0.95rem; margin-bottom: 10px;">Sejarah Serah Terima Saya</h3>
         <table id="table-driver-history">
@@ -201,7 +217,7 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.3.0)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.3.2)</p>
   </footer>
 
   <script>
@@ -292,12 +308,12 @@
 
     function autoFetchLinkedCard() {
       var regNo = document.getElementById('select-driver-vehicle').value;
-      document.getElementById('return-card-form').classList.add('hidden');
 
       if (!regNo) {
         document.getElementById('driver-card-no').innerText = "-";
         document.getElementById('driver-card-balance').innerText = "0.00";
         document.getElementById('driver-card-status').innerText = "-";
+        document.getElementById('return-card-form').classList.add('hidden');
         currentSelectedCard = null;
         return;
       }
@@ -316,6 +332,7 @@
               document.getElementById('input-return-balance').value = parseFloat(res.card.balance).toFixed(2);
             } else {
               document.getElementById('driver-card-status').style.color = "var(--success-color)";
+              document.getElementById('return-card-form').classList.add('hidden');
             }
           } else {
             alert(res.message || "Tiada kad dipautkan.");
@@ -326,7 +343,7 @@
     function handleTakeCard() {
       var regNo = document.getElementById('select-driver-vehicle').value;
       if (!regNo) {
-        alert("Sila pilih kenderaan terlebih dahulu.");
+        alert("Sila pilih Kenderaan Tugasan terlebih dahulu.");
         return;
       }
 
@@ -336,7 +353,7 @@
 
       sendJsonpRequest({ action: 'takeCard', userId: currentUser.userId, vehicleRegNo: regNo, notes: 'Pengambilan oleh ' + currentUser.fullName })
         .then(res => {
-          btn.innerText = 'AMBIL KAD';
+          btn.innerText = '📌 AMBIL KAD';
           btn.disabled = false;
 
           var msgBox = document.getElementById('driver-msg-box');
@@ -347,21 +364,28 @@
           if (res.success) autoFetchLinkedCard();
         })
         .catch(() => {
-          btn.innerText = 'AMBIL KAD';
+          btn.innerText = '📌 AMBIL KAD';
           btn.disabled = false;
         });
     }
 
     function handleReturnCard() {
       var regNo = document.getElementById('select-driver-vehicle').value;
+      if (!regNo) {
+        alert("Sila pilih Kenderaan Tugasan terlebih dahulu.");
+        return;
+      }
+
+      var form = document.getElementById('return-card-form');
+      if (form.classList.contains('hidden')) {
+        form.classList.remove('hidden');
+        alert("Sila masukkan Baki Akhir Semasa Pulang di dalam borang yang dipaparkan.");
+        return;
+      }
+
       var returnBal = document.getElementById('input-return-balance').value;
       var condition = document.getElementById('select-card-condition').value;
       var notes = document.getElementById('input-return-notes').value;
-
-      if (!regNo) {
-        alert("Sila pilih kenderaan terlebih dahulu.");
-        return;
-      }
 
       if (returnBal === "" || parseFloat(returnBal) < 0) {
         alert("Sila masukkan baki pemulangan yang sah.");
@@ -374,7 +398,7 @@
 
       sendJsonpRequest({ action: 'returnCard', userId: currentUser.userId, vehicleRegNo: regNo, returnBalance: returnBal, cardCondition: condition, notes: notes })
         .then(res => {
-          btn.innerText = 'PULANG KAD';
+          btn.innerText = '🔄 PULANG KAD';
           btn.disabled = false;
 
           var msgBox = document.getElementById('driver-msg-box');
@@ -385,7 +409,7 @@
           if (res.success) autoFetchLinkedCard();
         })
         .catch(() => {
-          btn.innerText = 'PULANG KAD';
+          btn.innerText = '🔄 PULANG KAD';
           btn.disabled = false;
         });
     }
