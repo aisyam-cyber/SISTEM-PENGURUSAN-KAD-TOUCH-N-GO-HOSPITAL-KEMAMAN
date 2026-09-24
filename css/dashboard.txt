@@ -1,0 +1,108 @@
+/* GAYA DASHBOARD KPI & KAD STATISTIK */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 5px solid var(--primary-color);
+}
+
+.kpi-card.success { border-left-color: var(--success-color); }
+.kpi-card.warning { border-left-color: #f59e0b; }
+.kpi-card.danger { border-left-color: var(--danger-color); }
+
+.kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: var(--primary-color);
+}
+
+.kpi-card.success .kpi-icon { color: var(--success-color); background-color: #d1fae5; }
+.kpi-card.warning .kpi-icon { color: #f59e0b; background-color: #fef3c7; }
+.kpi-card.danger .kpi-icon { color: var(--danger-color); background-color: #fee2e2; }
+
+.kpi-info h4 {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-info .kpi-value {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-top: 4px;
+}
+
+/* SEKSYEN JADUAL DASHBOARD */
+.dashboard-section {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h3 {
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.badge-status {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.badge-status.active { background-color: #d1fae5; color: #065f46; }
+.badge-status.warning { background-color: #fef3c7; color: #92400e; }
+.badge-status.danger { background-color: #fee2e2; color: #991b1b; }
