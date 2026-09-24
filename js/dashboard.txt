@@ -1,0 +1,293 @@
+/**
+ * SISTEM PENGURUSAN KAD TOUCH 'N GO HOSPITAL KEMAMAN
+ * Versi: 1.2.0
+ * Fail: js/dashboard.js
+ * Fungsi: Logik Antaramuka & Penyerapan Data Dashboard Penyelia dan Pemandu
+ */
+
+/**
+ * Muat Turun Dashboard Utama Berasaskan Peranan
+ */
+async function renderDashboardView() {
+    const user = JSON.parse(localStorage.getItem("tng_user") || "{}");
+    const appContent = document.getElementById("appContent");
+
+    appContent.innerHTML = `<div style="text-align:center; padding: 40px;">
+        <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-color)"></i>
+        <p style="margin-top: 10px; color: var(--text-muted);">Memuatkan data dashboard...</p>
+    </div>`;
+
+    if (user.role === "PENYELIA") {
+        await loadSupervisorDashboard(appContent);
+    } else {
+        await loadDriverDashboard(appContent);
+    }
+}
+
+/**
+ * Render Dashboard Penyelia
+ */
+async function loadSupervisorDashboard(container) {
+    const token = localStorage.getItem("tng_session_token");
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+                action: "GET_SUPERVISOR_DASHBOARD",
+                token: token
+            })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            container.innerHTML = `<div class="alert-box error">${result.message}</div>`;
+            return;
+        }
+
+        const kpi = result.data.kpi;
+        const lowBal = result.data.lowBalanceCards;
+        const recentTrx = result.data.recentTransactions;
+
+        let html = `
+            <!-- KPI STATISTIK -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-credit-card"></i></div>
+                    <div class="kpi-info">
+                        <h4>Jumlah Kad</h4>
+                        <div class="kpi-value">${kpi.totalCards}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card success">
+                    <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="kpi-info">
+                        <h4>Kad Aktif</h4>
+                        <div class="kpi-value">${kpi.activeCards}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card warning">
+                    <div class="kpi-icon"><i class="fa-solid fa-box-archive"></i></div>
+                    <div class="kpi-info">
+                        <h4>Dalam Simpanan</h4>
+                        <div class="kpi-value">${kpi.inStorageCards}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card danger">
+                    <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="kpi-info">
+                        <h4>Hilang / Rosak</h4>
+                        <div class="kpi-value">${kpi.lostCards + kpi.damagedCards}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-van-shuttle"></i></div>
+                    <div class="kpi-info">
+                        <h4>Kenderaan</h4>
+                        <div class="kpi-value">${kpi.totalVehicles}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-user-gear"></i></div>
+                    <div class="kpi-info">
+                        <h4>Pemandu</h4>
+                        <div class="kpi-value">${kpi.totalDrivers}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card success">
+                    <div class="kpi-icon"><i class="fa-solid fa-receipt"></i></div>
+                    <div class="kpi-info">
+                        <h4>Transaksi Hari Ini</h4>
+                        <div class="kpi-value">${kpi.todayTransactionsCount}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card success">
+                    <div class="kpi-icon"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="kpi-info">
+                        <h4>Tambah Nilai (Bulan Ini)</h4>
+                        <div class="kpi-value">RM ${kpi.monthlyTopupTotal.toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AMARAN BAKI RENDAH -->
+            ${lowBal.length > 0 ? `
+            <div class="dashboard-section" style="border-left: 4px solid var(--danger-color);">
+                <div class="section-header">
+                    <h3 style="color: var(--danger-color);"><i class="fa-solid fa-bell"></i> Amaran Baki Rendah (&lt; RM 50.00)</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombor Kad</th>
+                                <th>Nama Kad</th>
+                                <th>Status</th>
+                                <th>Baki Semasa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${lowBal.map(c => `
+                                <tr>
+                                    <td><strong>${c.cardNumber}</strong></td>
+                                    <td>${c.cardName}</td>
+                                    <td><span class="badge-status warning">${c.status}</span></td>
+                                    <td style="color: var(--danger-color); font-weight: bold;">RM ${c.balance.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- TRANSAKSI TERKINI -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Transaksi Terkini</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Transaksi</th>
+                                <th>Tarikh / Masa</th>
+                                <th>No. Kad</th>
+                                <th>Kenderaan</th>
+                                <th>Pemandu</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${recentTrx.length > 0 ? recentTrx.map(t => `
+                                <tr>
+                                    <td>${t.trxId}</td>
+                                    <td>${t.date}${t.time}</td>
+                                    <td>${t.cardNumber}</td>
+                                    <td>${t.vehiclePlate}</td>
+                                    <td>${t.driverName}</td>
+                                    <td style="font-weight: bold;">RM ${t.amount.toFixed(2)}</td>
+                                </tr>
+                            `).join('') : `<tr><td colspan="6" style="text-align:center;">Tiada rekod transaksi terkini.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (e) {
+        container.innerHTML = `<div class="alert-box error">Ralat memuatkan data dashboard: ${e.message}</div>`;
+    }
+}
+
+/**
+ * Render Dashboard Pemandu
+ */
+async function loadDriverDashboard(container) {
+    const token = localStorage.getItem("tng_session_token");
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+                action: "GET_DRIVER_DASHBOARD",
+                token: token
+            })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            container.innerHTML = `<div class="alert-box error">${result.message}</div>`;
+            return;
+        }
+
+        const driver = result.data.driver;
+        const card = result.data.assignedCard;
+        const myTrx = result.data.recentTransactions;
+
+        let html = `
+            <div class="dashboard-section">
+                <h3><i class="fa-solid fa-id-card-clip"></i> Profil Pemandu</h3>
+                <p style="margin-top: 10px;"><strong>Nama:</strong> ${driver.fullName}</p>
+                <p><strong>ID Pemandu:</strong> ${driver.driverId} &bull; <strong>Unit:</strong> ${driver.unit}</p>
+            </div>
+
+            <!-- MAKLUMAT KAD ASSIGNED -->
+            <div class="kpi-grid">
+                <div class="kpi-card ${card ? 'success' : 'warning'}">
+                    <div class="kpi-icon"><i class="fa-solid fa-credit-card"></i></div>
+                    <div class="kpi-info">
+                        <h4>Kad Touch 'n Go Anda</h4>
+                        <div class="kpi-value">${card ? card.cardNumber : 'TIADA KAD'}</div>
+                        <small>${card ? card.cardName : 'Sila minta penyerahan kad daripada Penyelia'}</small>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fa-solid fa-van-shuttle"></i></div>
+                    <div class="kpi-info">
+                        <h4>Kenderaan Assigned</h4>
+                        <div class="kpi-value">${card ? card.vehiclePlate : 'TIADA'}</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card ${card && card.balance < 50 ? 'danger' : 'success'}">
+                    <div class="kpi-icon"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="kpi-info">
+                        <h4>Baki Kad Semasa</h4>
+                        <div class="kpi-value">RM ${card ? card.balance.toFixed(2) : '0.00'}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRANSAKSI TERKINI PEMANDU -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-history"></i> Transaksi Terkini Saya</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tarikh / Masa</th>
+                                <th>No. Kad</th>
+                                <th>Kenderaan</th>
+                                <th>Lokasi</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${myTrx.length > 0 ? myTrx.map(t => `
+                                <tr>
+                                    <td>${t.date}${t.time}</td>
+                                    <td>${t.cardNumber}</td>
+                                    <td>${t.vehiclePlate}</td>
+                                    <td>${t.location}</td>
+                                    <td style="font-weight: bold;">RM ${t.amount.toFixed(2)}</td>
+                                </tr>
+                            `).join('') : `<tr><td colspan="5" style="text-align:center;">Tiada sejarah transaksi direkodkan.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (e) {
+        container.innerHTML = `<div class="alert-box error">Ralat memuatkan data dashboard pemandu: ${e.message}</div>`;
+    }
+}

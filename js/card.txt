@@ -1,0 +1,233 @@
+/**
+ * SISTEM PENGURUSAN KAD TOUCH 'N GO HOSPITAL KEMAMAN
+ * Versi: 1.3.0
+ * Fail: js/card.js
+ * Fungsi: Logik Antaramuka CRUD & Modal Borang Pengurusan Kad TNG
+ */
+
+let globalCardsData = [];
+
+/**
+ * Render Halaman Utama Pengurusan Kad
+ */
+async function renderCardView() {
+    const appContent = document.getElementById("appContent");
+
+    appContent.innerHTML = `
+        <div class="action-bar">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="cardSearchInput" placeholder="Cari nombor atau nama kad..." onkeyup="filterCards()">
+            </div>
+            <button class="btn-add" onclick="openCreateCardModal()">
+                <i class="fa-solid fa-plus"></i> Daftar Kad Baharu
+            </button>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID Kad</th>
+                            <th>Nombor Kad</th>
+                            <th>Nama Kad</th>
+                            <th>Jenis</th>
+                            <th>Status</th>
+                            <th>Kenderaan</th>
+                            <th>Baki Semasa</th>
+                            <th>Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cardTableBody">
+                        <tr><td colspan="8" style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Memuatkan data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MODAL BORANG KAD -->
+        <div id="cardModal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 id="cardModalTitle">Daftar Kad Touch 'n Go</h3>
+                    <button class="btn-icon" onclick="closeCardModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form id="cardForm" onsubmit="handleSaveCard(event)">
+                    <input type="hidden" id="modalCardId">
+                    <div class="form-group">
+                        <label>Nombor Kad TNG (10-16 Digit)</label>
+                        <input type="text" id="modalCardNo" required placeholder="Contoh: 1082938492">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Kad / Pengenalan</label>
+                        <input type="text" id="modalCardName" required placeholder="Contoh: TNG Ambulans 01">
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Kad</label>
+                        <select id="modalCardType" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+                            <option value="WISMA / KORPORAT">WISMA / KORPORAT</option>
+                            <option value="TNG NFC">TNG NFC</option>
+                            <option value="TNG STANDARD">TNG STANDARD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Baki Permulaan (RM)</label>
+                        <input type="number" step="0.01" id="modalCardBalance" value="100.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi Simpanan</label>
+                        <input type="text" id="modalStorageLocation" value="Pejabat Penyelia">
+                    </div>
+                    <div id="cardFormAlert" class="alert-box hidden"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="closeCardModal()">Batal</button>
+                        <button type="submit" class="btn-primary" style="width:auto;">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    await fetchAllCards();
+}
+
+/**
+ * Muat Turun Data Kad dari Backend
+ */
+async function fetchAllCards() {
+    const token = localStorage.getItem("tng_session_token");
+    const tbody = document.getElementById("cardTableBody");
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "GET_ALL_CARDS", token: token })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            globalCardsData = result.data;
+            renderCardRows(globalCardsData);
+        } else {
+            tbody.innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">${result.message}</td></tr>`;
+        }
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Ralat sambungan: ${e.message}</td></tr>`;
+    }
+}
+
+/**
+ * Render Baris Jadual Kad
+ */
+function renderCardRows(cards) {
+    const tbody = document.getElementById("cardTableBody");
+    if (!cards || cards.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Tiada rekod kad ditemui.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = cards.map(c => `
+        <tr>
+            <td><strong>${c.cardId}</strong></td>
+            <td>${c.cardNumber}</td>
+            <td>${c.cardName}</td>
+            <td>${c.cardType}</td>
+            <td><span class="badge-status ${c.status === 'AKTIF' || c.status === 'DALAM GUNA' ? 'active' : 'warning'}">${c.status}</span></td>
+            <td>${c.vehicleAssigned}</td>
+            <td style="font-weight:bold; color:${c.balance < 50 ? 'var(--danger-color)' : 'inherit'};">RM ${c.balance.toFixed(2)}</td>
+            <td>
+                <button class="btn-icon" title="Edit Kad" onclick="openEditCardModal('${c.cardId}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn-icon danger" title="Arkibkan Kad" onclick="confirmArchiveCard('${c.cardId}')"><i class="fa-solid fa-box-archive"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/**
+ * Carian & Penapisan Kad
+ */
+function filterCards() {
+    const query = document.getElementById("cardSearchInput").value.toLowerCase();
+    const filtered = globalCardsData.filter(c => 
+        c.cardNumber.toLowerCase().includes(query) || 
+        c.cardName.toLowerCase().includes(query)
+    );
+    renderCardRows(filtered);
+}
+
+function openCreateCardModal() {
+    document.getElementById("cardModalTitle").textContent = "Daftar Kad Touch 'n Go";
+    document.getElementById("modalCardId").value = "";
+    document.getElementById("modalCardNo").value = "";
+    document.getElementById("modalCardNo").disabled = false;
+    document.getElementById("modalCardName").value = "";
+    document.getElementById("modalCardBalance").value = "100.00";
+    document.getElementById("cardModal").classList.remove("hidden");
+}
+
+function closeCardModal() {
+    document.getElementById("cardModal").classList.add("hidden");
+}
+
+async function handleSaveCard(event) {
+    event.preventDefault();
+    const user = JSON.parse(localStorage.getItem("tng_user") || "{}");
+    const token = localStorage.getItem("tng_session_token");
+    const cardId = document.getElementById("modalCardId").value;
+    const alertBox = document.getElementById("cardFormAlert");
+
+    const payloadData = {
+        cardNumber: document.getElementById("modalCardNo").value,
+        cardName: document.getElementById("modalCardName").value,
+        cardType: document.getElementById("modalCardType").value,
+        initialBalance: document.getElementById("modalCardBalance").value,
+        storageLocation: document.getElementById("modalStorageLocation").value
+    };
+
+    const action = cardId ? "UPDATE_CARD" : "CREATE_CARD";
+    if (cardId) payloadData.cardId = cardId;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+                action: action,
+                token: token,
+                currentUserRole: user.role,
+                data: payloadData
+            })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            closeCardModal();
+            await fetchAllCards();
+        } else {
+            showAlert(alertBox, result.message, "error");
+        }
+    } catch (e) {
+        showAlert(alertBox, "Ralat menyimpan kad.", "error");
+    }
+}
+
+async function confirmArchiveCard(cardId) {
+    if (confirm(`Adakah anda pasti untuk mengarkibkan Kad ID: ${cardId}?`)) {
+        const token = localStorage.getItem("tng_session_token");
+        const user = JSON.parse(localStorage.getItem("tng_user") || "{}");
+
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+                action: "ARCHIVE_CARD",
+                token: token,
+                currentUserRole: user.role,
+                data: { cardId: cardId }
+            })
+        });
+        await fetchAllCards();
+    }
+}
