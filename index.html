@@ -7,7 +7,6 @@
   <style>
     :root {
       --primary: #0f172a;
-      --primary-accent: #1e3a8a;
       --brand-blue: #2563eb;
       --brand-light: #eff6ff;
       --success: #16a34a;
@@ -20,10 +19,9 @@
       --text-muted: #64748b;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
     body { background-color: var(--bg-main); color: var(--text-dark); line-height: 1.5; }
 
-    /* HEADER PREMIUM */
     .header {
       background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
       color: #ffffff;
@@ -35,45 +33,33 @@
     .header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.5px; }
     .header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
 
-    .container { max-width: 520px; margin: 30px auto; padding: 0 16px; }
-    .container-wide { max-width: 1100px; margin: 30px auto; padding: 0 16px; }
+    .container { max-width: 520px; margin: 25px auto; padding: 0 16px; }
+    .container-wide { max-width: 1100px; margin: 25px auto; padding: 0 16px; }
 
     .card {
       background: var(--card-bg);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 10px 25px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
+      box-shadow: 0 10px 25px -3px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
     }
 
-    /* WIDGET KAD DIPINJAM TERUS DI DASHBOARD (LIVE PINJAMAN) */
     .borrowed-live-widget {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       color: #ffffff;
       border-radius: 12px;
       padding: 18px;
       margin-bottom: 20px;
-      box-shadow: 0 8px 16px rgba(15,23,42,0.15);
       border-left: 6px solid #f59e0b;
-      position: relative;
     }
-    .borrowed-live-widget h4 { font-size: 0.82rem; text-transform: uppercase; color: #fbbf24; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .borrowed-live-widget h4 { font-size: 0.82rem; text-transform: uppercase; color: #fbbf24; letter-spacing: 0.5px; margin-bottom: 6px; }
     .borrowed-live-widget .card-no { font-size: 1.3rem; font-weight: 800; color: #ffffff; }
     .borrowed-live-widget .veh-no { font-size: 0.95rem; color: #cbd5e1; margin-top: 2px; }
-    .borrowed-live-widget .time-tag { font-size: 0.78rem; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 8px; color: #e2e8f0; }
 
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-control {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      background-color: #ffffff;
-      transition: all 0.2s;
-    }
-    .form-control:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); outline: none; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+    .form-control { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background-color: #ffffff; }
+    .form-control:focus { border-color: var(--brand-blue); outline: none; }
 
     .btn {
       display: block;
@@ -87,30 +73,19 @@
       font-weight: 700;
       cursor: pointer;
       text-align: center;
-      transition: all 0.2s;
-      box-shadow: 0 4px 6px -1px rgba(37,99,235,0.2);
     }
-    .btn:hover { background-color: #1d4ed8; }
-    .btn-secondary { background-color: #475569; box-shadow: none; }
-    .btn-danger { background-color: var(--danger); box-shadow: 0 4px 6px -1px rgba(220,38,38,0.2); }
-    .btn-warning { background-color: var(--warning); color: #ffffff; box-shadow: 0 4px 6px -1px rgba(217,119,6,0.2); }
-    .btn-success { background-color: var(--success); box-shadow: 0 4px 6px -1px rgba(22,163,74,0.2); }
+    .btn-secondary { background-color: #475569; }
+    .btn-danger { background-color: var(--danger); }
+    .btn-warning { background-color: var(--warning); color: #ffffff; }
+    .btn-success { background-color: var(--success); }
 
     .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem; display: none; font-weight: 500; }
     .alert-danger { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
     .alert-success { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 
-    .user-info-box {
-      background-color: var(--brand-light);
-      border-left: 4px solid var(--brand-blue);
-      padding: 14px 16px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-    }
-
+    .user-info-box { background-color: var(--brand-light); border-left: 4px solid var(--brand-blue); padding: 14px 16px; margin-bottom: 20px; border-radius: 8px; }
     .hidden { display: none !important; }
 
-    /* SIDENAV / TAB DESIGN */
     .driver-main-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .action-btn-card {
       padding: 16px 12px;
@@ -124,7 +99,6 @@
       align-items: center;
       gap: 6px;
       color: white;
-      transition: all 0.2s;
     }
     .btn-take-mode { background-color: var(--brand-blue); }
     .btn-return-mode { background-color: var(--warning); }
@@ -175,17 +149,15 @@
         <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Peranan: <strong>PEMANDU</strong></p>
       </div>
 
-      <!-- WIDGET LIVE PINJAMAN AKTIF PEMANDU -->
       <div id="driver-live-borrowed-widget" class="borrowed-live-widget hidden">
         <h4>⚠️ KAD SEDANG DIPINJAM KEPADA ANDA</h4>
         <div class="card-no" id="widget-card-no">-</div>
         <div class="veh-no" id="widget-veh-no">-</div>
-        <div class="time-tag">Dipinjam pada: <span id="widget-borrow-time">-</span></div>
+        <div style="font-size: 0.78rem; color: #e2e8f0; margin-top: 6px;">Dipinjam pada: <span id="widget-borrow-time">-</span></div>
       </div>
 
       <div id="driver-msg-box" class="alert"></div>
 
-      <!-- BUTANG MOD AMBIL / HANTAR -->
       <div class="driver-main-actions">
         <button id="btn-mode-take" class="action-btn-card btn-take-mode" onclick="showTakeForm()">
           <span style="font-size: 1.3rem;">📌</span>
@@ -197,7 +169,7 @@
         </button>
       </div>
 
-      <!-- FORM 1: AMBIL KAD -->
+      <!-- FORM 1: BORANG AMBIL KAD -->
       <div id="panel-take-card" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px;">
         <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 12px;">📌 Borang Pengambilan Kad TNG</h3>
         
@@ -224,48 +196,53 @@
         <button id="btn-take-card" class="btn btn-success" onclick="handleTakeCard()">Sahkan & Ambil Kad</button>
       </div>
 
-      <!-- FORM 2: HANTAR / PULANG KAD -->
+      <!-- FORM 2: BORANG HANTAR / PULANG KAD AUTOMATIK -->
       <div id="panel-return-card" class="hidden" style="background: #fffaf0; padding: 16px; border-radius: 12px; border: 1px solid #fef3c7; margin-bottom: 15px;">
         <h3 style="font-size: 1rem; color: #b45309; margin-bottom: 12px;">🔄 Borang Pemulangan / Hantar Kad</h3>
         
-        <div class="form-group">
-          <label for="select-return-supervisor">1. PILIH PENYELIA YANG MENERIMA KAD *</label>
-          <select id="select-return-supervisor" class="form-control">
-            <option value="">-- Sila Pilih Penyelia --</option>
-          </select>
+        <!-- PENGECAMAN AUTOMATIK KAD DI TANGAN PEMANDU -->
+        <div id="auto-return-card-info" style="padding: 14px; background: #ffffff; border-radius: 8px; border: 2px solid #f59e0b; margin-bottom: 15px;">
+          <p style="font-size: 0.8rem; color: #b45309; font-weight: bold; text-transform: uppercase;">Kad Dikesan Di Tangan Anda:</p>
+          <h2 id="auto-card-no" style="color: var(--brand-blue); font-size: 1.25rem; margin-top: 2px;">Mengecam Kad...</h2>
+          <p style="font-size: 0.88rem; margin-top: 2px;">Kenderaan: <strong id="auto-card-veh">-</strong></p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Baki Awal Semasa Pinjam: RM <span id="auto-card-prev-bal">0.00</span></p>
+          
+          <div style="margin-top: 10px; padding: 8px; background: #fef3c7; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none; color: #92400e;">
+              <input type="checkbox" id="chk-confirm-hand" checked style="width: 18px; height: 18px;">
+              Ya, kad ini berada di tangan saya.
+            </label>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="select-return-vehicle">2. PILIH KENDERAAN DIKEMBALIKAN *</label>
-          <select id="select-return-vehicle" class="form-control" onchange="autoFetchLinkedCardForReturn()">
-            <option value="">-- Sila Pilih Kenderaan --</option>
-          </select>
-        </div>
+        <div id="auto-return-fields">
+          <div class="form-group">
+            <label for="select-return-supervisor">1. PILIH PENYELIA YANG MENERIMA KAD *</label>
+            <select id="select-return-supervisor" class="form-control">
+              <option value="">-- Sila Pilih Penyelia --</option>
+            </select>
+          </div>
 
-        <div style="padding: 12px; background: #ffffff; border-radius: 8px; border: 1px solid #fef3c7; font-size: 0.88rem; margin-bottom: 12px;">
-          <p style="margin-bottom: 4px;"><strong>Nombor Kad TNG:</strong> <span id="return-card-no" style="font-weight: bold; color: var(--brand-blue);">-</span></p>
-          <p style="margin-bottom: 4px;"><strong>Baki Sebelum:</strong> RM <span id="return-card-prev-bal">0.00</span></p>
-        </div>
+          <div class="form-group">
+            <label>2. BAKI AKHIR SEMASA HANTAR (RM) *</label>
+            <input type="number" step="0.01" id="input-return-balance" class="form-control" placeholder="0.00" required>
+          </div>
 
-        <div class="form-group">
-          <label>3. BAKI AKHIR SEMASA HANTAR (RM) *</label>
-          <input type="number" step="0.01" id="input-return-balance" class="form-control" placeholder="0.00" required>
-        </div>
+          <div class="form-group">
+            <label>3. KEADAAN KAD *</label>
+            <select id="select-card-condition" class="form-control">
+              <option value="BAIK">BAIK (Boleh digunakan)</option>
+              <option value="ROSAK">ROSAK (Calar / Tidak Boleh Dibaca)</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label>4. KEADAAN KAD *</label>
-          <select id="select-card-condition" class="form-control">
-            <option value="BAIK">BAIK (Boleh digunakan)</option>
-            <option value="ROSAK">ROSAK (Calar / Tidak Boleh Dibaca)</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label>4. CATATAN / TUJUAN TUGASAN</label>
+            <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan">
+          </div>
 
-        <div class="form-group">
-          <label>5. CATATAN / TUJUAN TUGASAN</label>
-          <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan">
+          <button id="btn-return-card" class="btn btn-warning" onclick="handleReturnCardAuto()">Sahkan & Hantar Kad</button>
         </div>
-
-        <button id="btn-return-card" class="btn btn-warning" onclick="handleReturnCard()">Sahkan & Hantar Kad</button>
       </div>
 
       <div style="display: flex; gap: 8px; margin-top: 15px;">
@@ -321,7 +298,6 @@
         </div>
       </div>
 
-      <!-- TAB STATUS KAD SEDANG DIPINJAM (LIVE MONITORING) -->
       <div id="tab-active-borrowed" class="hidden">
         <h3 style="font-size: 1rem; margin-top: 10px; margin-bottom: 10px; color: var(--primary);">🔥 Senarai Kad Sedang Dipinjam Pemandu</h3>
         <table id="table-supervisor-active-borrowed">
@@ -365,12 +341,13 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG Premium (Versi 2.0.0)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 2.1.0)</p>
   </footer>
 
   <script>
     var currentUser = null;
-    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzcChC0q6pgECIVWQ0Hs_NYbIt1G6m550GMWhGnN538UXGZtVeGNhWwMzb49saDD0N8/exec";
+    var currentActiveCardForDriver = null;
+    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwOTUcrsWL40nmh6HLXEEFKSqMFqf-KbsPXQj8dOCZRlF4njt6Sl1cT_ll-POUmKjW8/exec";
 
     function sendJsonpRequest(params, callbackName) {
       return new Promise((resolve, reject) => {
@@ -447,12 +424,26 @@
         .then(res => {
           var widget = document.getElementById('driver-live-borrowed-widget');
           if (res.success && res.card) {
+            currentActiveCardForDriver = res.card;
             document.getElementById('widget-card-no').innerText = res.card.cardNumber;
-            document.getElementById('widget-veh-no').innerText = "Kenderaan: " + res.card.vehicle + " (Baki: RM" + parseFloat(res.card.balance).toFixed(2) + ")";
+            document.getElementById('widget-veh-no').innerText = "Kenderaan: " + res.card.vehicle + " (Baki Awal: RM" + parseFloat(res.card.balance).toFixed(2) + ")";
             document.getElementById('widget-borrow-time').innerText = res.card.borrowDate + " " + res.card.borrowTime;
             widget.classList.remove('hidden');
+
+            // Set data automatik dalam Borang Hantar Kad
+            document.getElementById('auto-card-no').innerText = res.card.cardNumber;
+            document.getElementById('auto-card-veh').innerText = res.card.vehicle;
+            document.getElementById('auto-card-prev-bal').innerText = parseFloat(res.card.balance).toFixed(2);
+            document.getElementById('input-return-balance').value = parseFloat(res.card.balance).toFixed(2);
+            document.getElementById('auto-return-fields').classList.remove('hidden');
           } else {
+            currentActiveCardForDriver = null;
             widget.classList.add('hidden');
+
+            document.getElementById('auto-card-no').innerText = "Tiada Kad Di Bawah Pinjaman Anda";
+            document.getElementById('auto-card-veh').innerText = "-";
+            document.getElementById('auto-card-prev-bal').innerText = "0.00";
+            document.getElementById('auto-return-fields').classList.add('hidden');
           }
         });
     }
@@ -465,6 +456,7 @@
     function showReturnForm() {
       document.getElementById('panel-take-card').classList.add('hidden');
       document.getElementById('panel-return-card').classList.remove('hidden');
+      checkDriverActiveBorrowedCard();
     }
 
     function loadSupervisorsDropdown() {
@@ -490,13 +482,10 @@
         .then(res => {
           if (res.success) {
             var select1 = document.getElementById('select-driver-vehicle');
-            var select2 = document.getElementById('select-return-vehicle');
             select1.innerHTML = '<option value="">-- Sila Pilih Kenderaan --</option>';
-            select2.innerHTML = '<option value="">-- Sila Pilih Kenderaan --</option>';
 
             res.data.forEach(v => {
               select1.innerHTML += `<option value="${v.regNo}">${v.regNo} - ${v.model || v.type}</option>`;
-              select2.innerHTML += `<option value="${v.regNo}">${v.regNo} - ${v.model || v.type}</option>`;
             });
           }
         });
@@ -518,24 +507,6 @@
             document.getElementById('driver-card-balance').innerText = parseFloat(res.card.balance).toFixed(2);
             document.getElementById('driver-card-status').innerText = res.card.status;
             document.getElementById('driver-card-status').style.color = (res.card.status === "DALAM GUNA") ? "var(--warning)" : "var(--success)";
-          }
-        });
-    }
-
-    function autoFetchLinkedCardForReturn() {
-      var regNo = document.getElementById('select-return-vehicle').value;
-      if (!regNo) {
-        document.getElementById('return-card-no').innerText = "-";
-        document.getElementById('return-card-prev-bal').innerText = "0.00";
-        return;
-      }
-
-      sendJsonpRequest({ action: 'getCardByVehicle', vehicleRegNo: regNo })
-        .then(res => {
-          if (res.success && res.card) {
-            document.getElementById('return-card-no').innerText = res.card.cardNumber;
-            document.getElementById('return-card-prev-bal').innerText = parseFloat(res.card.balance).toFixed(2);
-            document.getElementById('input-return-balance').value = parseFloat(res.card.balance).toFixed(2);
           }
         });
     }
@@ -568,22 +539,26 @@
         });
     }
 
-    function handleReturnCard() {
+    function handleReturnCardAuto() {
       var supId = document.getElementById('select-return-supervisor').value;
-      var regNo = document.getElementById('select-return-vehicle').value;
       var returnBal = document.getElementById('input-return-balance').value;
       var condition = document.getElementById('select-card-condition').value;
       var notes = document.getElementById('input-return-notes').value;
+      var confirmChk = document.getElementById('chk-confirm-hand').checked;
+
+      if (!confirmChk) {
+        alert("Sila tandakan pengesahan bahawa kad berada di tangan anda.");
+        return;
+      }
 
       if (!supId) { alert("Sila pilih Penyelia yang menerima kad."); return; }
-      if (!regNo) { alert("Sila pilih kenderaan dikembalikan terlebih dahulu."); return; }
       if (returnBal === "" || parseFloat(returnBal) < 0) { alert("Sila masukkan baki akhir yang sah."); return; }
 
       var btn = document.getElementById('btn-return-card');
       btn.innerText = 'MEMPROSES...';
       btn.disabled = true;
 
-      sendJsonpRequest({ action: 'returnCard', userId: currentUser.userId, vehicleRegNo: regNo, supervisorId: supId, returnBalance: returnBal, cardCondition: condition, notes: notes })
+      sendJsonpRequest({ action: 'returnCardAuto', userId: currentUser.userId, supervisorId: supId, returnBalance: returnBal, cardCondition: condition, notes: notes })
         .then(res => {
           btn.innerText = 'Sahkan & Hantar Kad';
           btn.disabled = false;
@@ -594,7 +569,6 @@
           msgBox.style.display = 'block';
 
           if (res.success) {
-            autoFetchLinkedCardForReturn();
             checkDriverActiveBorrowedCard();
           }
         });
