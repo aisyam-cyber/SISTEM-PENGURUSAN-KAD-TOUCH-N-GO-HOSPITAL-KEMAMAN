@@ -1,12 +1,12 @@
 /**
  * SISTEM PENGURUSAN KAD TOUCH 'N GO HOSPITAL KEMAMAN
- * Versi: 1.1.0
+ * Versi: 1.3.3
  * Fail: js/auth.js
  * Fungsi: Pengurusan Sesi, Pengesahan & Log Masuk Client Frontend
  */
 
-// Sila kemas kini URL Web App Google Apps Script anda di sini selepas Deploy
-const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbyPNcwetFufIY-hhr9VDWq1Hy1Xy8V8seR7w1tTOka0LBtix8b5TkRQRTo6CfGkwzWt/exec";
+// GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT ANDA SEBENAR:
+const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbxCf8Genk72FXf9-oyCZxyX6DzR91oNTWoFKy02U6CebjY2YKHKj6yYBt5grCQiJcxt/exec";
 
 /**
  * Kendali Borang Log Masuk
@@ -20,6 +20,11 @@ async function handleLogin(event) {
     const btnText = document.getElementById("btnText");
     const btnSpinner = document.getElementById("btnSpinner");
 
+    if (API_URL.includes("MASUKKAN_WEB_APP_URL")) {
+        showAlert(alertBox, "Sila kemas kini API_URL dalam js/auth.js dahulu.", "error");
+        return;
+    }
+
     // Tetapkan Keadaan Loading
     alertBox.classList.add("hidden");
     btnText.textContent = "MEMPROSES...";
@@ -28,7 +33,7 @@ async function handleLogin(event) {
     try {
         const response = await fetch(API_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain" },
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, // Digunakan untuk elak sekat CORS pada GAS
             body: JSON.stringify({
                 action: "LOGIN",
                 data: {
@@ -51,7 +56,7 @@ async function handleLogin(event) {
             showAlert(alertBox, result.message || "Gagal log masuk.", "error");
         }
     } catch (err) {
-        showAlert(alertBox, "Ralat sambungan ke pelayan backend. Sila cuba lagi.", "error");
+        showAlert(alertBox, "Ralat sambungan ke pelayan backend. Sila pastikan URL API dan kebenaran 'Anyone' pada Apps Script adalah betul.", "error");
     } finally {
         btnText.textContent = "LOG MASUK";
         btnSpinner.classList.add("hidden");
@@ -69,7 +74,7 @@ async function handleLogout() {
         try {
             fetch(API_URL, {
                 method: "POST",
-                headers: { "Content-Type": "text/plain" },
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({
                     action: "LOGOUT",
                     token: token,
@@ -87,13 +92,4 @@ async function handleLogout() {
 
     // Kembali ke Halaman Login
     checkSessionAndRenderUI();
-}
-
-/**
- * Papar Mesej Amaran
- */
-function showAlert(element, message, type) {
-    element.textContent = message;
-    element.className = `alert-box ${type}`;
-    element.classList.remove("hidden");
 }
