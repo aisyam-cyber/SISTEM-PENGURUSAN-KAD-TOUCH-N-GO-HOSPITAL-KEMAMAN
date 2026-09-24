@@ -27,19 +27,42 @@
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 0.82rem; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px; }
     .form-control { width: 100%; padding: 12px 14px; border: 2px solid #3182ce; border-radius: 8px; font-size: 0.95rem; background-color: #ffffff; outline: none; }
+    
     .btn { display: block; width: 100%; padding: 12px; background-color: #2b6cb0; color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; }
     .btn-secondary { background-color: var(--secondary-color); }
     .btn-danger { background-color: var(--danger-color); }
     .btn-warning { background-color: var(--warning-color); color: #1a202c; }
+    .btn-success { background-color: var(--success-color); }
+
     .alert { padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.88rem; display: none; }
     .alert-danger { background-color: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; }
     .alert-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
     .user-info-box { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 12px 15px; margin-bottom: 20px; border-radius: 6px; }
     .hidden { display: none !important; }
     
-    .driver-sidebar-menu { display: flex; gap: 8px; margin-bottom: 20px; background: #1a202c; padding: 8px; border-radius: 10px; }
-    .driver-menu-btn { flex: 1; padding: 10px; background: transparent; color: #e2e8f0; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; text-align: center; }
-    .driver-menu-btn.active { background: #2b6cb0; color: #ffffff; }
+    .driver-main-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .action-btn-card {
+      padding: 15px 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn-take-mode { background-color: #2b6cb0; }
+    .btn-return-mode { background-color: #d69e2e; color: #1a202c; }
 
     .nav-menu { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
     .nav-btn { padding: 8px 12px; background: #edf2f7; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.82rem; }
@@ -78,12 +101,6 @@
 
   <!-- SKRIN DASHBOARD PEMANDU -->
   <div id="screen-driver" class="container hidden">
-    <div class="driver-sidebar-menu">
-      <button id="tab-btn-take" class="driver-menu-btn active" onclick="switchDriverTab('take')">🪪 Ambil Kad</button>
-      <button id="tab-btn-return" class="driver-menu-btn" onclick="switchDriverTab('return')">🔄 Hantar Kad</button>
-      <button id="tab-btn-issue" class="driver-menu-btn" onclick="switchDriverTab('issue')">⚠️ Laporkan Masalah</button>
-    </div>
-
     <div class="card">
       <div class="user-info-box">
         <p style="font-size: 0.8rem; color: #4a5568;">Selamat Datang,</p>
@@ -93,47 +110,75 @@
 
       <div id="driver-msg-box" class="alert"></div>
 
-      <!-- FORM 1: AMBIL KAD -->
-      <div id="panel-take-card">
-        <h3 style="font-size: 1.05rem; color: #1a202c; margin-bottom: 15px;">🪪 Borang Pinjaman / Ambil Kad</h3>
+      <!-- BUTANG SERAH TERIMA MENONJOL -->
+      <div class="driver-main-actions">
+        <button id="btn-mode-take" class="action-btn-card btn-take-mode" onclick="showTakeForm()">
+          <span style="font-size: 1.3rem;">📌</span>
+          <span>AMBIL KAD</span>
+        </button>
+        <button id="btn-mode-return" class="action-btn-card btn-return-mode" onclick="showReturnForm()">
+          <span style="font-size: 1.3rem;">🔄</span>
+          <span>HANTAR KAD</span>
+        </button>
+      </div>
+
+      <!-- FORM 1: BORANG AMBIL KAD -->
+      <div id="panel-take-card" style="background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;">
+        <h3 style="font-size: 1rem; color: #1a202c; margin-bottom: 12px;">📌 Borang Pengambilan Kad TNG</h3>
+        
         <div class="form-group">
-          <label for="select-driver-vehicle">1. PILIH KENDERAAN (NO PLAT) *</label>
+          <label for="select-take-supervisor">1. PILIH PENYELIA YANG MENYERAHKAN KAD *</label>
+          <select id="select-take-supervisor" class="form-control">
+            <option value="">-- Sila Pilih Penyelia --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="select-driver-vehicle">2. PILIH KENDERAAN (NO PLAT) *</label>
           <select id="select-driver-vehicle" class="form-control" onchange="autoFetchLinkedCard()">
             <option value="">-- Sila Pilih Kenderaan --</option>
           </select>
         </div>
 
-        <div style="padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.88rem; margin-bottom: 18px;">
+        <div style="padding: 10px; background: #ffffff; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.88rem; margin-bottom: 15px;">
           <p style="margin-bottom: 4px;"><strong>Nombor Kad TNG:</strong> <span id="driver-card-no" style="font-weight: bold; color: #2b6cb0;">-</span></p>
           <p style="margin-bottom: 4px;"><strong>Baki Semasa:</strong> RM <span id="driver-card-balance">0.00</span></p>
           <p><strong>Status Kad:</strong> <span id="driver-card-status" style="font-weight: bold;">-</span></p>
         </div>
 
-        <button id="btn-take-card" class="btn" style="margin-bottom: 12px;" onclick="handleTakeCard()">Sahkan & Ambil Kad</button>
+        <button id="btn-take-card" class="btn btn-success" onclick="handleTakeCard()">Sahkan & Ambil Kad</button>
       </div>
 
-      <!-- FORM 2: HANTAR KAD -->
-      <div id="panel-return-card" class="hidden">
-        <h3 style="font-size: 1.05rem; color: #1a202c; margin-bottom: 15px;">🔄 Borang Hantar / Pulang Kad</h3>
+      <!-- FORM 2: BORANG HANTAR / PULANG KAD -->
+      <div id="panel-return-card" class="hidden" style="background: #fffaf0; padding: 15px; border-radius: 8px; border: 1px solid #feebc8; margin-bottom: 15px;">
+        <h3 style="font-size: 1rem; color: #c05621; margin-bottom: 12px;">🔄 Borang Pemulangan / Hantar Kad</h3>
+        
         <div class="form-group">
-          <label for="select-return-vehicle">1. PILIH KENDERAAN DIKEMBALIKAN *</label>
+          <label for="select-return-supervisor">1. PILIH PENYELIA YANG MENERIMA KAD *</label>
+          <select id="select-return-supervisor" class="form-control">
+            <option value="">-- Sila Pilih Penyelia --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="select-return-vehicle">2. PILIH KENDERAAN DIKEMBALIKAN *</label>
           <select id="select-return-vehicle" class="form-control" onchange="autoFetchLinkedCardForReturn()">
             <option value="">-- Sila Pilih Kenderaan --</option>
           </select>
         </div>
 
-        <div style="padding: 12px; background: #fffaf0; border-radius: 8px; border: 1px solid #feebc8; font-size: 0.88rem; margin-bottom: 15px;">
+        <div style="padding: 10px; background: #ffffff; border-radius: 6px; border: 1px solid #feebc8; font-size: 0.88rem; margin-bottom: 12px;">
           <p style="margin-bottom: 4px;"><strong>Nombor Kad TNG:</strong> <span id="return-card-no" style="font-weight: bold; color: #2b6cb0;">-</span></p>
           <p style="margin-bottom: 4px;"><strong>Baki Sebelum:</strong> RM <span id="return-card-prev-bal">0.00</span></p>
         </div>
 
         <div class="form-group">
-          <label>2. BAKI AKHIR SEMASA HANTAR (RM) *</label>
+          <label>3. BAKI AKHIR SEMASA HANTAR (RM) *</label>
           <input type="number" step="0.01" id="input-return-balance" class="form-control" placeholder="0.00" required>
         </div>
 
         <div class="form-group">
-          <label>3. KEADAAN KAD *</label>
+          <label>4. KEADAAN KAD *</label>
           <select id="select-card-condition" class="form-control">
             <option value="BAIK">BAIK (Boleh digunakan)</option>
             <option value="ROSAK">ROSAK (Calar / Tidak Boleh Dibaca)</option>
@@ -141,38 +186,14 @@
         </div>
 
         <div class="form-group">
-          <label>4. CATATAN / TUJUAN TUGASAN</label>
-          <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan outstation">
+          <label>5. CATATAN / TUJUAN TUGASAN</label>
+          <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan">
         </div>
 
-        <button id="btn-return-card" class="btn btn-warning" style="margin-bottom: 12px;" onclick="handleReturnCard()">Sahkan & Hantar Kad</button>
+        <button id="btn-return-card" class="btn btn-warning" onclick="handleReturnCard()">Sahkan & Hantar Kad</button>
       </div>
 
-      <!-- FORM 3: REKOD MASALAH / KES KAD -->
-      <div id="panel-issue-card" class="hidden">
-        <h3 style="font-size: 1.05rem; color: #1a202c; margin-bottom: 15px;">⚠️ Lapor Kes / Masalah Kad</h3>
-        <div class="form-group">
-          <label>1. NOMBOR KAD TNG *</label>
-          <input type="text" id="input-issue-cardno" class="form-control" style="border-color:#cbd5e0;" placeholder="Contoh: TNG-CONTOH-001" required>
-        </div>
-        <div class="form-group">
-          <label>2. JENIS MASALAH *</label>
-          <select id="select-issue-type" class="form-control" style="border-color:#cbd5e0;">
-            <option value="ROSAK">ROSAK (Tidak boleh dibaca di lorong tol/SmartTAG)</option>
-            <option value="HILANG">HILANG (Kad hilang semasa tugasan)</option>
-            <option value="TIDAK BOLEH DIGUNAKAN">TIDAK BOLEH DIGUNAKAN (Tamat tempoh sah/disertai ralat)</option>
-            <option value="MASALAH TRANSAKSI">MASALAH TRANSAKSI (Ditolak baki dua kali/resit ralat)</option>
-            <option value="LAIN-LAIN">LAIN-LAIN</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>3. KETERANGAN MASALAH *</label>
-          <textarea id="input-issue-desc" class="form-control" style="border-color:#cbd5e0; height: 80px;" placeholder="Terangkan punca atau lokasi kejadian..."></textarea>
-        </div>
-        <button id="btn-submit-issue" class="btn btn-danger" style="margin-bottom: 12px;" onclick="handleSubmitIssue()">Hantar Laporan Masalah</button>
-      </div>
-
-      <div style="display: flex; gap: 8px; margin-top: 10px;">
+      <div style="display: flex; gap: 8px; margin-top: 15px;">
         <button class="btn btn-secondary" style="flex: 1; padding: 9px; font-size: 0.85rem;" onclick="showDriverHistory()">📋 Sejarah Saya</button>
         <button class="btn btn-danger" style="flex: 1; padding: 9px; font-size: 0.85rem;" onclick="handleLogout()">🚪 Log Keluar</button>
       </div>
@@ -181,7 +202,7 @@
         <h3 style="font-size: 0.9rem; margin-bottom: 10px;">Sejarah Serah Terima Saya</h3>
         <table id="table-driver-history">
           <thead>
-            <tr><th>Tarikh/Masa</th><th>Kenderaan</th><th>Jenis</th><th>Baki Sebelum</th><th>Baki Selepas</th></tr>
+            <tr><th>Tarikh/Masa</th><th>Kenderaan</th><th>Jenis</th><th>Baki Sebelum</th><th>Baki Selepas</th><th>Penyelia</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -203,9 +224,6 @@
       <div class="nav-menu">
         <button class="nav-btn active" onclick="switchTab('dash')">Dashboard</button>
         <button class="nav-btn" onclick="switchTab('handover')">Serah Terima</button>
-        <button class="nav-btn" onclick="switchTab('transactions')">Transaksi</button>
-        <button class="nav-btn" onclick="switchTab('topups')">Tambah Nilai</button>
-        <button class="nav-btn" onclick="switchTab('issues')">Kes / Masalah</button>
         <button class="nav-btn" onclick="switchTab('cards')">Kad Touch 'n Go</button>
         <button class="nav-btn" onclick="switchTab('vehicles')">Kenderaan</button>
       </div>
@@ -227,82 +245,16 @@
         </div>
       </div>
 
-      <!-- TAB SERAH TERIMA -->
       <div id="tab-handover" class="hidden">
         <h3 style="font-size: 1rem; margin-top: 10px; margin-bottom: 10px;">Rekod Serah Terima Kad</h3>
         <table id="table-supervisor-handover">
           <thead>
-            <tr><th>ID Rekod</th><th>Tarikh/Masa</th><th>Pemandu</th><th>Kenderaan</th><th>No. Kad</th><th>Jenis</th><th>Baki Sebelum</th><th>Baki Selepas</th><th>Keadaan</th></tr>
+            <tr><th>ID Rekod</th><th>Tarikh/Masa</th><th>Pemandu</th><th>Kenderaan</th><th>No. Kad</th><th>Jenis</th><th>Baki Sebelum</th><th>Baki Selepas</th><th>Penyelia</th></tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
 
-      <!-- TAB TRANSAKSI -->
-      <div id="tab-transactions" class="hidden">
-        <h3 style="font-size: 1rem; margin-top: 10px; margin-bottom: 10px;">Rekod Transaksi Tol & Parking</h3>
-        <table id="table-supervisor-transactions">
-          <thead>
-            <tr><th>ID Transaksi</th><th>Tarikh/Masa</th><th>Pemandu</th><th>Kenderaan</th><th>No. Kad</th><th>Jenis</th><th>Jumlah (RM)</th><th>Baki Sebelum</th><th>Baki Selepas</th><th>Catatan</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <!-- TAB TAMBAH NILAI -->
-      <div id="tab-topups" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 10px;">
-          <h3 style="font-size: 1rem;">Rekod Tambah Nilai (Top-Up)</h3>
-          <button class="btn" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" onclick="toggleTopUpModal()">+ Rekod Top-Up Baharu</button>
-        </div>
-
-        <div id="modal-topup" class="hidden" style="background: #f8fafc; border: 1px solid var(--border-color); padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-          <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: var(--primary-color);">Borang Tambah Nilai Kad Touch 'n Go</h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-            <div class="form-group">
-              <label>Pilih Kad TNG</label>
-              <select id="select-topup-card" class="form-control" style="border-color: #cbd5e0;"></select>
-            </div>
-            <div class="form-group">
-              <label>Jumlah Tambah Nilai (RM)</label>
-              <input type="number" step="0.01" id="input-topup-amount" class="form-control" style="border-color: #cbd5e0;" placeholder="50.00" required>
-            </div>
-            <div class="form-group">
-              <label>Kaedah Bayaran</label>
-              <select id="select-topup-method" class="form-control" style="border-color: #cbd5e0;">
-                <option value="TUNAI">TUNAI</option>
-                <option value="PERBANKAN ATAS TALIAN">PERBANKAN ATAS TALIAN</option>
-                <option value="KAD KREDIT SYARIKAT">KAD KREDIT SYARIKAT</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>No. Rujukan / Resit</label>
-              <input type="text" id="input-topup-ref" class="form-control" style="border-color: #cbd5e0;" placeholder="Contoh: REF-9901">
-            </div>
-          </div>
-          <button class="btn" style="margin-top: 10px;" onclick="handleSubmitTopUp()">SIMPAN REKOD TAMBAH NILAI</button>
-        </div>
-
-        <table id="table-supervisor-topups">
-          <thead>
-            <tr><th>ID TopUp</th><th>Tarikh/Masa</th><th>No. Kad</th><th>Jumlah (RM)</th><th>Baki Sebelum</th><th>Baki Selepas</th><th>Kaedah</th><th>No. Rujukan</th><th>Direkod Oleh</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <!-- TAB KES / MASALAH -->
-      <div id="tab-issues" class="hidden">
-        <h3 style="font-size: 1rem; margin-top: 10px; margin-bottom: 10px;">Pengurusan Laporan Kes / Masalah Kad</h3>
-        <table id="table-supervisor-issues">
-          <thead>
-            <tr><th>ID Kes</th><th>Tarikh/Masa</th><th>No. Kad</th><th>Pelapor</th><th>Jenis Kes</th><th>Keterangan</th><th>Tindakan Penyelia</th><th>Status</th><th>Tindakan</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <!-- TAB KAD -->
       <div id="tab-cards" class="hidden">
         <h3 style="font-size: 1rem; margin-top: 10px;">Senarai Kad Touch 'n Go</h3>
         <table id="table-cards">
@@ -313,7 +265,6 @@
         </table>
       </div>
 
-      <!-- TAB KENDERAAN -->
       <div id="tab-vehicles" class="hidden">
         <h3 style="font-size: 1rem; margin-top: 10px;">Senarai Kenderaan</h3>
         <table id="table-vehicles">
@@ -327,12 +278,12 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.5.0)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.6.0)</p>
   </footer>
 
   <script>
     var currentUser = null;
-    var BACKEND_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycby1qT_ELnwkqnEMEYlbseGa_IDIrgpXpksaLdA_snwN01OE__warf8xS8Fvx-3nWm3I/exec";
+    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzSKwr__U6Fry0ZJpEUwj3U-KDlzZsHCySka9r8BxnvY2XF_Gqv1Gt1OO4eQ7xjRz1w/exec";
 
     function sendJsonpRequest(params, callbackName) {
       return new Promise((resolve, reject) => {
@@ -390,6 +341,7 @@
           document.getElementById('driver-name').innerText = currentUser.fullName;
           document.getElementById('screen-driver').classList.remove('hidden');
           loadDriverVehicles();
+          loadSupervisorsDropdown();
         }
       } else {
         alert(response.message || "ID pengguna atau kata laluan tidak sah.");
@@ -402,25 +354,32 @@
       alert("ID pengguna atau kata laluan tidak sah.");
     }
 
-    function switchDriverTab(tab) {
-      document.getElementById('tab-btn-take').classList.remove('active');
-      document.getElementById('tab-btn-return').classList.remove('active');
-      document.getElementById('tab-btn-issue').classList.remove('active');
-
-      document.getElementById('panel-take-card').classList.add('hidden');
+    function showTakeForm() {
+      document.getElementById('panel-take-card').classList.remove('hidden');
       document.getElementById('panel-return-card').classList.add('hidden');
-      document.getElementById('panel-issue-card').classList.add('hidden');
+    }
 
-      if (tab === 'take') {
-        document.getElementById('tab-btn-take').classList.add('active');
-        document.getElementById('panel-take-card').classList.remove('hidden');
-      } else if (tab === 'return') {
-        document.getElementById('tab-btn-return').classList.add('active');
-        document.getElementById('panel-return-card').classList.remove('hidden');
-      } else {
-        document.getElementById('tab-btn-issue').classList.add('active');
-        document.getElementById('panel-issue-card').classList.remove('hidden');
-      }
+    function showReturnForm() {
+      document.getElementById('panel-take-card').classList.add('hidden');
+      document.getElementById('panel-return-card').classList.remove('hidden');
+    }
+
+    function loadSupervisorsDropdown() {
+      sendJsonpRequest({ action: 'getSupervisors' })
+        .then(res => {
+          if (res.success) {
+            var selectTake = document.getElementById('select-take-supervisor');
+            var selectReturn = document.getElementById('select-return-supervisor');
+
+            selectTake.innerHTML = '<option value="">-- Sila Pilih Penyelia --</option>';
+            selectReturn.innerHTML = '<option value="">-- Sila Pilih Penyelia --</option>';
+
+            res.data.forEach(s => {
+              selectTake.innerHTML += `<option value="${s.userId}">${s.fullName} (${s.userId})</option>`;
+              selectReturn.innerHTML += `<option value="${s.userId}">${s.fullName} (${s.userId})</option>`;
+            });
+          }
+        });
     }
 
     function loadDriverVehicles() {
@@ -479,7 +438,14 @@
     }
 
     function handleTakeCard() {
+      var supId = document.getElementById('select-take-supervisor').value;
       var regNo = document.getElementById('select-driver-vehicle').value;
+
+      if (!supId) {
+        alert("Sila pilih Penyelia yang menyerahkan kad.");
+        return;
+      }
+
       if (!regNo) {
         alert("Sila pilih kenderaan terlebih dahulu.");
         return;
@@ -489,7 +455,7 @@
       btn.innerText = 'MEMPROSES...';
       btn.disabled = true;
 
-      sendJsonpRequest({ action: 'takeCard', userId: currentUser.userId, vehicleRegNo: regNo, notes: 'Pengambilan oleh ' + currentUser.fullName })
+      sendJsonpRequest({ action: 'takeCard', userId: currentUser.userId, vehicleRegNo: regNo, supervisorId: supId, notes: 'Diambil daripada Penyelia ' + supId })
         .then(res => {
           btn.innerText = 'Sahkan & Ambil Kad';
           btn.disabled = false;
@@ -504,10 +470,16 @@
     }
 
     function handleReturnCard() {
+      var supId = document.getElementById('select-return-supervisor').value;
       var regNo = document.getElementById('select-return-vehicle').value;
       var returnBal = document.getElementById('input-return-balance').value;
       var condition = document.getElementById('select-card-condition').value;
       var notes = document.getElementById('input-return-notes').value;
+
+      if (!supId) {
+        alert("Sila pilih Penyelia yang menerima kad.");
+        return;
+      }
 
       if (!regNo) {
         alert("Sila pilih kenderaan dikembalikan terlebih dahulu.");
@@ -523,7 +495,7 @@
       btn.innerText = 'MEMPROSES...';
       btn.disabled = true;
 
-      sendJsonpRequest({ action: 'returnCard', userId: currentUser.userId, vehicleRegNo: regNo, returnBalance: returnBal, cardCondition: condition, notes: notes })
+      sendJsonpRequest({ action: 'returnCard', userId: currentUser.userId, vehicleRegNo: regNo, supervisorId: supId, returnBalance: returnBal, cardCondition: condition, notes: notes })
         .then(res => {
           btn.innerText = 'Sahkan & Hantar Kad';
           btn.disabled = false;
@@ -534,33 +506,6 @@
           msgBox.style.display = 'block';
 
           if (res.success) autoFetchLinkedCardForReturn();
-        });
-    }
-
-    function handleSubmitIssue() {
-      var cardNo = document.getElementById('input-issue-cardno').value.trim();
-      var issueType = document.getElementById('select-issue-type').value;
-      var desc = document.getElementById('input-issue-desc').value.trim();
-
-      if (!cardNo || !desc) {
-        alert("Sila masukkan nombor kad dan keterangan masalah.");
-        return;
-      }
-
-      var btn = document.getElementById('btn-submit-issue');
-      btn.innerText = 'MEMPROSES...';
-      btn.disabled = true;
-
-      sendJsonpRequest({ action: 'reportIssue', userId: currentUser.userId, cardNumber: cardNo, issueType: issueType, description: desc })
-        .then(res => {
-          btn.innerText = 'Hantar Laporan Masalah';
-          btn.disabled = false;
-
-          alert(res.message);
-          if (res.success) {
-            document.getElementById('input-issue-cardno').value = '';
-            document.getElementById('input-issue-desc').value = '';
-          }
         });
     }
 
@@ -575,47 +520,11 @@
               var tbody = document.querySelector('#table-driver-history tbody');
               tbody.innerHTML = '';
               res.data.forEach(h => {
-                tbody.innerHTML += `<tr><td>${h.date} ${h.time}</td><td>${h.vehicleReg}</td><td><strong>${h.type}</strong></td><td>RM ${parseFloat(h.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(h.balanceAfter).toFixed(2)}</td></tr>`;
+                tbody.innerHTML += `<tr><td>${h.date} ${h.time}</td><td>${h.vehicleReg}</td><td><strong>${h.type}</strong></td><td>RM ${parseFloat(h.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(h.balanceAfter).toFixed(2)}</td><td>${h.recordedBy}</td></tr>`;
               });
             }
           });
       }
-    }
-
-    function toggleTopUpModal() {
-      document.getElementById('modal-topup').classList.toggle('hidden');
-    }
-
-    function handleSubmitTopUp() {
-      var cardNo = document.getElementById('select-topup-card').value;
-      var amount = document.getElementById('input-topup-amount').value;
-      var method = document.getElementById('select-topup-method').value;
-      var refNo = document.getElementById('input-topup-ref').value;
-
-      if (!cardNo || !amount || parseFloat(amount) <= 0) {
-        alert("Sila pilih kad dan masukkan jumlah tambah nilai yang sah.");
-        return;
-      }
-
-      sendJsonpRequest({ action: 'addTopUp', userId: currentUser.userId, cardNumber: cardNo, amount: amount, paymentMethod: method, refNo: refNo })
-        .then(res => {
-          alert(res.message);
-          if (res.success) {
-            toggleTopUpModal();
-            loadSupervisorData();
-          }
-        });
-    }
-
-    function handleSolveIssue(caseId) {
-      var actionTaken = prompt("Masukkan tindakan yang telah diambil oleh Penyelia:");
-      if (!actionTaken) return;
-
-      sendJsonpRequest({ action: 'updateIssue', userId: currentUser.userId, caseId: caseId, actionTaken: actionTaken, status: 'SELESAI', notes: 'Ditutup oleh Penyelia' })
-        .then(res => {
-          alert(res.message);
-          if (res.success) loadSupervisorData();
-        });
     }
 
     function loadSupervisorData() {
@@ -628,13 +537,9 @@
           document.getElementById('dash-active-cards').innerText = active;
 
           var tbody = document.querySelector('#table-cards tbody');
-          var selectTopUp = document.getElementById('select-topup-card');
           tbody.innerHTML = '';
-          selectTopUp.innerHTML = '<option value="">-- Pilih Kad --</option>';
-
           res.data.forEach(c => {
             tbody.innerHTML += `<tr><td>${c.cardId}</td><td>${c.cardNumber}</td><td>${c.vehicle}</td><td>${parseFloat(c.balance).toFixed(2)}</td><td>${c.status}</td></tr>`;
-            selectTopUp.innerHTML += `<option value="${c.cardNumber}">${c.cardNumber} (${c.vehicle}) - RM${parseFloat(c.balance).toFixed(2)}</option>`;
           });
         }
       });
@@ -654,41 +559,7 @@
           var tbody = document.querySelector('#table-supervisor-handover tbody');
           tbody.innerHTML = '';
           res.data.forEach(h => {
-            tbody.innerHTML += `<tr><td>${h.stId}</td><td>${h.date} ${h.time}</td><td>${h.driverName}</td><td>${h.vehicleReg}</td><td>${h.cardNumber}</td><td><strong>${h.type}</strong></td><td>RM ${parseFloat(h.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(h.balanceAfter).toFixed(2)}</td><td>${h.condition}</td></tr>`;
-          });
-        }
-      });
-
-      sendJsonpRequest({ action: 'getTransactions' }).then(res => {
-        if (res.success) {
-          var tbody = document.querySelector('#table-supervisor-transactions tbody');
-          tbody.innerHTML = '';
-          res.data.forEach(t => {
-            tbody.innerHTML += `<tr><td>${t.trxId}</td><td>${t.date} ${t.time}</td><td>${t.driverId}</td><td>${t.vehicleReg}</td><td>${t.cardNumber}</td><td>${t.type}</td><td>RM ${parseFloat(t.amount).toFixed(2)}</td><td>RM ${parseFloat(t.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(t.balanceAfter).toFixed(2)}</td><td>${t.notes}</td></tr>`;
-          });
-        }
-      });
-
-      sendJsonpRequest({ action: 'getTopUps' }).then(res => {
-        if (res.success) {
-          var tbody = document.querySelector('#table-supervisor-topups tbody');
-          tbody.innerHTML = '';
-          res.data.forEach(tp => {
-            tbody.innerHTML += `<tr><td>${tp.topUpId}</td><td>${tp.date} ${tp.time}</td><td>${tp.cardNumber}</td><td>RM ${parseFloat(tp.amount).toFixed(2)}</td><td>RM ${parseFloat(tp.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(tp.balanceAfter).toFixed(2)}</td><td>${tp.method}</td><td>${tp.refNo}</td><td>${tp.recordedBy}</td></tr>`;
-          });
-        }
-      });
-
-      sendJsonpRequest({ action: 'getIssues' }).then(res => {
-        if (res.success) {
-          var tbody = document.querySelector('#table-supervisor-issues tbody');
-          tbody.innerHTML = '';
-          res.data.forEach(iss => {
-            var actionBtn = (iss.status === 'SELESAI') 
-              ? '<span style="color:var(--success-color); font-weight:bold;">Selesai</span>' 
-              : `<button class="btn" style="padding:4px 8px; font-size:0.75rem;" onclick="handleSolveIssue('${iss.caseId}')">Tindakan</button>`;
-
-            tbody.innerHTML += `<tr><td>${iss.caseId}</td><td>${iss.date} ${iss.time}</td><td>${iss.cardNumber}</td><td>${iss.driverId}</td><td><strong>${iss.issueType}</strong></td><td>${iss.description}</td><td>${iss.action}</td><td>${iss.status}</td><td>${actionBtn}</td></tr>`;
+            tbody.innerHTML += `<tr><td>${h.stId}</td><td>${h.date} ${h.time}</td><td>${h.driverName}</td><td>${h.vehicleReg}</td><td>${h.cardNumber}</td><td><strong>${h.type}</strong></td><td>RM ${parseFloat(h.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(h.balanceAfter).toFixed(2)}</td><td>${h.recordedBy}</td></tr>`;
           });
         }
       });
@@ -697,9 +568,6 @@
     function switchTab(tab) {
       document.getElementById('tab-dash').classList.add('hidden');
       document.getElementById('tab-handover').classList.add('hidden');
-      document.getElementById('tab-transactions').classList.add('hidden');
-      document.getElementById('tab-topups').classList.add('hidden');
-      document.getElementById('tab-issues').classList.add('hidden');
       document.getElementById('tab-cards').classList.add('hidden');
       document.getElementById('tab-vehicles').classList.add('hidden');
       document.getElementById('tab-' + tab).classList.remove('hidden');
