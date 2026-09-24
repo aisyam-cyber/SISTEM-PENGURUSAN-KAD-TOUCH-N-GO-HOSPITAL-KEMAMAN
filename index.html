@@ -21,7 +21,7 @@
     .header { background-color: var(--primary-color); color: #ffffff; padding: 15px 20px; text-align: center; }
     .header h1 { font-size: 1.3rem; font-weight: bold; }
     .header p { font-size: 0.85rem; opacity: 0.9; }
-    .container { max-width: 450px; margin: 25px auto; padding: 0 15px; }
+    .container { max-width: 480px; margin: 25px auto; padding: 0 15px; }
     .container-wide { max-width: 1000px; margin: 25px auto; padding: 0 15px; }
     .card { background: var(--card-bg); border-radius: 8px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
     .form-group { margin-bottom: 16px; }
@@ -30,14 +30,16 @@
     .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; }
     .btn-secondary { background-color: var(--secondary-color); }
     .btn-danger { background-color: var(--danger-color); }
+    .btn-warning { background-color: var(--warning-color); }
     .alert { padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.88rem; display: none; }
     .alert-danger { background-color: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; }
+    .alert-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
     .user-info-box { background-color: #ebf8ff; border-left: 4px solid var(--primary-color); padding: 15px; margin-bottom: 20px; border-radius: 4px; }
     .hidden { display: none !important; }
     .nav-menu { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
     .nav-btn { padding: 8px 12px; background: #edf2f7; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.82rem; }
     .nav-btn.active { background: var(--primary-color); color: white; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.82rem; }
     th, td { border: 1px solid var(--border-color); padding: 8px 10px; text-align: left; }
     th { background: #f1f5f9; }
     footer { text-align: center; margin-top: 40px; padding: 15px; font-size: 0.8rem; color: #718096; }
@@ -58,7 +60,7 @@
       <form id="form-login" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label>ID Pengguna</label>
-          <input type="text" id="input-userid" class="form-control" placeholder="Contoh: SUP1234 / DRV1234" required>
+          <input type="text" id="input-userid" class="form-control" placeholder="Contoh: SUP5041 / DRV0001" required>
         </div>
         <div class="form-group">
           <label>Kata Laluan</label>
@@ -78,6 +80,8 @@
         <p style="font-size: 0.8rem; color: #718096;">Peranan: <strong>PEMANDU</strong></p>
       </div>
 
+      <div id="driver-msg-box" class="alert"></div>
+
       <div class="form-group">
         <label for="select-driver-vehicle">Pilih Kenderaan Tugasan:</label>
         <select id="select-driver-vehicle" class="form-control" onchange="autoFetchLinkedCard()">
@@ -88,13 +92,44 @@
       <div style="margin-bottom: 20px; padding: 12px; background: #f7fafc; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9rem;">
         <p style="margin-bottom: 6px;"><strong>Nombor Kad TNG:</strong> <span id="driver-card-no" style="font-weight: bold; color: var(--primary-color);">-</span></p>
         <p style="margin-bottom: 6px;"><strong>Baki Semasa:</strong> RM <span id="driver-card-balance">0.00</span></p>
-        <p><strong>Status Kad:</strong> <span id="driver-card-status" style="font-weight: bold; color: var(--success-color);">-</span></p>
+        <p><strong>Status Kad:</strong> <span id="driver-card-status" style="font-weight: bold;">-</span></p>
       </div>
 
-      <button class="btn" style="margin-bottom: 10px;" onclick="alert('Pemandu sedia mengambil kad ini.')">AMBIL KAD</button>
-      <button class="btn" style="margin-bottom: 10px; background-color: var(--warning-color);" onclick="alert('Pemandu sedia memulangkan kad ini.')">PULANG KAD</button>
-      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="alert('Modul Rekod Masalah diaktifkan pada Fasa 8')">REKOD MASALAH</button>
+      <!-- BORANG PEMULANGAN KAD (HANYA MUNCUL APABILA PERLU PULANG KAD) -->
+      <div id="return-card-form" class="hidden" style="margin-bottom: 15px; padding: 12px; background: #fffaf0; border: 1px solid #feebc8; border-radius: 6px;">
+        <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #c05621;">Borang Pemulangan Kad</h4>
+        <div class="form-group">
+          <label style="font-size: 0.82rem;">Baki Akhir Semasa Pulang (RM)</label>
+          <input type="number" step="0.01" id="input-return-balance" class="form-control" placeholder="0.00" required>
+        </div>
+        <div class="form-group">
+          <label style="font-size: 0.82rem;">Keadaan Kad</label>
+          <select id="select-card-condition" class="form-control">
+            <option value="BAIK">BAIK (Boleh digunakan)</option>
+            <option value="ROSAK">ROSAK (Calar / Tidak Boleh Dibaca)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-size: 0.82rem;">Catatan Pemulangan</label>
+          <input type="text" id="input-return-notes" class="form-control" placeholder="Contoh: Selesai tugasan outstation">
+        </div>
+      </div>
+
+      <button id="btn-take-card" class="btn" style="margin-bottom: 10px;" onclick="handleTakeCard()">AMBIL KAD</button>
+      <button id="btn-return-card" class="btn btn-warning" style="margin-bottom: 10px;" onclick="handleReturnCard()">PULANG KAD</button>
+      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="showDriverHistory()">SEJARAH SAYA</button>
       <button class="btn btn-danger" onclick="handleLogout()">LOG KELUAR</button>
+
+      <!-- SEJARAH TRANSACTION PEMANDU -->
+      <div id="driver-history-box" class="hidden" style="margin-top: 20px;">
+        <h3 style="font-size: 0.95rem; margin-bottom: 10px;">Sejarah Serah Terima Saya</h3>
+        <table id="table-driver-history">
+          <thead>
+            <tr><th>Tarikh/Masa</th><th>Kenderaan</th><th>Jenis</th><th>Baki Sebelum</th><th>Baki Selepas</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -111,6 +146,7 @@
 
       <div class="nav-menu">
         <button class="nav-btn active" onclick="switchTab('dash')">Dashboard</button>
+        <button class="nav-btn" onclick="switchTab('handover')">Serah Terima</button>
         <button class="nav-btn" onclick="switchTab('cards')">Kad Touch 'n Go</button>
         <button class="nav-btn" onclick="switchTab('vehicles')">Kenderaan</button>
       </div>
@@ -122,10 +158,24 @@
             <h2 id="dash-total-cards" style="color: var(--primary-color);">0</h2>
           </div>
           <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
-            <p style="font-size: 0.8rem;">Jumlah Kenderaan</p>
-            <h2 id="dash-total-vehicles" style="color: #2b6cb0;">0</h2>
+            <p style="font-size: 0.8rem;">Kad Dalam Simpanan</p>
+            <h2 id="dash-idle-cards" style="color: var(--success-color);">0</h2>
+          </div>
+          <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+            <p style="font-size: 0.8rem;">Kad Dalam Guna</p>
+            <h2 id="dash-active-cards" style="color: var(--warning-color);">0</h2>
           </div>
         </div>
+      </div>
+
+      <div id="tab-handover" class="hidden">
+        <h3 style="font-size: 1rem; margin-top: 10px;">Rekod Serah Terima Kad</h3>
+        <table id="table-supervisor-handover">
+          <thead>
+            <tr><th>ID Rekod</th><th>Tarikh/Masa</th><th>Pemandu</th><th>Kenderaan</th><th>No. Kad</th><th>Jenis</th><th>Baki Sebelum</th><th>Baki Selepas</th><th>Keadaan</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
 
       <div id="tab-cards" class="hidden">
@@ -151,13 +201,13 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.2.3)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.3.0)</p>
   </footer>
 
   <script>
     var currentUser = null;
-    // URL Web App Apps Script Rasmi Terkini
-    var BACKEND_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbwM_soEce_93B9s_hnBNmMO1UkUel2Og0-Dc5ga3-aO9QmpFw_QSYEsj_a-LkpbzRD9/exec";
+    var currentSelectedCard = null;
+    var BACKEND_URL = "https://script.google.com/a/macros/moh.gov.mys/AKfycbzMRI-7UqAW09OD6KO50MMPZTlhsLFWNnRT3XU2cY6r0BkLY4r8VqOiQ6b30iey2oVF/exec";
 
     function sendJsonpRequest(params, callbackName) {
       return new Promise((resolve, reject) => {
@@ -242,29 +292,131 @@
 
     function autoFetchLinkedCard() {
       var regNo = document.getElementById('select-driver-vehicle').value;
+      document.getElementById('return-card-form').classList.add('hidden');
+
       if (!regNo) {
         document.getElementById('driver-card-no').innerText = "-";
         document.getElementById('driver-card-balance').innerText = "0.00";
         document.getElementById('driver-card-status').innerText = "-";
+        currentSelectedCard = null;
         return;
       }
 
       sendJsonpRequest({ action: 'getCardByVehicle', vehicleRegNo: regNo })
         .then(res => {
           if (res.success && res.card) {
+            currentSelectedCard = res.card;
             document.getElementById('driver-card-no').innerText = res.card.cardNumber;
             document.getElementById('driver-card-balance').innerText = parseFloat(res.card.balance).toFixed(2);
             document.getElementById('driver-card-status').innerText = res.card.status;
+
+            if (res.card.status === "DALAM GUNA") {
+              document.getElementById('driver-card-status').style.color = "var(--warning-color)";
+              document.getElementById('return-card-form').classList.remove('hidden');
+              document.getElementById('input-return-balance').value = parseFloat(res.card.balance).toFixed(2);
+            } else {
+              document.getElementById('driver-card-status').style.color = "var(--success-color)";
+            }
           } else {
             alert(res.message || "Tiada kad dipautkan.");
           }
         });
     }
 
+    function handleTakeCard() {
+      var regNo = document.getElementById('select-driver-vehicle').value;
+      if (!regNo) {
+        alert("Sila pilih kenderaan terlebih dahulu.");
+        return;
+      }
+
+      var btn = document.getElementById('btn-take-card');
+      btn.innerText = 'MEMPROSES...';
+      btn.disabled = true;
+
+      sendJsonpRequest({ action: 'takeCard', userId: currentUser.userId, vehicleRegNo: regNo, notes: 'Pengambilan oleh ' + currentUser.fullName })
+        .then(res => {
+          btn.innerText = 'AMBIL KAD';
+          btn.disabled = false;
+
+          var msgBox = document.getElementById('driver-msg-box');
+          msgBox.innerText = res.message;
+          msgBox.className = res.success ? 'alert alert-success' : 'alert alert-danger';
+          msgBox.style.display = 'block';
+
+          if (res.success) autoFetchLinkedCard();
+        })
+        .catch(() => {
+          btn.innerText = 'AMBIL KAD';
+          btn.disabled = false;
+        });
+    }
+
+    function handleReturnCard() {
+      var regNo = document.getElementById('select-driver-vehicle').value;
+      var returnBal = document.getElementById('input-return-balance').value;
+      var condition = document.getElementById('select-card-condition').value;
+      var notes = document.getElementById('input-return-notes').value;
+
+      if (!regNo) {
+        alert("Sila pilih kenderaan terlebih dahulu.");
+        return;
+      }
+
+      if (returnBal === "" || parseFloat(returnBal) < 0) {
+        alert("Sila masukkan baki pemulangan yang sah.");
+        return;
+      }
+
+      var btn = document.getElementById('btn-return-card');
+      btn.innerText = 'MEMPROSES...';
+      btn.disabled = true;
+
+      sendJsonpRequest({ action: 'returnCard', userId: currentUser.userId, vehicleRegNo: regNo, returnBalance: returnBal, cardCondition: condition, notes: notes })
+        .then(res => {
+          btn.innerText = 'PULANG KAD';
+          btn.disabled = false;
+
+          var msgBox = document.getElementById('driver-msg-box');
+          msgBox.innerText = res.message;
+          msgBox.className = res.success ? 'alert alert-success' : 'alert alert-danger';
+          msgBox.style.display = 'block';
+
+          if (res.success) autoFetchLinkedCard();
+        })
+        .catch(() => {
+          btn.innerText = 'PULANG KAD';
+          btn.disabled = false;
+        });
+    }
+
+    function showDriverHistory() {
+      var historyBox = document.getElementById('driver-history-box');
+      historyBox.classList.toggle('hidden');
+
+      if (!historyBox.classList.contains('hidden')) {
+        sendJsonpRequest({ action: 'getHandoverHistory', userId: currentUser.userId })
+          .then(res => {
+            if (res.success) {
+              var tbody = document.querySelector('#table-driver-history tbody');
+              tbody.innerHTML = '';
+              res.data.forEach(h => {
+                tbody.innerHTML += `<tr><td>${h.date} ${h.time}</td><td>${h.vehicleReg}</td><td><strong>${h.type}</strong></td><td>RM ${parseFloat(h.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(h.balanceAfter).toFixed(2)}</td></tr>`;
+              });
+            }
+          });
+      }
+    }
+
     function loadSupervisorData() {
       sendJsonpRequest({ action: 'getCards' }).then(res => {
         if (res.success) {
           document.getElementById('dash-total-cards').innerText = res.data.length;
+          var idle = res.data.filter(c => c.status === 'DALAM SIMPANAN').length;
+          var active = res.data.filter(c => c.status === 'DALAM GUNA').length;
+          document.getElementById('dash-idle-cards').innerText = idle;
+          document.getElementById('dash-active-cards').innerText = active;
+
           var tbody = document.querySelector('#table-cards tbody');
           tbody.innerHTML = '';
           res.data.forEach(c => {
@@ -275,7 +427,6 @@
 
       sendJsonpRequest({ action: 'getVehicles' }).then(res => {
         if (res.success) {
-          document.getElementById('dash-total-vehicles').innerText = res.data.length;
           var tbody = document.querySelector('#table-vehicles tbody');
           tbody.innerHTML = '';
           res.data.forEach(v => {
@@ -283,10 +434,21 @@
           });
         }
       });
+
+      sendJsonpRequest({ action: 'getHandoverHistory' }).then(res => {
+        if (res.success) {
+          var tbody = document.querySelector('#table-supervisor-handover tbody');
+          tbody.innerHTML = '';
+          res.data.forEach(h => {
+            tbody.innerHTML += `<tr><td>${h.stId}</td><td>${h.date} ${h.time}</td><td>${h.driverName}</td><td>${h.vehicleReg}</td><td>${h.cardNumber}</td><td><strong>${h.type}</strong></td><td>RM ${parseFloat(h.balanceBefore).toFixed(2)}</td><td>RM ${parseFloat(h.balanceAfter).toFixed(2)}</td><td>${h.condition}</td></tr>`;
+          });
+        }
+      });
     }
 
     function switchTab(tab) {
       document.getElementById('tab-dash').classList.add('hidden');
+      document.getElementById('tab-handover').classList.add('hidden');
       document.getElementById('tab-cards').classList.add('hidden');
       document.getElementById('tab-vehicles').classList.add('hidden');
       document.getElementById('tab-' + tab).classList.remove('hidden');
