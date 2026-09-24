@@ -1,8 +1,8 @@
 /**
  * SISTEM PENGURUSAN KAD TOUCH 'N GO HOSPITAL KEMAMAN
- * Versi: 1.3.0
+ * Versi: 1.4.0
  * Fail: js/app.js
- * Fungsi: Logik Utama APLIKASI Frontend & Routing View (Dikemas Kini untuk Fasa 6 & 7)
+ * Fungsi: Routing View Utama (Dikemas kini untuk Fasa 8 & 9)
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -90,6 +90,10 @@ function loadView(viewName, element) {
         renderCardView();
     } else if (viewName === "vehicles") {
         renderVehicleView();
+    } else if (viewName === "drivers") {
+        renderDriverView();
+    } else if (viewName === "handover") {
+        renderHandoverView();
     } else {
         appContent.innerHTML = `<div style="padding: 20px; background: white; border-radius: 8px;">
             <h3>Modul ${viewName.toUpperCase()}</h3>
