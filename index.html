@@ -4,18 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Pengurusan Kad Touch 'n Go - Hospital Kemaman</title>
-    
-    <!-- Font Awesome CDN untuk Ikon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- Gaya CSS Utama & Modul -->
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/login.css">
     <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
 </head>
 <body>
 
-    <!-- CONTAINER PENGESAHAN (LOGIN) -->
     <div id="authContainer" class="auth-wrapper">
         <div class="login-card">
             <div class="login-header">
@@ -29,7 +24,7 @@
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="userId"><i class="fa-solid fa-id-card"></i> ID Pengguna</label>
-                    <input type="text" id="userId" placeholder="Contoh: SUP1001 atau DRV1001" required autocomplete="username">
+                    <input type="text" id="userId" placeholder="Contoh: SUP5041 atau DRV1001" required autocomplete="username">
                 </div>
 
                 <div class="form-group">
@@ -51,7 +46,6 @@
         </div>
     </div>
 
-    <!-- CONTAINER DASHBOARD UTAMA -->
     <div id="mainContainer" class="main-wrapper hidden">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -62,9 +56,7 @@
                 <p id="navUserName" class="user-name">Nama Pengguna</p>
                 <span id="navUserRole" class="role-badge">PENYELIA</span>
             </div>
-            <nav class="nav-menu" id="navMenu">
-                <!-- Navigasi Dinamik Mengikut Peranan -->
-            </nav>
+            <nav class="nav-menu" id="navMenu"></nav>
             <div class="sidebar-footer">
                 <button onclick="handleLogout()" class="btn-logout">
                     <i class="fa-solid fa-right-from-bracket"></i> Log Keluar
@@ -80,9 +72,7 @@
                 </div>
             </header>
             
-            <section id="appContent" class="view-content">
-                <!-- Kandungan Halaman Dinamik -->
-            </section>
+            <section id="appContent" class="view-content"></section>
         </main>
     </div>
 
@@ -92,6 +82,8 @@
     <script src="./js/dashboard.js"></script>
     <script src="./js/card.js"></script>
     <script src="./js/vehicle.js"></script>
+    <script src="./js/driver.js"></script>
+    <script src="./js/handover.js"></script>
     <script src="./js/app.js"></script>
 </body>
 </html>
