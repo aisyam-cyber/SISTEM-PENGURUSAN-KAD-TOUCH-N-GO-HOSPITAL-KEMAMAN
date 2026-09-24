@@ -6,7 +6,7 @@
  */
 
 // Sila kemas kini URL Web App Google Apps Script anda di sini selepas Deploy
-const API_URL = "https://script.google.com/macros/s/AKfycbyPNcwetFufIY-hhr9VDWq1Hy1Xy8V8seR7w1tTOka0LBtix8b5TkRQRTo6CfGkwzWt/exec";
+const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbyPNcwetFufIY-hhr9VDWq1Hy1Xy8V8seR7w1tTOka0LBtix8b5TkRQRTo6CfGkwzWt/exec";
 
 /**
  * Kendali Borang Log Masuk
