@@ -151,14 +151,14 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.2.1)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.2.3)</p>
   </footer>
 
   <script>
     var currentUser = null;
-    var BACKEND_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzqx6X0kpvX_hCnjNSYL4J-6fGNsgdNVNHrnoDdFBEvsIaJfSLTsewM3nIyxIcOJvfE/exec";
+    // URL Web App Apps Script Rasmi Terkini
+    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzwoHIeHC_romNwzChv74sWJ0ecy-YQTdjm5KF8f6pkCr1dJkdRVj-7BXdqTfAUOQiO/exec";
 
-    // Fungsi Pembantu untuk menghantar permintaan secara JSONP bagi mengelakkan ralat CORS
     function sendJsonpRequest(params, callbackName) {
       return new Promise((resolve, reject) => {
         var fnName = callbackName || 'jsonp_cb_' + Math.round(100000 * Math.random());
