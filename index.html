@@ -151,12 +151,39 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.2.0)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 1.2.1)</p>
   </footer>
 
   <script>
     var currentUser = null;
-    var BACKEND_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzqx6X0kpvX_hCnjNSYL4J-6fGNsgdNVNHrnoDdFBEvsIaJfSLTsewM3nIyxIcOJvfE/exec";
+    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzqx6X0kpvX_hCnjNSYL4J-6fGNsgdNVNHrnoDdFBEvsIaJfSLTsewM3nIyxIcOJvfE/exec";
+
+    // Fungsi Pembantu untuk menghantar permintaan secara JSONP bagi mengelakkan ralat CORS
+    function sendJsonpRequest(params, callbackName) {
+      return new Promise((resolve, reject) => {
+        var fnName = callbackName || 'jsonp_cb_' + Math.round(100000 * Math.random());
+        window[fnName] = function(data) {
+          delete window[fnName];
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+          resolve(data);
+        };
+
+        var queryParams = [];
+        for (var key in params) {
+          queryParams.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
+        }
+        queryParams.push("callback=" + fnName);
+
+        var script = document.createElement('script');
+        script.src = BACKEND_URL + "?" + queryParams.join("&");
+        script.onerror = function() {
+          delete window[fnName];
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+          reject(new Error("Ralat rangkaian/log masuk."));
+        };
+        document.body.appendChild(script);
+      });
+    }
 
     function handleLogin(event) {
       event.preventDefault();
@@ -167,8 +194,7 @@
       btn.innerText = 'MEMPROSES...';
       btn.disabled = true;
 
-      fetch(BACKEND_URL + "?action=login&userId=" + encodeURIComponent(userId) + "&password=" + encodeURIComponent(password))
-        .then(res => res.json())
+      sendJsonpRequest({ action: 'login', userId: userId, password: password })
         .then(data => onLoginSuccess(data))
         .catch(err => onLoginFailure(err));
     }
@@ -191,19 +217,18 @@
           loadDriverVehicles();
         }
       } else {
-        alert(response.message || "Log masuk gagal.");
+        alert(response.message || "ID pengguna atau kata laluan tidak sah.");
       }
     }
 
     function onLoginFailure(err) {
       document.getElementById('btn-login').innerText = 'LOG MASUK';
       document.getElementById('btn-login').disabled = false;
-      alert("Ralat rangkaian/log masuk.");
+      alert("ID pengguna atau kata laluan tidak sah.");
     }
 
     function loadDriverVehicles() {
-      fetch(BACKEND_URL + "?action=getVehicles")
-        .then(res => res.json())
+      sendJsonpRequest({ action: 'getVehicles' })
         .then(res => {
           if (res.success) {
             var select = document.getElementById('select-driver-vehicle');
@@ -224,8 +249,7 @@
         return;
       }
 
-      fetch(BACKEND_URL + "?action=getCardByVehicle&vehicleRegNo=" + encodeURIComponent(regNo))
-        .then(res => res.json())
+      sendJsonpRequest({ action: 'getCardByVehicle', vehicleRegNo: regNo })
         .then(res => {
           if (res.success && res.card) {
             document.getElementById('driver-card-no').innerText = res.card.cardNumber;
@@ -238,7 +262,7 @@
     }
 
     function loadSupervisorData() {
-      fetch(BACKEND_URL + "?action=getCards").then(r => r.json()).then(res => {
+      sendJsonpRequest({ action: 'getCards' }).then(res => {
         if (res.success) {
           document.getElementById('dash-total-cards').innerText = res.data.length;
           var tbody = document.querySelector('#table-cards tbody');
@@ -249,7 +273,7 @@
         }
       });
 
-      fetch(BACKEND_URL + "?action=getVehicles").then(r => r.json()).then(res => {
+      sendJsonpRequest({ action: 'getVehicles' }).then(res => {
         if (res.success) {
           document.getElementById('dash-total-vehicles').innerText = res.data.length;
           var tbody = document.querySelector('#table-vehicles tbody');
