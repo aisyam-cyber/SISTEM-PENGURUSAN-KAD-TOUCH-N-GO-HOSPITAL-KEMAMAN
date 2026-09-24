@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengurusan Kad Touch 'n Go - Hospital Kemaman</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 
+    <!-- CONTAINER PENGESAHAN (LOGIN) -->
+    <div id="authContainer" class="auth-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-area">
+                    <i class="fa-solid => fa-hospital-user logo-icon"></i>
+                </div>
+                <h2>HOSPITAL KEMAMAN</h2>
+                <p>Sistem Pengurusan Kad Touch 'n Go</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="userId"><i class="fa-solid fa-id-card"></i> ID Pengguna</label>
+                    <input type="text" id="userId" placeholder="Contoh: SUP1001 atau DRV1001" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fa-solid fa-lock"></i> Kata Laluan</label>
+                    <input type="password" id="password" placeholder="Masukkan kata laluan" required autocomplete="current-password">
+                </div>
+
+                <div id="loginAlert" class="alert-box hidden"></div>
+
+                <button type="submit" id="btnLogin" class="btn-primary">
+                    <span id="btnText">LOG MASUK</span>
+                    <i id="btnSpinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <small>&copy; 2026 Hospital Kemaman &bull; Jabatan Kesihatan Negeri Terengganu</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTAINER DASHBOARD UTAMA -->
+    <div id="mainContainer" class="main-wrapper hidden">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>e-TNG KEMAMAN</span>
+            </div>
+            <div class="user-info-badge">
+                <p id="navUserName" class="user-name">Nama Pengguna</p>
+                <span id="navUserRole" class="role-badge">PENYELIA</span>
+            </div>
+            <nav class="nav-menu" id="navMenu">
+                <!-- Navigasi Dinamik Mengikut Peranan Akan Diisi Oleh JS -->
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="handleLogout()" class="btn-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Log Keluar
+                </button>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="top-header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-status">
+                    <span class="status-indicator online"></span> Sistem Beroperasi
+                </div>
+            </header>
+            
+            <section id="appContent" class="view-content">
+                <!-- Kandungan Halaman Dinamik -->
+            </section>
+        </main>
+    </div>
+
+    <!-- SKRIP APLIKASI -->
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
