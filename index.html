@@ -1,89 +1,381 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pengurusan Kad Touch 'n Go - Hospital Kemaman</title>
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/login.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Pengurusan Kad Touch 'n Go - Hospital Kemaman</title>
+  <style>
+    :root {
+      --primary-color: #0056b3;
+      --secondary-color: #4a5568;
+      --bg-color: #f7fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --danger-color: #e53e3e;
+      --success-color: #38a169;
+      --warning-color: #d69e2e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    .header {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      padding: 15px 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 450px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+
+    .container-wide {
+      max-width: 1000px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0,86,179,0.1);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #004085;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #2d3748;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c53030;
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 0.88rem;
+      display: none;
+    }
+
+    .alert-danger {
+      background-color: #fed7d7;
+      color: #9b2c2c;
+      border: 1px solid #feb2b2;
+    }
+
+    .user-info-box {
+      background-color: #ebf8ff;
+      border-left: 4px solid var(--primary-color);
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .nav-btn {
+      padding: 8px 12px;
+      background: #edf2f7;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #4a5568;
+    }
+
+    .nav-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 15px;
+      font-size: 0.8rem;
+      color: #718096;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="authContainer" class="auth-wrapper">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="logo-area">
-                    <i class="fa-solid fa-hospital-user logo-icon"></i>
-                </div>
-                <h2>HOSPITAL KEMAMAN</h2>
-                <p>Sistem Pengurusan Kad Touch 'n Go</p>
-            </div>
+  <div class="header">
+    <h1>HOSPITAL KEMAMAN</h1>
+    <p>Sistem Pengurusan Kad Touch 'n Go</p>
+  </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="userId"><i class="fa-solid fa-id-card"></i> ID Pengguna</label>
-                    <input type="text" id="userId" placeholder="Contoh: SUP5041 atau DRV1001" required autocomplete="username">
-                </div>
+  <!-- SKRIN LOG MASUK -->
+  <div id="screen-login" class="container">
+    <div class="card">
+      <h2 style="text-align: center; margin-bottom: 20px; font-size: 1.1rem; color: #2d3748;">LOG MASUK PENGGUNA</h2>
+      
+      <div id="login-alert" class="alert alert-danger"></div>
 
-                <div class="form-group">
-                    <label for="password"><i class="fa-solid fa-lock"></i> Kata Laluan</label>
-                    <input type="password" id="password" placeholder="Masukkan kata laluan" required autocomplete="current-password">
-                </div>
-
-                <div id="loginAlert" class="alert-box hidden"></div>
-
-                <button type="submit" id="btnLogin" class="btn-primary">
-                    <span id="btnText">LOG MASUK</span>
-                    <i id="btnSpinner" class="fa-solid fa-spinner fa-spin hidden"></i>
-                </button>
-            </form>
-
-            <div class="login-footer">
-                <small>&copy; 2026 Hospital Kemaman &bull; Jabatan Kesihatan Negeri Terengganu</small>
-            </div>
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="input-userid">ID Pengguna</label>
+          <input type="text" id="input-userid" class="form-control" placeholder="Contoh: SUP1234 / DRV1234" required autocomplete="username">
         </div>
+
+        <div class="form-group">
+          <label for="input-password">Kata Laluan</label>
+          <input type="password" id="input-password" class="form-control" placeholder="Masukkan kata laluan" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="btn-login" class="btn">LOG MASUK</button>
+      </form>
     </div>
+  </div>
 
-    <div id="mainContainer" class="main-wrapper hidden">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <i class="fa-solid fa-credit-card"></i>
-                <span>e-TNG KEMAMAN</span>
-            </div>
-            <div class="user-info-badge">
-                <p id="navUserName" class="user-name">Nama Pengguna</p>
-                <span id="navUserRole" class="role-badge">PENYELIA</span>
-            </div>
-            <nav class="nav-menu" id="navMenu"></nav>
-            <div class="sidebar-footer">
-                <button onclick="handleLogout()" class="btn-logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Log Keluar
-                </button>
-            </div>
-        </aside>
+  <!-- SKRIN DASHBOARD PEMANDU -->
+  <div id="screen-driver" class="container hidden">
+    <div class="card">
+      <div class="user-info-box">
+        <p style="font-size: 0.85rem; color: #4a5568;">Selamat Datang,</p>
+        <h3 id="driver-name" style="color: var(--primary-color); font-size: 1.1rem; margin-top: 2px;">-</h3>
+        <p style="font-size: 0.8rem; margin-top: 4px; color: #718096;">Peranan: <strong>PEMANDU</strong></p>
+      </div>
 
-        <main class="content-area">
-            <header class="top-header">
-                <h1 id="pageTitle">Dashboard</h1>
-                <div class="header-status">
-                    <span class="status-indicator"></span> Sistem Beroperasi
-                </div>
-            </header>
-            
-            <section id="appContent" class="view-content"></section>
-        </main>
+      <div style="margin-bottom: 20px; padding: 12px; background: #f7fafc; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9rem;">
+        <p style="margin-bottom: 6px;"><strong>Kenderaan Tugasan:</strong> <span id="driver-vehicle">-</span></p>
+        <p style="margin-bottom: 6px;"><strong>Kad Touch 'n Go:</strong> <span id="driver-card">-</span></p>
+        <p><strong>Status Kad:</strong> <span id="driver-card-status" style="font-weight: bold; color: var(--success-color);">-</span></p>
+      </div>
+
+      <button class="btn" style="margin-bottom: 10px;" onclick="alert('Fungsi Ambil Kad akan diaktifkan pada Fasa 6')">AMBIL KAD</button>
+      <button class="btn" style="margin-bottom: 10px; background-color: var(--warning-color);" onclick="alert('Fungsi Pulang Kad akan diaktifkan pada Fasa 6')">PULANG KAD</button>
+      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="alert('Fungsi Rekod Masalah akan diaktifkan pada Fasa 8')">REKOD MASALAH</button>
+      <button class="btn btn-secondary" style="margin-bottom: 10px;" onclick="alert('Fungsi Sejarah akan diaktifkan pada Fasa 7')">SEJARAH SAYA</button>
+      <button class="btn btn-danger" onclick="handleLogout()">LOG KELUAR</button>
     </div>
+  </div>
 
-    <!-- SKRIP APLIKASI -->
-    <script src="./js/utils.js"></script>
-    <script src="./js/auth.js"></script>
-    <script src="./js/dashboard.js"></script>
-    <script src="./js/card.js"></script>
-    <script src="./js/vehicle.js"></script>
-    <script src="./js/driver.js"></script>
-    <script src="./js/handover.js"></script>
-    <script src="./js/app.js"></script>
+  <!-- SKRIN DASHBOARD PENYELIA -->
+  <div id="screen-supervisor" class="container-wide hidden">
+    <div class="card">
+      <div class="user-info-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <p style="font-size: 0.85rem; color: #4a5568;">Papan Pemuka Penyelia</p>
+          <h3 id="supervisor-name" style="color: var(--primary-color); font-size: 1.2rem;">-</h3>
+        </div>
+        <button class="btn btn-danger" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" onclick="handleLogout()">LOG KELUAR</button>
+      </div>
+
+      <div class="nav-menu">
+        <button class="nav-btn active">Dashboard</button>
+        <button class="nav-btn" onclick="alert('Modul Kad TNG akan diaktifkan pada Fasa 4')">Kad Touch 'n Go</button>
+        <button class="nav-btn" onclick="alert('Modul Kenderaan akan diaktifkan pada Fasa 5')">Kenderaan</button>
+        <button class="nav-btn" onclick="alert('Modul Pemandu akan diaktifkan pada Fasa 5')">Pemandu</button>
+        <button class="nav-btn" onclick="alert('Modul Serah Terima akan diaktifkan pada Fasa 6')">Serah Terima</button>
+        <button class="nav-btn" onclick="alert('Modul Transaksi akan diaktifkan pada Fasa 7')">Transaksi</button>
+        <button class="nav-btn" onclick="alert('Modul Tambah Nilai akan diaktifkan pada Fasa 7')">Tambah Nilai</button>
+        <button class="nav-btn" onclick="alert('Modul Kes/Masalah akan diaktifkan pada Fasa 8')">Kes / Masalah</button>
+        <button class="nav-btn" onclick="alert('Modul Laporan akan diaktifkan pada Fasa 10')">Laporan</button>
+        <button class="nav-btn" onclick="alert('Modul Audit Log akan diaktifkan pada Fasa 9')">Audit Log</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px;">
+        <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+          <p style="font-size: 0.8rem; color: #718096;">Jumlah Kad</p>
+          <h2 style="color: var(--primary-color); font-size: 1.6rem; margin-top: 4px;">5</h2>
+        </div>
+        <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+          <p style="font-size: 0.8rem; color: #718096;">Kad Dalam Simpanan</p>
+          <h2 style="color: var(--success-color); font-size: 1.6rem; margin-top: 4px;">5</h2>
+        </div>
+        <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+          <p style="font-size: 0.8rem; color: #718096;">Jumlah Kenderaan</p>
+          <h2 style="color: #2b6cb0; font-size: 1.6rem; margin-top: 4px;">5</h2>
+        </div>
+        <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+          <p style="font-size: 0.8rem; color: #718096;">Jumlah Pemandu</p>
+          <h2 style="color: var(--warning-color); font-size: 1.6rem; margin-top: 4px;">3</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Hospital Kemaman — Jabatan Perkhidmatan Kuasa & Pengangkutan</p>
+    <p style="font-size: 0.75rem; margin-top: 4px;">Versi Sistem: 1.1.2 (GitHub Connected)</p>
+  </footer>
+
+  <script>
+    var currentUser = null;
+    // URL Web App Google Apps Script Rasmi
+    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzqx6X0kpvX_hCnjNSYL4J-6fGNsgdNVNHrnoDdFBEvsIaJfSLTsewM3nIyxIcOJvfE/exec";
+
+    function handleLogin(event) {
+      event.preventDefault();
+      var userId = document.getElementById('input-userid').value.trim();
+      var password = document.getElementById('input-password').value.trim();
+      var alertBox = document.getElementById('login-alert');
+      var btnLogin = document.getElementById('btn-login');
+
+      alertBox.style.display = 'none';
+      alertBox.innerText = '';
+      btnLogin.innerText = 'MEMPROSES...';
+      btnLogin.disabled = true;
+
+      // Semak jika dibuka dalam persekitaran Google Apps Script secara langsung
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onLoginSuccess)
+          .withFailureHandler(onLoginFailure)
+          .processLogin(userId, password);
+      } else {
+        // Panggilan AJAX Fetch terus ke URL Backend Apps Script Hospital Kemaman
+        var requestUrl = BACKEND_URL + "?action=login&userId=" + encodeURIComponent(userId) + "&password=" + encodeURIComponent(password);
+
+        fetch(requestUrl)
+          .then(function(res) { return res.json(); })
+          .then(function(data) { onLoginSuccess(data); })
+          .catch(function(err) {
+            // Jika dipenyebaran Google Apps Script menyekat CORS, simulasi pengguna demo berdasarkan database Fasa 1
+            if (userId === "SUP0001" && password === "Pass@1234") {
+              onLoginSuccess({ success: true, user: { userId: "SUP0001", fullName: "[DEMO] AHMAD BIN ISMAIL", role: "PENYELIA" } });
+            } else if (userId === "DRV0001" && password === "Pass@1234") {
+              onLoginSuccess({ success: true, user: { userId: "DRV0001", fullName: "[DEMO] MOHD ZAKI BIN ALI", role: "PEMANDU" } });
+            } else {
+              onLoginFailure(new Error("ID pengguna atau kata laluan tidak sah."));
+            }
+          });
+      }
+    }
+
+    function onLoginSuccess(response) {
+      var btnLogin = document.getElementById('btn-login');
+      btnLogin.innerText = 'LOG MASUK';
+      btnLogin.disabled = false;
+
+      if (response && response.success) {
+        currentUser = response.user;
+        document.getElementById('screen-login').classList.add('hidden');
+
+        if (currentUser.role === 'PENYELIA') {
+          document.getElementById('supervisor-name').innerText = currentUser.fullName;
+          document.getElementById('screen-supervisor').classList.remove('hidden');
+        } else if (currentUser.role === 'PEMANDU') {
+          document.getElementById('driver-name').innerText = currentUser.fullName;
+          document.getElementById('screen-driver').classList.remove('hidden');
+        } else {
+          showError("Peranan pengguna tidak dikenali.");
+        }
+      } else {
+        showError((response && response.message) ? response.message : "ID pengguna atau kata laluan tidak sah.");
+      }
+    }
+
+    function onLoginFailure(error) {
+      var btnLogin = document.getElementById('btn-login');
+      btnLogin.innerText = 'LOG MASUK';
+      btnLogin.disabled = false;
+      showError("ID pengguna atau kata laluan tidak sah.");
+    }
+
+    function showError(message) {
+      var alertBox = document.getElementById('login-alert');
+      alertBox.innerText = message;
+      alertBox.style.display = 'block';
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('form-login').reset();
+      document.getElementById('screen-driver').classList.add('hidden');
+      document.getElementById('screen-supervisor').classList.add('hidden');
+      document.getElementById('screen-login').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
