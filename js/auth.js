@@ -6,7 +6,7 @@
  */
 
 // GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT ANDA SEBENAR:
-const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbxCf8Genk72FXf9-oyCZxyX6DzR91oNTWoFKy02U6CebjY2YKHKj6yYBt5grCQiJcxt/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxCf8Genk72FXf9-oyCZxyX6DzR91oNTWoFKy02U6CebjY2YKHKj6yYBt5grCQiJcxt/exec";
 
 /**
  * Kendali Borang Log Masuk
