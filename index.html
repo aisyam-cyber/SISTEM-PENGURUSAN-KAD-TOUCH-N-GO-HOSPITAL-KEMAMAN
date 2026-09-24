@@ -200,7 +200,6 @@
       <div id="panel-return-card" class="hidden" style="background: #fffaf0; padding: 16px; border-radius: 12px; border: 1px solid #fef3c7; margin-bottom: 15px;">
         <h3 style="font-size: 1rem; color: #b45309; margin-bottom: 12px;">🔄 Borang Pemulangan / Hantar Kad</h3>
         
-        <!-- PENGECAMAN AUTOMATIK KAD DI TANGAN PEMANDU -->
         <div id="auto-return-card-info" style="padding: 14px; background: #ffffff; border-radius: 8px; border: 2px solid #f59e0b; margin-bottom: 15px;">
           <p style="font-size: 0.8rem; color: #b45309; font-weight: bold; text-transform: uppercase;">Kad Dikesan Di Tangan Anda:</p>
           <h2 id="auto-card-no" style="color: var(--brand-blue); font-size: 1.25rem; margin-top: 2px;">Mengecam Kad...</h2>
@@ -279,6 +278,7 @@
         <button class="nav-btn" onclick="switchTab('handover')">Serah Terima</button>
         <button class="nav-btn" onclick="switchTab('cards')">Kad Touch 'n Go</button>
         <button class="nav-btn" onclick="switchTab('vehicles')">Kenderaan</button>
+        <button class="nav-btn" onclick="switchTab('audit')">Audit Log</button>
       </div>
 
       <div id="tab-dash">
@@ -337,17 +337,27 @@
           <tbody></tbody>
         </table>
       </div>
+
+      <div id="tab-audit" class="hidden">
+        <h3 style="font-size: 1rem; margin-top: 10px; margin-bottom: 10px;">Jejak Audit Sistem (Audit Log)</h3>
+        <table id="table-audit">
+          <thead>
+            <tr><th>ID Audit</th><th>Tarikh/Masa</th><th>Pengguna</th><th>Peranan</th><th>Modul</th><th>Tindakan</th><th>Mesej</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <footer>
-    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 2.1.0)</p>
+    <p>&copy; 2026 Hospital Kemaman — Pengurusan Kad TNG (Versi 2.1.2)</p>
   </footer>
 
   <script>
     var currentUser = null;
     var currentActiveCardForDriver = null;
-    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwOTUcrsWL40nmh6HLXEEFKSqMFqf-KbsPXQj8dOCZRlF4njt6Sl1cT_ll-POUmKjW8/exec";
+    var BACKEND_URL = "https://script.google.com/macros/s/AKfycbxas2nu8mxdIXqOM0SjNCXpMGz11KAzFbMkZML45lEOv842rRJ0A9ofMCQ_uBSSN53b/exec";
 
     function sendJsonpRequest(params, callbackName) {
       return new Promise((resolve, reject) => {
@@ -430,7 +440,6 @@
             document.getElementById('widget-borrow-time').innerText = res.card.borrowDate + " " + res.card.borrowTime;
             widget.classList.remove('hidden');
 
-            // Set data automatik dalam Borang Hantar Kad
             document.getElementById('auto-card-no').innerText = res.card.cardNumber;
             document.getElementById('auto-card-veh').innerText = res.card.vehicle;
             document.getElementById('auto-card-prev-bal').innerText = parseFloat(res.card.balance).toFixed(2);
@@ -638,6 +647,16 @@
           });
         }
       });
+
+      sendJsonpRequest({ action: 'getAuditLogs' }).then(res => {
+        if (res.success) {
+          var tbody = document.querySelector('#table-audit tbody');
+          tbody.innerHTML = '';
+          res.data.forEach(a => {
+            tbody.innerHTML += `<tr><td>${a.auditId}</td><td>${a.date} ${a.time}</td><td>${a.userName} (${a.userId})</td><td>${a.role}</td><td>${a.module}</td><td><strong>${a.action}</strong></td><td>${a.message}</td></tr>`;
+          });
+        }
+      });
     }
 
     function switchTab(tab) {
@@ -646,6 +665,7 @@
       document.getElementById('tab-handover').classList.add('hidden');
       document.getElementById('tab-cards').classList.add('hidden');
       document.getElementById('tab-vehicles').classList.add('hidden');
+      document.getElementById('tab-audit').classList.add('hidden');
       document.getElementById('tab-' + tab).classList.remove('hidden');
     }
 
