@@ -69,8 +69,7 @@
           <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go</button>
           <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Keluarkan Kad</button>
           <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
-          <!-- MENU BAHARU ANALISIS BULANAN -->
-          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Analisis Bulanan</button>
+          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Analisis & Audit KKM</button>
         </nav>
       </div>
       <div class="p-4 border-t border-slate-800">
@@ -178,13 +177,13 @@
           </div>
         </section>
 
-        <!-- TAB BAHARU: ANALISIS & LAPORAN BULANAN DENGAN PENAPIS -->
+        <!-- TAB BAHARU: ANALISIS & AUDIT KKM HOLISTIK -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
-          <!-- BAR PENAPIS (FILTER BAR) -->
+          <!-- BAR PENAPIS -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 class="text-base font-bold text-slate-800">Analisis Perbelanjaan Kad</h3>
-              <p class="text-xs text-slate-500">Saringan data mengikut bulan kewangan Hospital Kemaman</p>
+              <h3 class="text-base font-bold text-slate-800">Laporan Analisis & Audit Kewangan KKM</h3>
+              <p class="text-xs text-slate-500">Saringan pergerakan kenderaan & perbelanjaan kad mengikut bulan</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
               <select id="filterMonth" onchange="renderAnalyticsCharts()" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
@@ -214,34 +213,57 @@
             </div>
           </div>
 
-          <!-- KAD RINGKASAN KOS PERBELANJAAN TERPENAPIS -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- KAD RINGKASAN KOS PERBELANJAAN -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
               <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perbelanjaan</p>
               <p class="text-2xl font-bold text-hospital-900 mt-1" id="anaTotalCost">RM 0.00</p>
               <span class="text-[11px] text-slate-400">Tol + Parkir Bulanan</span>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <p class="text-xs font-semibold text-slate-500 uppercase">Perbelanjaan Tol</p>
+              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perjalanan</p>
+              <p class="text-2xl font-bold text-sky-600 mt-1" id="anaTotalTrips">0 Perjalanan</p>
+              <span class="text-[11px] text-sky-500">Keluar / Masuk Kad</span>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Kos Tol</p>
               <p class="text-2xl font-bold text-emerald-600 mt-1" id="anaTollCost">RM 0.00</p>
               <span class="text-[11px] text-emerald-500">Penggunaan Lebuhraya</span>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <p class="text-xs font-semibold text-slate-500 uppercase">Perbelanjaan Parkir</p>
+              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Kos Parkir</p>
               <p class="text-2xl font-bold text-amber-600 mt-1" id="anaParkingCost">RM 0.00</p>
-              <span class="text-[11px] text-amber-500">Bayaran Parkir Hospital/Lokasi</span>
+              <span class="text-[11px] text-amber-500">Bayaran Parkir</span>
             </div>
           </div>
 
-          <!-- GRAF INTERAKTIF -->
+          <!-- GRAF INTERAKTIF ANALISIS AUDIT KKM -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- CARTA 1: KENDERAAN PALING BANYAK BERGERAK -->
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4">Pecahan Nisbah (Tol vs Parkir)</h4>
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4"><i class="fa-solid fa-truck-medical text-hospital-500 mr-2"></i>Kenderaan Paling Banyak Bergerak (Bil. Perjalanan)</h4>
+              <canvas id="chartTopVehicles"></canvas>
+            </div>
+
+            <!-- CARTA 2: NISBAH PERBELANJAAN (TOL VS PARKIR) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4"><i class="fa-solid fa-chart-pie text-amber-500 mr-2"></i>Nisbah Perbelanjaan (Tol vs Parkir)</h4>
               <div class="max-w-xs mx-auto"><canvas id="chartCostBreakdown"></canvas></div>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4">Jumlah Perjalanan Mengikut Bulan</h4>
-              <canvas id="chartMonthlyTrend"></canvas>
+          </div>
+
+          <!-- JADUAL PEMANDU PALING AKTIF & AUDIT TRAIL RINGKAS -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h4 class="text-xs font-bold text-slate-700 uppercase border-b pb-2"><i class="fa-solid fa-users text-purple-500 mr-2"></i>Statistik Penggunaan Kad Mengikut Pemandu</h4>
+            <div class="overflow-x-auto max-h-48 custom-scrollbar">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold">
+                  <tr><th class="p-2">Nama Pemandu</th><th class="p-2">ID Pemandu</th><th class="p-2 text-center">Jumlah Perjalanan</th></tr>
+                </thead>
+                <tbody id="anaDriverTableBody">
+                  <tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada rekod pemandu</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -348,8 +370,8 @@
   <!-- LOGIK JAVASCRIPT -->
   <script>
     let currentUser = null;
-    let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [], recentTransactions: [] };
-    let chartPieInstance = null, chartBarInstance = null;
+    let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
+    let chartPieInstance = null, chartVehicleInstance = null;
 
     function callApi(action, payload = {}) {
       showLoading();
@@ -466,15 +488,15 @@
       document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
     }
 
-    // LOGIK GRAF INTERAKTIF & PENAPIS BULANAN
+    // LOGIK GRAF ANALISIS KENDERAAN & AUDIT KKM
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
 
-      let totalToll = 0, totalPark = 0;
-      const monthlyCounts = Array(12).fill(0);
+      let totalToll = 0, totalPark = 0, totalTrips = 0;
+      const vehicleTripCounts = {};
+      const driverTripCounts = {};
 
-      // KIRA BERDASARKAN TRANS AKSI TERKINI ATAU ISSUES
       (dbData.issues || []).forEach(iss => {
         if (!iss.TIMESTAMP) return;
         const parts = String(iss.TIMESTAMP).split('/');
@@ -482,13 +504,20 @@
           const m = parts[1].padStart(2, '0');
           const y = parts[2].split(',')[0].trim();
 
-          if (y === selectedYear) {
-            const mIndex = parseInt(m, 10) - 1;
-            if (mIndex >= 0 && mIndex < 12) monthlyCounts[mIndex]++;
-          }
-
           if ((selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear) {
+            totalTrips++;
+
+            // Merekodkan pemandu yang mengambil kad
+            const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
+            driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
+
+            // Merekodkan pergerakan kenderaan dari teks tujuan
             const txt = String(iss.TUJUAN || "");
+            const vehMatch = txt.match(/\[(.*?)\]/);
+            const regNo = vehMatch ? vehMatch[1] : "Kenderaan Lain";
+            vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
+
+            // Kira kos Tol & Parkir
             const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
             const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
 
@@ -500,10 +529,31 @@
 
       const grandTotal = totalToll + totalPark;
       document.getElementById('anaTotalCost').innerText = "RM " + grandTotal.toFixed(2);
+      document.getElementById('anaTotalTrips').innerText = totalTrips + " Perjalanan";
       document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
       document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
 
-      // JANAKAN CARTA PAI (TOL VS PARKIR)
+      // 1. CARTA BAR: KENDERAAN PALING BANYAK BERGERAK
+      const vehLabels = Object.keys(vehicleTripCounts);
+      const vehData = Object.values(vehicleTripCounts);
+
+      const ctxVeh = document.getElementById('chartTopVehicles').getContext('2d');
+      if (chartVehicleInstance) chartVehicleInstance.destroy();
+      chartVehicleInstance = new Chart(ctxVeh, {
+        type: 'bar',
+        data: {
+          labels: vehLabels.length ? vehLabels : ['Tiada Data'],
+          datasets: [{
+            label: 'Kekerapan Perjalanan',
+            data: vehData.length ? vehData : [0],
+            backgroundColor: '#0284c7',
+            borderRadius: 6
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      // 2. CARTA PAI: NISBAH PERBELANJAAN
       const ctxPie = document.getElementById('chartCostBreakdown').getContext('2d');
       if (chartPieInstance) chartPieInstance.destroy();
       chartPieInstance = new Chart(ctxPie, {
@@ -518,22 +568,25 @@
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
 
-      // JANAKAN CARTA BAR (PERJALANAN BULANAN)
-      const ctxBar = document.getElementById('chartMonthlyTrend').getContext('2d');
-      if (chartBarInstance) chartBarInstance.destroy();
-      chartBarInstance = new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-          labels: ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'],
-          datasets: [{
-            label: 'Bil. Perjalanan Rasmi (' + selectedYear + ')',
-            data: monthlyCounts,
-            backgroundColor: '#0284c7',
-            borderRadius: 6
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
-      });
+      // 3. JADUAL PEMANDU PALING AKTIF
+      const driverBody = document.getElementById('anaDriverTableBody');
+      driverBody.innerHTML = '';
+      const driverKeys = Object.keys(driverTripCounts);
+
+      if (driverKeys.length === 0) {
+        driverBody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada pergerakan direkodkan untuk tempoh ini</td></tr>';
+      } else {
+        driverKeys.forEach(drv => {
+          const userObj = (dbData.users || []).find(u => u.NAMA_PENGGUNA === drv);
+          driverBody.innerHTML += `
+            <tr class="border-b border-slate-100">
+              <td class="p-2 font-bold text-slate-700">${drv}</td>
+              <td class="p-2 text-slate-500">${userObj ? userObj.ID_PENGGUNA : '-'}</td>
+              <td class="p-2 text-center font-bold text-hospital-800">${driverTripCounts[drv]} kali</td>
+            </tr>
+          `;
+        });
+      }
     }
 
     function resetAnalyticsFilter() {
