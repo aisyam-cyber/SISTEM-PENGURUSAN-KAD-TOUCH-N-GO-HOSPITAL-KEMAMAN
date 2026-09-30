@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbyYIHI4OzcCn8h-yCYBrmouoLn4NWKwnA0tc4EGSsYVc9uzicXZT2yHE0HsZukeeide/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyu1hfb_Jil0YxGWVncqoEQlNDuV2diRKqtdP9QDPpc89GRVqBnwXurOPzOW4MT1CjDLg/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -104,7 +104,7 @@
       </header>
 
       <main class="flex-1 p-6 overflow-y-auto custom-scrollbar">
-        <!-- DASHBOARD VIEW STANDARD KKM -->
+        <!-- DASHBOARD VIEW -->
         <section id="view-dashboard" class="tab-view space-y-6">
           <div class="bg-gradient-to-r from-navy-900 via-hospital-900 to-hospital-800 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center">
             <div>
@@ -169,8 +169,8 @@
               </div>
               <ul class="text-xs space-y-2 text-slate-300">
                 <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Setiap pengeluaran & pemulangan kad <strong>WAJIB</strong> direkodkan melalui sistem.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Kad Touch 'n Go adalah khusus untuk <strong>kenderaan jabatan sahaja</strong>.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit penggunaan/top-up hendaklah disimpan untuk tujuan audit kewangan.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Kad Touch 'n Go adalah khusus untuk <strong>kenderaan jabatan sahaja</strong> (Tol & Parkir).</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit bayaran parkir / tol hendaklah disimpan untuk tujuan audit kewangan.</li>
               </ul>
             </div>
           </div>
@@ -188,7 +188,7 @@
           </div>
         </section>
 
-        <!-- KELUARKAN KAD -->
+        <!-- KELUARKAN KAD (DENGAN RUANG PARKIR RM CADANGAN PENGARAH) -->
         <section id="view-issueCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad</h3>
@@ -200,6 +200,7 @@
                 </select>
               </div>
 
+              <!-- PADANAN KAD AUTOMATIK -->
               <div class="grid grid-cols-2 gap-4 bg-sky-50 p-4 rounded-xl border border-sky-100">
                 <div>
                   <label class="block text-xs font-semibold text-hospital-800 mb-1">Kad TNG Padanan Auto</label>
@@ -230,6 +231,12 @@
                 </select>
               </div>
 
+              <!-- RUANG PARKIR (RM) TAMBAHAN UNTUK KEPERLUAN PENGARAH -->
+              <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-200/60">
+                <label class="block text-xs font-bold text-amber-900 mb-1"><i class="fa-solid fa-square-parking text-amber-600 mr-1"></i> Anggaran / Bayaran Parkir (RM) <span class="text-slate-500 font-normal">(Sila isi jika berkaitan)</span></label>
+                <input type="number" step="0.10" min="0" id="issueParkingAmount" placeholder="0.00" class="w-full p-2.5 bg-white border border-amber-200 rounded-xl text-sm font-bold text-amber-800 focus:ring-2 focus:ring-amber-500 outline-none">
+              </div>
+
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">4. Tujuan / Destinasi Tugasan</label>
                 <input type="text" id="issuePurpose" required placeholder="Contoh: Tugasan Rasmi ke HSB" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm">
@@ -253,6 +260,13 @@
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
                 <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-500">
               </div>
+              
+              <!-- TAMBAHAN RUANG INPUT PARKIR SEBENAR KETIKA PEMULANGAN -->
+              <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-200/60">
+                <label class="block text-xs font-bold text-amber-900 mb-1"><i class="fa-solid fa-square-parking text-amber-600 mr-1"></i> Jumlah Bayaran Parkir Sebenar (RM)</label>
+                <input type="number" step="0.10" min="0" id="returnParkingAmount" placeholder="0.00" class="w-full p-2.5 bg-white border border-amber-200 rounded-xl text-sm font-bold text-amber-800 outline-none">
+              </div>
+
               <button type="submit" id="btnSubmitReturn" class="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold text-sm">Pulangkan Kad</button>
             </form>
           </div>
@@ -515,6 +529,7 @@
       const cardId = document.getElementById('issueCardId').value;
       const supervisorId = document.getElementById('issueSupervisorId').value;
       const driverId = document.getElementById('issueUserId').value;
+      const parkingAmt = document.getElementById('issueParkingAmount').value || '0.00';
       
       const supervisor = dbData.users.find(u => String(u.ID_PENGGUNA) === String(supervisorId));
       const driver = dbData.users.find(u => String(u.ID_PENGGUNA) === String(driverId));
@@ -525,6 +540,7 @@
         namaPengguna: driver ? driver.NAMA_PENGGUNA : currentUser.NAMA_PENGGUNA,
         noPendaftaran: document.getElementById('issueVehicleReg').value,
         tujuan: document.getElementById('issuePurpose').value,
+        parkingAmount: parkingAmt, // MENGHANTAR NILAI PARKIR (RM)
         idPegawaiPenyerah: supervisorId,
         namaPegawaiPenyerah: supervisor ? supervisor.NAMA_PENGGUNA : currentUser.NAMA_PENGGUNA
       };
@@ -537,11 +553,13 @@
     async function handleReturnCardSubmit(e) {
       e.preventDefault();
       const cardId = document.getElementById('returnCardId').value;
+      const parkingAmt = document.getElementById('returnParkingAmount').value || '0.00';
 
       const payload = {
         idKad: cardId,
         idPegawaiPenerima: currentUser.ID_PENGGUNA,
         namaPegawaiPenerima: currentUser.NAMA_PENGGUNA,
+        parkingAmount: parkingAmt, // MENGHANTAR PARKIR SEBENAR DIPULANGKAN
         peranan: currentUser.PERANAN
       };
 
