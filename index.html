@@ -46,7 +46,7 @@
   <!-- CONFIGURATION -->
   <script>
     // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbz7F0UCEwBni7iLybBQK-PFqksXDK3Fr0PynfAIbTLyDQcepcKWY50T1A4zlCCUFHFCJg/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzPWkdzX1oq0wOxtFZ1K4m_R6lRuApxY-y_tFPFeFl3aJW6qzKQyLNJWXpODzCS0X6IUw/exec";
   </script>
 
   <!-- LOADING OVERLAY -->
@@ -446,7 +446,7 @@
             <form id="transactionForm" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad</label>
-                <select id="txCardId" required onchange="updateTxCardDetails()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                <select id="txCardId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
                   <option value="">-- Pilih Kad TNG --</option>
                 </select>
               </div>
@@ -783,7 +783,6 @@
 
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
-      // Set default dates
       const today = new Date().toISOString().split('T')[0];
       if (document.getElementById('txDate')) document.getElementById('txDate').value = today;
       if (document.getElementById('topupDate')) document.getElementById('topupDate').value = today;
@@ -819,7 +818,6 @@
       document.getElementById('navUserAvatar').innerText = currentUser.NAMA_PENGGUNA.charAt(0);
       document.getElementById('welcomeUser').innerText = "Selamat Datang, " + currentUser.NAMA_PENGGUNA;
 
-      // Restriksi Peranan
       if (currentUser.PERANAN !== 'ADMIN') {
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
       } else {
@@ -869,7 +867,6 @@
       document.getElementById('dashMonthlyUsage').innerText = formatCurrency(stats.monthlyUsageValue || 0);
       document.getElementById('dashMonthlyTopup').innerText = formatCurrency(stats.monthlyTopupValue || 0);
 
-      // Render Recent Tx
       const txBody = document.getElementById('dashRecentTxBody');
       txBody.innerHTML = '';
       if (dbData.recentTransactions && dbData.recentTransactions.length > 0) {
@@ -887,7 +884,6 @@
         txBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Tiada transaksi terkini</td></tr>';
       }
 
-      // Render Chart
       renderCharts(stats);
     }
 
@@ -1025,28 +1021,24 @@
 
     // DROPDOWN POPULATORS
     function populateDropdowns() {
-      // Issue Card Dropdown
       const issueSelect = document.getElementById('issueCardId');
       issueSelect.innerHTML = '<option value="">-- Pilih Kad Dalam Simpanan --</option>';
       dbData.cards.filter(c => c.STATUS_KAD === 'DALAM SIMPANAN').forEach(c => {
         issueSelect.innerHTML += `<option value="${c.ID_KAD}">${c.NO_KAD_DISPLAY} (${c.NO_PENDAFTARAN || 'Tiada Kenderaan'})</option>`;
       });
 
-      // Drivers Dropdown
       const userSelect = document.getElementById('issueUserId');
       userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
       dbData.users.filter(u => u.STATUS === 'AKTIF').forEach(u => {
         userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${escapeHtml(u.NAMA_PENGGUNA)} (${u.JAWATAN})</option>`;
       });
 
-      // Return Card Dropdown
       const returnSelect = document.getElementById('returnCardId');
       returnSelect.innerHTML = '<option value="">-- Pilih Kad Sedang Digunakan --</option>';
       dbData.cards.filter(c => c.STATUS_KAD === 'SEDANG DIGUNAKAN').forEach(c => {
         returnSelect.innerHTML += `<option value="${c.ID_KAD}">${c.NO_KAD_DISPLAY} - Pemegang: ${escapeHtml(c.PEMEGANG_SEMASA || 'Tidak diketahui')}</option>`;
       });
 
-      // All Cards Dropdown (Tx & Topup & Complaints)
       ['txCardId', 'topupCardId', 'compCardId', 'modalCardVehicle'].forEach(id => {
         const select = document.getElementById(id);
         if (!select) return;
@@ -1074,9 +1066,28 @@
     function updateReturnFormDetails() {
       const id = document.getElementById('returnCardId').value;
       const card = dbData.cards.find(c => c.ID_KAD === id);
+      const submitBtn = document.querySelector('#returnCardForm button[type="submit"]');
+
       if (card) {
         document.getElementById('returnHolderName').value = card.PEMEGANG_SEMASA || '-';
         document.getElementById('returnCardBalance').value = formatCurrency(card.BAKI_SEMASA);
+
+        const isCurrentHolder = currentUser && (
+          currentUser.NAMA_PENGGUNA === card.PEMEGANG_SEMASA || 
+          currentUser.PERANAN === 'ADMIN'
+        );
+
+        if (!isCurrentHolder && card.PEMEGANG_SEMASA) {
+          showError("Amaran: Hanya " + card.PEMEGANG_SEMASA + " sahaja yang dibenarkan membuat pemulangan kad ini.");
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
       }
     }
 
@@ -1117,11 +1128,17 @@
       const cardId = document.getElementById('returnCardId').value;
       const card = dbData.cards.find(c => c.ID_KAD === cardId);
 
+      if (currentUser.PERANAN !== 'ADMIN' && card.PEMEGANG_SEMASA !== currentUser.NAMA_PENGGUNA) {
+        showError("Akses Ditolak: Anda bukan pemegang kad ini. Hanya " + card.PEMEGANG_SEMASA + " sahaja boleh pulangkan.");
+        return;
+      }
+
       showConfirmModal("Pemulangan Kad", `Pasti mahu menerima pemulangan kad ****${card.NO_KAD_AKHIR_4_DIGIT}?`, async () => {
         const payload = {
           idKad: cardId,
           idPegawaiPenerima: currentUser.ID_PENGGUNA,
           namaPegawaiPenerima: currentUser.NAMA_PENGGUNA,
+          peranan: currentUser.PERANAN,
           catatan: document.getElementById('returnNotes').value
         };
 
@@ -1204,196 +1221,4 @@
 
       const res = await callApi('saveComplaint', payload);
       if (res.success) {
-        showSuccess(res.message);
-        document.getElementById('complaintForm').reset();
-        refreshData();
-        switchTab('dashboard');
-      } else {
-        showError(res.message);
-      }
-    }
-
-    async function handleSaveCard(e) {
-      e.preventDefault();
-      const payload = {
-        idKad: document.getElementById('modalCardId').value,
-        noKad: document.getElementById('modalCardNo').value,
-        idKenderaan: document.getElementById('modalCardVehicle').value,
-        bakiSemasa: document.getElementById('modalCardBalance').value,
-        lokasiSimpanan: document.getElementById('modalCardLocation').value,
-        operatorId: currentUser.ID_PENGGUNA,
-        operatorName: currentUser.NAMA_PENGGUNA
-      };
-
-      const res = await callApi('saveCard', payload);
-      if (res.success) {
-        showSuccess(res.message);
-        closeModal('cardModal');
-        refreshData();
-      } else {
-        showError(res.message);
-      }
-    }
-
-    async function changeCardStatus(idKad) {
-      const status = prompt("Masukkan Status Baru (AKTIF / DISEKAT / HILANG / ROSAK / DALAM SIMPANAN):");
-      if (!status) return;
-      const res = await callApi('updateCardStatus', {
-        idKad,
-        status: status.toUpperCase(),
-        idPengguna: currentUser.ID_PENGGUNA,
-        namaPengguna: currentUser.NAMA_PENGGUNA
-      });
-      if (res.success) {
-        showSuccess(res.message);
-        refreshData();
-      } else {
-        showError(res.message);
-      }
-    }
-
-    // UI CONTROLLERS & UTILS
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-white'));
-
-      const selectedView = document.getElementById('view-' + tabId);
-      if (selectedView) selectedView.classList.remove('hidden');
-
-      const btn = document.querySelector(`[data-tab="${tabId}"]`);
-      if (btn) btn.classList.add('active', 'bg-slate-800', 'text-white');
-
-      // Update Header Title
-      const titles = {
-        dashboard: 'Dashboard Utama',
-        cards: 'Rekod Kad Touch \'n Go',
-        vehicles: 'Senarai Kenderaan Jabatan',
-        holders: 'Rekod Pemegang Kad',
-        issueCard: 'Pengeluaran Kad',
-        returnCard: 'Pemulangan Kad',
-        transactions: 'Transaksi Penggunaan',
-        topup: 'Tambah Nilai Kad',
-        complaints: 'Aduan & Kehilangan Kad',
-        history: 'Sejarah Pergerakan',
-        reports: 'Laporan Sistem',
-        users: 'Pengurusan Pengguna',
-        auditLogs: 'Audit Trail Sistem'
-      };
-      document.getElementById('pageTitle').innerText = titles[tabId] || 'Sistem Pengurusan Kad';
-    }
-
-    function toggleMobileSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('hidden');
-    }
-
-    function openCardModal() {
-      document.getElementById('cardModalForm').reset();
-      document.getElementById('modalCardId').value = '';
-      document.getElementById('cardModal').classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
-    function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
-
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      const colors = {
-        success: 'bg-emerald-600 text-white',
-        error: 'bg-rose-600 text-white',
-        warning: 'bg-amber-500 text-white',
-        info: 'bg-navy-900 text-white'
-      };
-      toast.className = `px-4 py-3 rounded-xl shadow-lg text-sm font-medium transform transition duration-300 translate-y-2 pointer-events-auto flex items-center gap-2 ${colors[type]}`;
-      toast.innerHTML = `<span>${escapeHtml(msg)}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3500);
-    }
-
-    function showSuccess(msg) { showToast(msg, 'success'); }
-    function showError(msg) { showToast(msg, 'error'); }
-
-    let confirmCallback = null;
-    function showConfirmModal(title, msg, onConfirm) {
-      document.getElementById('confirmTitle').innerText = title;
-      document.getElementById('confirmMessage').innerText = msg;
-      confirmCallback = onConfirm;
-      document.getElementById('confirmModal').classList.remove('hidden');
-      document.getElementById('confirmBtnAction').onclick = () => {
-        closeConfirmModal(true);
-      };
-    }
-
-    function closeConfirmModal(confirmed) {
-      document.getElementById('confirmModal').classList.add('hidden');
-      if (confirmed && confirmCallback) confirmCallback();
-      confirmCallback = null;
-    }
-
-    function formatCurrency(val) {
-      const num = parseFloat(val) || 0;
-      return "RM " + num.toLocaleString('ms-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function formatDateStr(str) {
-      if (!str) return '';
-      const parts = str.split('-');
-      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      return str;
-    }
-
-    function escapeHtml(text) {
-      if (!text) return '';
-      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    function getStatusBadge(status) {
-      const badges = {
-        'AKTIF': '<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-emerald-100 text-emerald-700">AKTIF</span>',
-        'DALAM SIMPANAN': '<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-sky-100 text-sky-700">DALAM SIMPANAN</span>',
-        'SEDANG DIGUNAKAN': '<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-amber-100 text-amber-700">SEDANG DIGUNAKAN</span>',
-        'DISEKAT': '<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-slate-200 text-slate-700">DISEKAT</span>',
-        'HILANG': '<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-rose-100 text-rose-700">HILANG</span>',
-        'ROSAK': '<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-rose-100 text-rose-700">ROSAK</span>'
-      };
-      return badges[status] || `<span class="px-2 py-0.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-600">${status}</span>`;
-    }
-
-    function filterTable(tableId, query) {
-      const table = document.getElementById(tableId);
-      const rows = table.getElementsByTagName('tr');
-      const q = query.toLowerCase();
-      for (let i = 1; i < rows.length; i++) {
-        let text = rows[i].innerText.toLowerCase();
-        rows[i].style.display = text.includes(q) ? '' : 'none';
-      }
-    }
-
-    function exportTableToCSV(tableId, filename) {
-      const table = document.getElementById(tableId);
-      let csv = [];
-      for (let i = 0; i < table.rows.length; i++) {
-        let row = [], cols = table.rows[i].querySelectorAll('td, th');
-        for (let j = 0; j < cols.length; j++) row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-        csv.push(row.join(','));
-      }
-      const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-      const downloadLink = document.createElement('a');
-      downloadLink.download = filename;
-      downloadLink.href = window.URL.createObjectURL(csvFile);
-      downloadLink.style.display = 'none';
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    }
-
-    function generateReport(type) {
-      window.print();
-    }
-  </script>
-</body>
-</html>
+        showSuccess(r
