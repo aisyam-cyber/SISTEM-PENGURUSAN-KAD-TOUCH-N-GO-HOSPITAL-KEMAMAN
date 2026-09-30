@@ -9,42 +9,27 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Poppins', 'sans-serif'] },
-          colors: {
-            hospital: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 800: '#075985', 900: '#0c4a6e' },
-            navy: { 800: '#1e293b', 900: '#0f172a' }
-          }
-        }
-      }
-    }
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Poppins', 'sans-serif'] }, colors: { hospital: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 800: '#075985', 900: '#0c4a6e' }, navy: { 800: '#1e293b', 900: '#0f172a' } } } } }
   </script>
-  <style>
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-  </style>
+  <style>.custom-scrollbar::-webkit-scrollbar{width:6px}.custom-scrollbar::-webkit-scrollbar-track{background:#f1f1f1}.custom-scrollbar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}</style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
 
   <script>
-    // ⚠️ GANTI DENGAN WEB APP URL GOOGLE APPS SCRIPT ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbxCTQykG6smPlRg7EXq4VjHE3myjNEzSuC4OmlGB646ipGFxE4e7CdikvTBMmfSV1RyTQ/exec";
+    // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT ANDA
+    const API_URL = "https://script.google.com/macros/s/AKfycbyE5ugI261wetTCzk02P6AwtWropwXiwS9F3NvitGjCN6ABby4FzoRATEsDPQaOmP0Gxg/exec";
   </script>
 
-  <!-- LOADING OVERLAY -->
+  <!-- OVERLAY LOADING & NOTIFIKASI -->
   <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-slate-100">
       <div class="w-12 h-12 border-4 border-hospital-500 border-t-transparent rounded-full animate-spin"></div>
       <p class="font-semibold text-slate-700 text-sm animate-pulse">Memproses data...</p>
     </div>
   </div>
-
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- CONFIRMATION MODAL -->
+  <!-- MODAL PENGESAHAN -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 m-4 border border-slate-100">
       <h3 class="text-lg font-bold text-slate-800 mb-2" id="confirmTitle">Pengesahan</h3>
@@ -56,7 +41,7 @@
     </div>
   </div>
 
-  <!-- LOGIN SCREEN -->
+  <!-- PAPARAN LOG MASUK -->
   <div id="loginScreen" class="fixed inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-navy-900 via-hospital-900 to-slate-900 p-4">
     <div class="bg-white rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md w-full space-y-6">
       <div class="text-center space-y-2">
@@ -66,7 +51,6 @@
         <h1 class="text-xl font-bold text-slate-800">SISTEM PENGURUSAN KAD TOUCH 'N GO</h1>
         <p class="text-xs font-semibold uppercase text-hospital-800">Hospital Kemaman</p>
       </div>
-
       <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">ID Pengguna</label>
@@ -81,7 +65,7 @@
     </div>
   </div>
 
-  <!-- APP CONTAINER -->
+  <!-- APLIKASI UTAMA -->
   <div id="appContainer" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
     <aside id="sidebar" class="w-64 bg-navy-900 text-slate-300 flex-shrink-0 flex flex-col justify-between hidden md:flex z-20">
       <div>
@@ -131,7 +115,7 @@
           </div>
         </section>
 
-        <!-- KAD VIEW -->
+        <!-- SENARAI KAD VIEW -->
         <section id="view-cards" class="tab-view hidden space-y-4">
           <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-4">
             <table class="w-full text-left text-xs text-slate-600">
@@ -143,20 +127,44 @@
           </div>
         </section>
 
-        <!-- KELUARKAN KAD -->
+        <!-- KELUARKAN KAD (AUTO-MATCH KENDERAAN KE KAD) -->
         <section id="view-issueCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad</h3>
             <form id="issueCardForm" onsubmit="handleIssueCardSubmit(event)" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold mb-1">Pilih Kad</label>
-                <select id="issueCardId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">1. Pilih Kenderaan</label>
+                <select id="issueVehicleSelect" required onchange="autoMatchCardByVehicle()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800">
+                  <option value="">-- Pilih No. Pendaftaran Kenderaan --</option>
+                </select>
+              </div>
+
+              <!-- PAPARAN PADANAN KAD AUTOMATIK -->
+              <div class="grid grid-cols-2 gap-4 bg-sky-50 p-4 rounded-xl border border-sky-100">
+                <div>
+                  <label class="block text-xs font-semibold text-hospital-800 mb-1">Kad TNG Padanan Auto</label>
+                  <input type="text" id="issueCardDisplay" readonly placeholder="Pilih kenderaan di atas" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-hospital-900">
+                  <input type="hidden" id="issueCardId">
+                  <input type="hidden" id="issueVehicleReg">
+                  <input type="hidden" id="issueVehicleId">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-hospital-800 mb-1">Baki Semasa Kad</label>
+                  <input type="text" id="issueCardBalance" readonly placeholder="RM 0.00" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-emerald-600">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">2. Pilih Pemandu Penerima</label>
+                <select id="issueUserId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm">
+                  <option value="">-- Pilih Pemandu --</option>
+                </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold mb-1">Pilih Pemandu</label>
-                <select id="issueUserId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Tujuan / Destinasi</label>
+                <input type="text" id="issuePurpose" required placeholder="Contoh: Tugasan Rasmi ke HSB" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm">
               </div>
-              <button type="submit" class="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold text-sm">Serahkan Kad</button>
+              <button type="submit" id="btnSubmitIssue" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition">Serahkan Kad</button>
             </form>
           </div>
         </section>
@@ -167,10 +175,14 @@
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pemulangan Kad</h3>
             <form id="returnCardForm" onsubmit="handleReturnCardSubmit(event)" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold mb-1">Pilih Kad</label>
-                <select id="returnCardId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad Untuk Dipulangkan</label>
+                <select id="returnCardId" required onchange="updateReturnFormDetails()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
               </div>
-              <button type="submit" class="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold text-sm">Pulangkan Kad</button>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
+                <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-500">
+              </div>
+              <button type="submit" id="btnSubmitReturn" class="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold text-sm">Pulangkan Kad</button>
             </form>
           </div>
         </section>
@@ -178,7 +190,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- LOGIK JAVASCRIPT -->
   <script>
     let currentUser = null;
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
@@ -276,28 +288,84 @@
     }
 
     function populateDropdowns() {
-      const issueSelect = document.getElementById('issueCardId');
-      if (issueSelect) {
-        issueSelect.innerHTML = '<option value="">-- Pilih Kad --</option>';
-        dbData.cards.filter(c => String(c.STATUS_KAD).toUpperCase() === 'DALAM SIMPANAN').forEach(c => {
-          issueSelect.innerHTML += `<option value="${c.ID_KAD}">${c.ID_KAD}</option>`;
+      // POPULATE KENDERAAN YANG ADA KAD DALAM SIMPANAN
+      const vehicleSelect = document.getElementById('issueVehicleSelect');
+      if (vehicleSelect) {
+        vehicleSelect.innerHTML = '<option value="">-- Pilih No. Pendaftaran Kenderaan --</option>';
+        const availableCards = dbData.cards.filter(c => String(c.STATUS_KAD).toUpperCase() === 'DALAM SIMPANAN');
+        availableCards.forEach(c => {
+          const v = dbData.vehicles.find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
+          const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || 'Tanpa No Plat');
+          const vName = v ? v.NAMA_KENDERAAN : '';
+          vehicleSelect.innerHTML += `<option value="${c.ID_KAD}">${regNo} ${vName ? ' - ' + vName : ''}</option>`;
         });
       }
 
+      // POPULATE PEMANDU
       const userSelect = document.getElementById('issueUserId');
       if (userSelect) {
         userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
         dbData.users.filter(u => String(u.STATUS).toUpperCase() === 'AKTIF').forEach(u => {
-          userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${u.NAMA_PENGGUNA}</option>`;
+          userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${u.NAMA_PENGGUNA} (${u.ID_PENGGUNA})</option>`;
         });
       }
 
+      // POPULATE KAD UNTUK PEMULANGAN
       const returnSelect = document.getElementById('returnCardId');
       if (returnSelect) {
-        returnSelect.innerHTML = '<option value="">-- Pilih Kad --</option>';
+        returnSelect.innerHTML = '<option value="">-- Pilih Kad Untuk Dipulangkan --</option>';
         dbData.cards.filter(c => String(c.STATUS_KAD).toUpperCase() === 'SEDANG DIGUNAKAN').forEach(c => {
-          returnSelect.innerHTML += `<option value="${c.ID_KAD}">${c.ID_KAD} - ${c.PEMEGANG_SEMASA}</option>`;
+          returnSelect.innerHTML += `<option value="${c.ID_KAD}">${c.ID_KAD} - Pemegang: ${c.PEMEGANG_SEMASA || ''}</option>`;
         });
+      }
+    }
+
+    // AUTO-MATCH KAD DENGAN KENDERAAN
+    function autoMatchCardByVehicle() {
+      const selectedCardId = document.getElementById('issueVehicleSelect').value;
+      const card = dbData.cards.find(c => String(c.ID_KAD) === String(selectedCardId));
+      const submitBtn = document.getElementById('btnSubmitIssue');
+
+      if (card) {
+        const v = dbData.vehicles.find(veh => String(veh.ID_KENDERAAN) === String(card.ID_KENDERAAN));
+        const regNo = v ? v.NO_PENDAFTARAN : (card.NO_PENDAFTARAN || '-');
+
+        document.getElementById('issueCardId').value = card.ID_KAD;
+        document.getElementById('issueCardDisplay').value = `${card.NO_KAD_DISPLAY || card.NO_KAD} (${card.ID_KAD})`;
+        document.getElementById('issueVehicleReg').value = regNo;
+        document.getElementById('issueVehicleId').value = card.ID_KENDERAAN || '-';
+        document.getElementById('issueCardBalance').value = "RM " + parseFloat(card.BAKI_SEMASA || 0).toFixed(2);
+        submitBtn.disabled = false;
+      } else {
+        document.getElementById('issueCardId').value = '';
+        document.getElementById('issueCardDisplay').value = '';
+        document.getElementById('issueVehicleReg').value = '';
+        document.getElementById('issueVehicleId').value = '';
+        document.getElementById('issueCardBalance').value = '';
+        submitBtn.disabled = true;
+      }
+    }
+
+    function updateReturnFormDetails() {
+      const id = document.getElementById('returnCardId').value;
+      const card = dbData.cards.find(c => String(c.ID_KAD) === String(id));
+      const submitBtn = document.getElementById('btnSubmitReturn');
+
+      if (card) {
+        document.getElementById('returnHolderName').value = card.PEMEGANG_SEMASA || '-';
+        const isCurrentHolder = currentUser && (
+          String(currentUser.NAMA_PENGGUNA).trim().toUpperCase() === String(card.PEMEGANG_SEMASA).trim().toUpperCase() || 
+          String(currentUser.PERANAN).toUpperCase() === 'ADMIN'
+        );
+
+        if (!isCurrentHolder && card.PEMEGANG_SEMASA) {
+          showError("Hanya " + card.PEMEGANG_SEMASA + " sahaja dibenarkan memulangkan kad ini.");
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
       }
     }
 
@@ -311,6 +379,8 @@
         idKad: cardId,
         idPengguna: userId,
         namaPengguna: user ? user.NAMA_PENGGUNA : '',
+        noPendaftaran: document.getElementById('issueVehicleReg').value,
+        tujuan: document.getElementById('issuePurpose').value,
         idPegawaiPenyerah: currentUser.ID_PENGGUNA,
         namaPegawaiPenyerah: currentUser.NAMA_PENGGUNA
       };
