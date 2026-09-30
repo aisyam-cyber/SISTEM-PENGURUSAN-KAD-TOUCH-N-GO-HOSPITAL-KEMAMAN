@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbw7-XhP3SwjESculmpkZNm-0tMhGnp1990kXoTFY9kFkFhf_CglAzDMsfc9pkWVu_8TEw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyGpE3IMyyc5dqeDQL8CsWL0VrScTrNbJZS-DUO1E9_o5npwdpMGSPKjuPKuuSW2T5c_Q/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -67,7 +67,8 @@
         <nav class="p-3 space-y-1 text-sm custom-scrollbar overflow-y-auto max-h-[calc(100vh-140px)]">
           <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="dashboard"><i class="fa-solid fa-chart-pie w-5 text-hospital-500"></i> Dashboard</button>
           <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go</button>
-          <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Keluarkan Kad</button>
+          <!-- LABEL DITUKAR KEPADA 'AMBIL KAD' -->
+          <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Ambil Kad</button>
           <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
           <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Analisis & Audit KKM</button>
         </nav>
@@ -157,7 +158,7 @@
                 <h3 class="text-sm font-bold text-white">Tatacara Pengurusan Kad TnG KKM</h3>
               </div>
               <ul class="text-xs space-y-2 text-slate-300">
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Setiap pengeluaran & pemulangan kad <strong>WAJIB</strong> direkodkan melalui sistem.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Setiap proses mengambil & memulangkan kad <strong>WAJIB</strong> direkodkan.</li>
                 <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Masukkan jumlah <strong>TOL (RM)</strong> & <strong>PARKIR (RM)</strong> semasa pemulangan kad diisi.</li>
                 <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit rasmi hendaklah disimpan untuk tujuan pengesahan audit kewangan.</li>
               </ul>
@@ -177,7 +178,7 @@
           </div>
         </section>
 
-        <!-- TAB BAHARU: ANALISIS & AUDIT KKM HOLISTIK -->
+        <!-- ANALISIS VIEW -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -262,10 +263,10 @@
           </div>
         </section>
 
-        <!-- AMBIL KAD -->
+        <!-- AMBIL KAD (TAJUK BORANG KEMASKINI) -->
         <section id="view-issueCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad</h3>
+            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengambilan Kad</h3>
             <form id="issueCardForm" onsubmit="handleIssueCardSubmit(event)" class="space-y-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">1. Pilih Kenderaan</label>
@@ -482,7 +483,6 @@
       document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
     }
 
-    // LOGIK GRAF ANALISIS KENDERAAN & AUDIT KKM (PENECAMAN NOMBOR PLAT TEPAT)
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -504,7 +504,6 @@
             const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
             driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
 
-            // HANYA KIRA KENDERAAN JIKA ADA NO PLAT [...] YANG SAH
             const txt = String(iss.TUJUAN || "");
             const vehMatch = txt.match(/\[(.*?)\]/);
             
