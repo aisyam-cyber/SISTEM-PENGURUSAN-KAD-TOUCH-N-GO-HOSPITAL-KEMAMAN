@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbyGpE3IMyyc5dqeDQL8CsWL0VrScTrNbJZS-DUO1E9_o5npwdpMGSPKjuPKuuSW2T5c_Q/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycby7QzhI4PPBnLKsm9x7N4lJcENVnICa0T40SjPhOn2UbESjXHSzS9qglW7OBaKAWK7xmw/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -67,7 +67,6 @@
         <nav class="p-3 space-y-1 text-sm custom-scrollbar overflow-y-auto max-h-[calc(100vh-140px)]">
           <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="dashboard"><i class="fa-solid fa-chart-pie w-5 text-hospital-500"></i> Dashboard</button>
           <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go</button>
-          <!-- LABEL DITUKAR KEPADA 'AMBIL KAD' -->
           <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Ambil Kad</button>
           <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
           <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Analisis & Audit KKM</button>
@@ -131,6 +130,46 @@
                 <p class="text-[11px] text-rose-500 font-medium">Baki Kurang RM 30.00</p>
               </div>
               <div class="p-3 bg-rose-100 text-rose-600 rounded-2xl"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
+            </div>
+          </div>
+
+          <!-- SENARAI KAD BELUM DIPULANGKAN (REKA BENTUK MENARIK & MAX 10 PER PAGE) -->
+          <div class="bg-white rounded-3xl border border-amber-200 shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-6 py-4 flex items-center justify-between text-white">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold"><i class="fa-solid fa-clock-rotate-left text-lg"></i></div>
+                <div>
+                  <h3 class="font-bold text-sm uppercase tracking-wide">Senarai Kad Belum Dipulangkan</h3>
+                  <p class="text-xs text-amber-100">Kad yang sedang berada di luar bagi tugasan rasmi</p>
+                </div>
+              </div>
+              <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/20" id="badgePendingCount">0 Kad</span>
+            </div>
+
+            <div class="p-4 overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-700">
+                <thead class="bg-amber-50/60 uppercase font-bold text-amber-900 border-b border-amber-100">
+                  <tr>
+                    <th class="p-3">Kenderaan</th>
+                    <th class="p-3">ID Kad / No. Kad</th>
+                    <th class="p-3">Pemegang Semasa</th>
+                    <th class="p-3">Tarikh / Masa Diambil</th>
+                    <th class="p-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashPendingCardsBody">
+                  <tr><td colspan="5" class="p-4 text-center text-slate-400">Semua kad berada dalam simpanan.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- FOOTER PAGINATION MAKSIMUM 10 REKOD -->
+            <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500">
+              <span id="pendingPageInfo">Menunjukkan 0 daripada 0 rekod</span>
+              <div class="flex gap-2">
+                <button onclick="changePendingPage(-1)" id="btnPendingPrev" disabled class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">Sebelumnya</button>
+                <button onclick="changePendingPage(1)" id="btnPendingNext" disabled class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">Seterusnya</button>
+              </div>
             </div>
           </div>
 
@@ -263,7 +302,7 @@
           </div>
         </section>
 
-        <!-- AMBIL KAD (TAJUK BORANG KEMASKINI) -->
+        <!-- AMBIL KAD -->
         <section id="view-issueCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengambilan Kad</h3>
@@ -368,6 +407,11 @@
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
     let chartPieInstance = null, chartVehicleInstance = null;
 
+    // VARIABEL PAGINATION KAD BELUM DIPULANGKAN
+    let pendingCurrentPage = 1;
+    const pendingPageSize = 10;
+    let pendingCardsList = [];
+
     function callApi(action, payload = {}) {
       showLoading();
       return new Promise((resolve, reject) => {
@@ -450,13 +494,18 @@
       const lowBalBody = document.getElementById('dashLowBalBody');
       lowBalBody.innerHTML = '';
 
+      pendingCardsList = [];
+
       (dbData.cards || []).forEach(c => {
         const bal = parseFloat(c.BAKI_SEMASA || 0);
         totalBal += bal;
 
         const status = String(c.STATUS_KAD).toUpperCase();
         if (status === 'DALAM SIMPANAN') availCount++;
-        if (status === 'SEDANG DIGUNAKAN') usedCount++;
+        if (status === 'SEDANG DIGUNAKAN') {
+          usedCount++;
+          pendingCardsList.push(c);
+        }
 
         if (bal < 30.00) {
           lowBalCount++;
@@ -481,6 +530,66 @@
       document.getElementById('dashCardsAvailable').innerText = availCount;
       document.getElementById('dashCardsInUse').innerText = usedCount;
       document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
+      document.getElementById('badgePendingCount').innerText = usedCount + " Kad";
+
+      // RENDERING KAD BELUM DIPULANGKAN
+      pendingCurrentPage = 1;
+      renderPendingCardsPage();
+    }
+
+    // FUNGSI PAGINATION (MAKSIMUM 10 REKOD PER PAGE)
+    function renderPendingCardsPage() {
+      const tbody = document.getElementById('dashPendingCardsBody');
+      tbody.innerHTML = '';
+
+      const total = pendingCardsList.length;
+      if (total === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400 font-semibold">Semua kad berada dalam simpanan. Tiada kad belum dipulangkan.</td></tr>';
+        document.getElementById('pendingPageInfo').innerText = "Menunjukkan 0 daripada 0 rekod";
+        document.getElementById('btnPendingPrev').disabled = true;
+        document.getElementById('btnPendingNext').disabled = true;
+        return;
+      }
+
+      const totalPages = Math.ceil(total / pendingPageSize);
+      if (pendingCurrentPage > totalPages) pendingCurrentPage = totalPages;
+      if (pendingCurrentPage < 1) pendingCurrentPage = 1;
+
+      const start = (pendingCurrentPage - 1) * pendingPageSize;
+      const end = Math.min(start + pendingPageSize, total);
+      const currentItems = pendingCardsList.slice(start, end);
+
+      currentItems.forEach(c => {
+        const v = (dbData.vehicles || []).find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
+        const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || '-');
+        
+        // Cari timestamp pengambilan dari log ISSUES
+        const lastIssue = (dbData.issues || []).find(iss => String(iss.ID_KAD) === String(c.ID_KAD) && String(iss.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN');
+        const issueTime = lastIssue ? lastIssue.TIMESTAMP : '-';
+
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-100 hover:bg-amber-50/30 transition">
+            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-car text-amber-500 mr-2"></i>${regNo}</td>
+            <td class="p-3 font-mono text-slate-600">${c.ID_KAD} (${c.NO_KAD_DISPLAY || c.NO_KAD})</td>
+            <td class="p-3 font-semibold text-slate-700">${c.PEMEGANG_SEMASA || '-'}</td>
+            <td class="p-3 text-slate-500">${issueTime}</td>
+            <td class="p-3 text-center">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Belum Dipulangkan
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('pendingPageInfo').innerText = `Menunjukkan ${start + 1} hingga ${end} daripada ${total} rekod (Halaman ${pendingCurrentPage}/${totalPages})`;
+      document.getElementById('btnPendingPrev').disabled = (pendingCurrentPage === 1);
+      document.getElementById('btnPendingNext').disabled = (pendingCurrentPage === totalPages);
+    }
+
+    function changePendingPage(dir) {
+      pendingCurrentPage += dir;
+      renderPendingCardsPage();
     }
 
     function renderAnalyticsCharts() {
