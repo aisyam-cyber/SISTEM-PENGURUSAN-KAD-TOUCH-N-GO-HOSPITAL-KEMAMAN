@@ -4,13 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Pengurusan Kad Touch 'n Go - Hospital Kemaman</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -18,24 +14,14 @@
         extend: {
           fontFamily: { sans: ['Poppins', 'sans-serif'] },
           colors: {
-            hospital: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0284c7',
-              800: '#075985',
-              900: '#0c4a6e',
-            },
-            navy: {
-              800: '#1e293b',
-              900: '#0f172a',
-            }
+            hospital: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 800: '#075985', 900: '#0c4a6e' },
+            navy: { 800: '#1e293b', 900: '#0f172a' }
           }
         }
       }
     }
   </script>
   <style>
-    .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -43,753 +29,188 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <!-- CONFIGURATION -->
   <script>
-    // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
-    const API_URL = "https://script.google.com/macros/s/AKfycbxqF_VEiE439QhFg2X-6_b3YFw3b5OeMgZvIPsw6XxlcNfNxp2zczzsdYTq0ZK0WI4n5A/exec";
+    // ⚠️ GANTI DENGAN WEB APP URL GOOGLE APPS SCRIPT ANDA
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbxCTQykG6smPlRg7EXq4VjHE3myjNEzSuC4OmlGB646ipGFxE4e7CdikvTBMmfSV1RyTQ/exec";
   </script>
 
   <!-- LOADING OVERLAY -->
   <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-slate-100">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
       <div class="w-12 h-12 border-4 border-hospital-500 border-t-transparent rounded-full animate-spin"></div>
-      <p class="font-semibold text-slate-700 text-sm animate-pulse" id="loadingText">Memproses data...</p>
+      <p class="font-semibold text-slate-700 text-sm animate-pulse">Memproses data...</p>
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATIONS CONTAINER -->
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- CONFIRMATION MODAL -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 m-4 border border-slate-100 transform transition-all">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 m-4 border border-slate-100">
       <h3 class="text-lg font-bold text-slate-800 mb-2" id="confirmTitle">Pengesahan</h3>
-      <p class="text-slate-600 text-sm mb-6" id="confirmMessage">Adakah anda pasti mahu meneruskan tindakan ini?</p>
+      <p class="text-slate-600 text-sm mb-6" id="confirmMessage">Teruskan tindakan ini?</p>
       <div class="flex justify-end gap-3">
-        <button onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200 text-sm font-medium transition">Batal</button>
-        <button id="confirmBtnAction" class="px-4 py-2 rounded-xl text-white bg-hospital-500 hover:bg-hospital-800 text-sm font-medium transition">Teruskan</button>
+        <button onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl text-slate-600 bg-slate-100 text-sm">Batal</button>
+        <button id="confirmBtnAction" class="px-4 py-2 rounded-xl text-white bg-hospital-500 text-sm font-medium">Teruskan</button>
       </div>
     </div>
   </div>
 
   <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="fixed inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-navy-900 via-hospital-900 to-slate-900 p-4">
-    <div class="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md w-full space-y-6">
+    <div class="bg-white rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md w-full space-y-6">
       <div class="text-center space-y-2">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-hospital-50 text-hospital-500 mb-2 shadow-inner">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-hospital-50 text-hospital-500 mb-2">
           <i class="fa-solid fa-credit-card text-3xl"></i>
         </div>
-        <h1 class="text-xl font-bold text-slate-800 tracking-tight">SISTEM PENGURUSAN KAD TOUCH 'N GO</h1>
-        <p class="text-xs font-semibold uppercase tracking-wider text-hospital-800">Hospital Kemaman</p>
+        <h1 class="text-xl font-bold text-slate-800">SISTEM PENGURUSAN KAD TOUCH 'N GO</h1>
+        <p class="text-xs font-semibold uppercase text-hospital-800">Hospital Kemaman</p>
       </div>
 
       <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">ID Pengguna</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-user"></i></span>
-            <input type="text" id="loginUserId" required placeholder="Contoh: USR001" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-hospital-500 transition">
-          </div>
+          <input type="text" id="loginUserId" required placeholder="Contoh: DRV5469 / SUP5055" class="w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm focus:ring-2 focus:ring-hospital-500 outline-none">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">PIN Login</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-lock"></i></span>
-            <input type="password" id="loginPin" required maxlength="6" placeholder="****" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-hospital-500 transition">
-          </div>
+          <input type="password" id="loginPin" required maxlength="6" placeholder="****" class="w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm focus:ring-2 focus:ring-hospital-500 outline-none">
         </div>
-        <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-hospital-500 to-hospital-800 hover:from-hospital-800 hover:to-navy-900 text-white font-semibold rounded-xl shadow-lg shadow-hospital-500/30 transition transform active:scale-95 text-sm">
-          LOG MASUK
-        </button>
+        <button type="submit" class="w-full py-3 bg-hospital-500 hover:bg-hospital-800 text-white font-semibold rounded-xl text-sm transition">LOG MASUK</button>
       </form>
-      <div class="text-center">
-        <span class="text-xs text-slate-400">Versi 1.0.0 &bull; Kawalan Dalaman Hospital Kemaman</span>
-      </div>
     </div>
   </div>
 
-  <!-- MAIN APP CONTAINER -->
+  <!-- APP CONTAINER -->
   <div id="appContainer" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
-
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="w-64 bg-navy-900 text-slate-300 flex-shrink-0 flex flex-col justify-between hidden md:flex transition-all duration-300 z-20">
+    <aside id="sidebar" class="w-64 bg-navy-900 text-slate-300 flex-shrink-0 flex flex-col justify-between hidden md:flex z-20">
       <div>
         <div class="p-5 border-b border-slate-800 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-hospital-500 text-white flex items-center justify-center font-bold text-lg shadow-md">
-            <i class="fa-solid fa-hospital-user"></i>
-          </div>
+          <div class="w-10 h-10 rounded-xl bg-hospital-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-hospital-user"></i></div>
           <div>
-            <h2 class="font-bold text-white text-sm leading-tight">HKEM TnG</h2>
+            <h2 class="font-bold text-white text-sm">HKEM TnG</h2>
             <p class="text-xs text-slate-400">Pengurusan Kad</p>
           </div>
         </div>
-
-        <nav class="p-3 space-y-1 text-sm custom-scrollbar overflow-y-auto max-h-[calc(100vh-140px)]" id="sidebarNav">
-          <button onclick="switchTab('dashboard')" class="nav-btn active w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left text-slate-200" data-tab="dashboard">
-            <i class="fa-solid fa-chart-pie w-5 text-hospital-500"></i> Dashboard
-          </button>
-          <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="cards">
-            <i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go
-          </button>
-          <button onclick="switchTab('vehicles')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="vehicles">
-            <i class="fa-solid fa-car w-5 text-hospital-500"></i> Kenderaan
-          </button>
-          <button onclick="switchTab('holders')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="holders">
-            <i class="fa-solid fa-id-card-clip w-5 text-hospital-500"></i> Pemegang Kad
-          </button>
-
-          <div class="pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase px-4">Tindakan</div>
-          <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="issueCard">
-            <i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Keluarkan Kad
-          </button>
-          <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="returnCard">
-            <i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad
-          </button>
-          <button onclick="switchTab('transactions')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="transactions">
-            <i class="fa-solid fa-receipt w-5 text-cyan-400"></i> Transaksi
-          </button>
-          <button onclick="switchTab('topup')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="topup">
-            <i class="fa-solid fa-wallet w-5 text-indigo-400"></i> Top-Up
-          </button>
-          <button onclick="switchTab('complaints')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="complaints">
-            <i class="fa-solid fa-triangle-exclamation w-5 text-rose-400"></i> Aduan / Kehilangan
-          </button>
-
-          <div class="pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase px-4">Laporan & Pentadbiran</div>
-          <button onclick="switchTab('history')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="history">
-            <i class="fa-solid fa-clock-rotate-left w-5 text-hospital-500"></i> Sejarah Pergerakan
-          </button>
-          <button onclick="switchTab('reports')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="reports">
-            <i class="fa-solid fa-file-invoice w-5 text-hospital-500"></i> Laporan
-          </button>
-          <button onclick="switchTab('users')" class="admin-only nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="users">
-            <i class="fa-solid fa-users w-5 text-hospital-500"></i> Pengguna
-          </button>
-          <button onclick="switchTab('auditLogs')" class="admin-only nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition text-left" data-tab="auditLogs">
-            <i class="fa-solid fa-shield-halved w-5 text-hospital-500"></i> Audit Log
-          </button>
+        <nav class="p-3 space-y-1 text-sm custom-scrollbar overflow-y-auto max-h-[calc(100vh-140px)]">
+          <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="dashboard"><i class="fa-solid fa-chart-pie w-5 text-hospital-500"></i> Dashboard</button>
+          <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go</button>
+          <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Keluarkan Kad</button>
+          <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
         </nav>
       </div>
-
       <div class="p-4 border-t border-slate-800">
-        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-sm font-medium transition">
-          <i class="fa-solid fa-right-from-bracket"></i> Log Keluar
-        </button>
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-rose-500/10 text-rose-400 rounded-xl text-sm font-medium"><i class="fa-solid fa-right-from-bracket"></i> Log Keluar</button>
       </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
     <div class="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
-      <!-- TOP NAVBAR -->
-      <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
+      <header class="bg-white border-b px-6 py-4 flex items-center justify-between shadow-sm z-10">
         <div class="flex items-center gap-4">
-          <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-600 hover:text-slate-800 focus:outline-none">
-            <i class="fa-solid fa-bars text-xl"></i>
-          </button>
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-600"><i class="fa-solid fa-bars text-xl"></i></button>
           <h1 id="pageTitle" class="text-lg font-bold text-slate-800">Dashboard</h1>
         </div>
-
-        <div class="flex items-center gap-4">
-          <button onclick="refreshData()" class="p-2 text-slate-500 hover:text-hospital-500 rounded-lg hover:bg-slate-100 transition" title="Muat Semula Data">
-            <i class="fa-solid fa-arrows-rotate"></i>
-          </button>
-          <div class="text-right hidden sm:block">
-            <p id="navUserName" class="text-sm font-semibold text-slate-800">Nama Pengguna</p>
-            <p id="navUserRole" class="text-xs text-slate-500">Peranan</p>
-          </div>
-          <div class="w-9 h-9 rounded-full bg-hospital-100 text-hospital-800 font-bold flex items-center justify-center border border-hospital-500/20" id="navUserAvatar">
-            U
-          </div>
+        <div class="text-right hidden sm:block">
+          <p id="navUserName" class="text-sm font-semibold text-slate-800">Nama</p>
+          <p id="navUserRole" class="text-xs text-slate-500">Peranan</p>
         </div>
       </header>
 
-      <!-- VIEW PANELS -->
       <main class="flex-1 p-6 overflow-y-auto custom-scrollbar">
-        
         <!-- DASHBOARD VIEW -->
         <section id="view-dashboard" class="tab-view space-y-6">
-          <div class="bg-gradient-to-r from-navy-900 via-hospital-900 to-hospital-800 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="bg-gradient-to-r from-navy-900 via-hospital-900 to-hospital-800 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center">
             <div>
               <h2 class="text-2xl font-bold" id="welcomeUser">Selamat Datang</h2>
               <p class="text-slate-300 text-sm mt-1">Sistem Pengurusan Kad Touch 'n Go Hospital Kemaman</p>
             </div>
-            <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-right">
+            <div class="bg-white/10 px-4 py-2 rounded-2xl border border-white/10 text-right">
               <span class="text-xs text-slate-300 block uppercase">Baki Keseluruhan Kad</span>
               <span class="text-xl font-bold text-emerald-400" id="dashTotalBalance">RM 0.00</span>
             </div>
           </div>
-
-          <!-- STAT CARDS -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <div class="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase mb-2">
-                <span>Jumlah Kad</span>
-                <i class="fa-solid fa-credit-card text-hospital-500"></i>
-              </div>
-              <p class="text-2xl font-bold text-slate-800" id="statTotalCards">0</p>
-              <p class="text-xs text-slate-400 mt-1"><span id="statActiveCards" class="text-emerald-600 font-semibold">0</span> Aktif</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <div class="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase mb-2">
-                <span>Dalam Simpanan</span>
-                <i class="fa-solid fa-box-archive text-amber-500"></i>
-              </div>
-              <p class="text-2xl font-bold text-slate-800" id="statInStoreCards">0</p>
-              <p class="text-xs text-slate-400 mt-1">Sedia Digunakan</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <div class="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase mb-2">
-                <span>Sedang Digunakan</span>
-                <i class="fa-solid fa-hand-holding text-blue-500"></i>
-              </div>
-              <p class="text-2xl font-bold text-slate-800" id="statUsedCards">0</p>
-              <p class="text-xs text-slate-400 mt-1">Di Luar Bilik Penyelia</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <div class="flex items-center justify-between text-slate-500 text-xs font-semibold uppercase mb-2">
-                <span>Aduan / Masalah</span>
-                <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
-              </div>
-              <p class="text-2xl font-bold text-slate-800" id="statActiveComplaints">0</p>
-              <p class="text-xs text-slate-400 mt-1"><span id="statLostDamagedCards" class="text-rose-600 font-semibold">0</span> Hilang/Rosak</p>
-            </div>
-          </div>
-
-          <!-- CHARTS SECTION -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h3 class="text-sm font-bold text-slate-700 mb-4">Status Agihan Kad</h3>
-              <div class="h-64">
-                <canvas id="chartStatus"></canvas>
-              </div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h3 class="text-sm font-bold text-slate-700 mb-4">Aktiviti Bulan Ini</h3>
-              <div class="space-y-4 pt-4">
-                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
-                  <div>
-                    <p class="text-xs text-slate-500 font-medium">Penggunaan Transaksi</p>
-                    <p class="text-lg font-bold text-slate-800" id="dashMonthlyUsage">RM 0.00</p>
-                  </div>
-                  <div class="p-3 bg-rose-100 text-rose-600 rounded-xl"><i class="fa-solid fa-arrow-down"></i></div>
-                </div>
-                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
-                  <div>
-                    <p class="text-xs text-slate-500 font-medium">Jumlah Top-Up</p>
-                    <p class="text-lg font-bold text-slate-800" id="dashMonthlyTopup">RM 0.00</p>
-                  </div>
-                  <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl"><i class="fa-solid fa-arrow-up"></i></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RECENT TABLES -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h3 class="text-sm font-bold text-slate-700 mb-4">Transaksi Terakhir</h3>
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-600">
-                  <thead class="bg-slate-50 text-slate-500 uppercase font-semibold">
-                    <tr>
-                      <th class="p-2">Kad</th>
-                      <th class="p-2">Pengguna</th>
-                      <th class="p-2">Lokasi</th>
-                      <th class="p-2 text-right">Jumlah</th>
-                    </tr>
-                  </thead>
-                  <tbody id="dashRecentTxBody">
-                    <tr><td colspan="4" class="p-4 text-center text-slate-400">Tiada data</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h3 class="text-sm font-bold text-slate-700 mb-4">Log Aktiviti Terakhir</h3>
-              <div class="space-y-3" id="dashRecentLogList">
-                <p class="text-center text-xs text-slate-400 py-4">Tiada rekod log</p>
-              </div>
-            </div>
-          </div>
         </section>
 
-        <!-- KAD TOUCH N GO VIEW -->
+        <!-- KAD VIEW -->
         <section id="view-cards" class="tab-view hidden space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between gap-4">
-            <input type="text" id="searchCards" onkeyup="filterTable('cardsTable', this.value)" placeholder="Cari nombor kad, kenderaan..." class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-hospital-500 w-full sm:w-64">
-            <button onclick="openCardModal()" class="admin-only bg-hospital-500 hover:bg-hospital-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
-              <i class="fa-solid fa-plus"></i> Tambah Kad
-            </button>
-          </div>
-          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table id="cardsTable" class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
-                  <tr>
-                    <th class="p-3">ID Kad</th>
-                    <th class="p-3">No. Kad (Akhir 4)</th>
-                    <th class="p-3">Kenderaan</th>
-                    <th class="p-3">Pemegang Semasa</th>
-                    <th class="p-3">Baki Semasa</th>
-                    <th class="p-3">Status</th>
-                    <th class="p-3 text-right">Tindakan</th>
-                  </tr>
-                </thead>
-                <tbody id="cardsTableBody" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-4">
+            <table class="w-full text-left text-xs text-slate-600">
+              <thead class="bg-slate-50 uppercase font-semibold">
+                <tr><th class="p-3">ID Kad</th><th class="p-3">No. Kad</th><th class="p-3">Pemegang</th><th class="p-3">Baki</th><th class="p-3">Status</th></tr>
+              </thead>
+              <tbody id="cardsTableBody"></tbody>
+            </table>
           </div>
         </section>
 
-        <!-- KENDERAAN VIEW -->
-        <section id="view-vehicles" class="tab-view hidden space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between gap-4">
-            <input type="text" id="searchVehicles" onkeyup="filterTable('vehiclesTable', this.value)" placeholder="Cari no pendaftaran, jenis..." class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-hospital-500 w-full sm:w-64">
-            <button onclick="openVehicleModal()" class="admin-only bg-hospital-500 hover:bg-hospital-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
-              <i class="fa-solid fa-plus"></i> Tambah Kenderaan
-            </button>
-          </div>
-          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table id="vehiclesTable" class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
-                  <tr>
-                    <th class="p-3">No. Pendaftaran</th>
-                    <th class="p-3">Nama Kenderaan</th>
-                    <th class="p-3">Jenis</th>
-                    <th class="p-3">Unit</th>
-                    <th class="p-3">Status Kad TNG</th>
-                    <th class="p-3 text-right">Tindakan</th>
-                  </tr>
-                </thead>
-                <tbody id="vehiclesTableBody" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- KELUARKAN KAD VIEW -->
+        <!-- KELUARKAN KAD -->
         <section id="view-issueCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad Touch 'n Go</h3>
+            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad</h3>
             <form id="issueCardForm" onsubmit="handleIssueCardSubmit(event)" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad (Penyelia)</label>
-                <select id="issueCardId" required onchange="updateIssueFormDetails()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                  <option value="">-- Pilih Kad Dalam Simpanan --</option>
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Kenderaan</label>
-                  <input type="text" id="issueVehicleReg" readonly class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500">
-                  <input type="hidden" id="issueVehicleId">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Baki Semasa</label>
-                  <input type="text" id="issueCardBalance" readonly class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 font-bold">
-                </div>
+                <label class="block text-xs font-semibold mb-1">Pilih Kad</label>
+                <select id="issueCardId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pengguna / Pemandu Penerima</label>
-                <select id="issueUserId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                  <option value="">-- Pilih Pemandu --</option>
-                </select>
+                <label class="block text-xs font-semibold mb-1">Pilih Pemandu</label>
+                <select id="issueUserId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Tujuan / Destinasi Tugasan</label>
-                <input type="text" id="issuePurpose" required placeholder="Contoh: hantar pesakit ke HSB" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan</label>
-                <textarea id="issueNotes" rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"></textarea>
-              </div>
-              <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition">Serahkan Kad</button>
+              <button type="submit" class="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold text-sm">Serahkan Kad</button>
             </form>
           </div>
         </section>
 
-        <!-- PULANGKAN KAD VIEW -->
+        <!-- PULANGKAN KAD -->
         <section id="view-returnCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pemulangan Kad Touch 'n Go</h3>
+            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pemulangan Kad</h3>
             <form id="returnCardForm" onsubmit="handleReturnCardSubmit(event)" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad Untuk Dipulangkan</label>
-                <select id="returnCardId" required onchange="updateReturnFormDetails()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                  <option value="">-- Pilih Kad Sedang Digunakan --</option>
-                </select>
+                <label class="block text-xs font-semibold mb-1">Pilih Kad</label>
+                <select id="returnCardId" required class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
               </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
-                  <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Baki Rekod Semasa</label>
-                  <input type="text" id="returnCardBalance" readonly class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 font-bold">
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan Pemulangan / Keadaan Kad</label>
-                <textarea id="returnNotes" rows="2" placeholder="Kad dalam keadaan baik..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"></textarea>
-              </div>
-              <button type="submit" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-sm transition">Terima & Simpan Kad</button>
+              <button type="submit" class="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold text-sm">Pulangkan Kad</button>
             </form>
           </div>
         </section>
-
-        <!-- TRANSAKSI VIEW -->
-        <section id="view-transactions" class="tab-view hidden max-w-2xl mx-auto">
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Rekod Penggunaan Transaksi Kad</h3>
-            <form id="transactionForm" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad</label>
-                <select id="txCardId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                  <option value="">-- Pilih Kad TNG --</option>
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Tarikh Transaksi</label>
-                  <input type="date" id="txDate" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Masa</label>
-                  <input type="time" id="txTime" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Transaksi</label>
-                  <select id="txType" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                    <option value="TOL">TOL</option>
-                    <option value="PARKIR">PARKIR</option>
-                    <option value="PENGANGKUTAN">PENGANGKUTAN</option>
-                    <option value="LAIN-LAIN">LAIN-LAIN</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah (RM)</label>
-                  <input type="number" step="0.01" min="0.01" id="txAmount" required placeholder="0.00" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-rose-600">
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi / Plaza Tol</label>
-                <input type="text" id="txLocation" required placeholder="Contoh: Plaza Tol Chukai" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">No Resit (Jika Ada)</label>
-                  <input type="text" id="txReceipt" placeholder="OPTIONAL" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Tujuan</label>
-                  <input type="text" id="txPurpose" placeholder="Tugasan Rasmi" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-              </div>
-              <button type="submit" class="w-full py-3 bg-hospital-500 hover:bg-hospital-800 text-white font-semibold rounded-xl text-sm transition">Simpan Transaksi</button>
-            </form>
-          </div>
-        </section>
-
-        <!-- TOPUP VIEW -->
-        <section id="view-topup" class="tab-view hidden max-w-2xl mx-auto">
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Rekod Tambah Nilai (Top-Up)</h3>
-            <form id="topupForm" onsubmit="handleTopupSubmit(event)" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad TNG</label>
-                <select id="topupCardId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                  <option value="">-- Pilih Kad --</option>
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Tarikh Top-Up</label>
-                  <input type="date" id="topupDate" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Top-Up (RM)</label>
-                  <input type="number" step="0.01" min="1" id="topupAmount" required placeholder="0.00" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-emerald-600">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Kaedah Top-Up</label>
-                  <select id="topupMethod" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                    <option value="KAUNTER">KAUNTER</option>
-                    <option value="ONLINE">ONLINE / E-WALLET</option>
-                    <option value="LAIN-LAIN">LAIN-LAIN</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">No Rujukan / Resit</label>
-                  <input type="text" id="topupRef" placeholder="OPTIONAL" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan</label>
-                <textarea id="topupNotes" rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"></textarea>
-              </div>
-              <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition">Kemaskini Baki & Top-Up</button>
-            </form>
-          </div>
-        </section>
-
-        <!-- ADUAN VIEW -->
-        <section id="view-complaints" class="tab-view hidden max-w-2xl mx-auto space-y-6">
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b pb-3">Lapor Aduan / Kehilangan / Kerosakan</h3>
-            <form id="complaintForm" onsubmit="handleComplaintSubmit(event)" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad Terlibatan</label>
-                <select id="compCardId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                  <option value="">-- Pilih Kad --</option>
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Aduan</label>
-                  <select id="compType" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                    <option value="HILANG">KAD HILANG</option>
-                    <option value="ROSAK">KAD ROSAK</option>
-                    <option value="TRANSAKSI TIDAK DIKENALI">TRANSAKSI TIDAK DIKENALI</option>
-                    <option value="BAKI TIDAK SEPADAN">BAKI TIDAK SEPADAN</option>
-                    <option value="LAIN-LAIN">LAIN-LAIN</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Tarikh Kejadian</label>
-                  <input type="date" id="compDate" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Butiran Inciden</label>
-                <textarea id="compDetails" required rows="3" placeholder="Terangkan butiran kejadian..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"></textarea>
-              </div>
-              <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-sm transition">Hantar Aduan</button>
-            </form>
-          </div>
-        </section>
-
-        <!-- SEJARAH / HISTORY VIEW -->
-        <section id="view-history" class="tab-view hidden space-y-4">
-          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-            <input type="text" id="searchHistory" onkeyup="filterTable('historyTable', this.value)" placeholder="Cari dalam sejarah..." class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm w-full md:w-64">
-            <div class="flex gap-2 w-full md:w-auto">
-              <button onclick="exportTableToCSV('historyTable', 'Sejarah_TnG.csv')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">CSV</button>
-              <button onclick="window.print()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">Cetak</button>
-            </div>
-          </div>
-          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table id="historyTable" class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
-                  <tr>
-                    <th class="p-3">Masa</th>
-                    <th class="p-3">Kad</th>
-                    <th class="p-3">Pengguna</th>
-                    <th class="p-3">Aktiviti / Tujuan</th>
-                    <th class="p-3">Pegawai Penyerah / Penerima</th>
-                    <th class="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="historyTableBody" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- LAPORAN VIEW -->
-        <section id="view-reports" class="tab-view hidden space-y-6">
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800">Cetak & Muat Turun Laporan</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button onclick="generateReport('all_cards')" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:border-hospital-500 transition text-left space-y-1">
-                <i class="fa-solid fa-credit-card text-hospital-500 text-xl"></i>
-                <h4 class="font-bold text-sm text-slate-800">Laporan Semua Kad TNG</h4>
-                <p class="text-xs text-slate-500">Ringkasan senarai kad dan baki</p>
-              </button>
-              <button onclick="generateReport('card_movement')" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:border-hospital-500 transition text-left space-y-1">
-                <i class="fa-solid fa-right-left text-hospital-500 text-xl"></i>
-                <h4 class="font-bold text-sm text-slate-800">Laporan Pergerakan Kad</h4>
-                <p class="text-xs text-slate-500">Pengeluaran dan pemulangan</p>
-              </button>
-              <button onclick="generateReport('monthly_tx')" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:border-hospital-500 transition text-left space-y-1">
-                <i class="fa-solid fa-file-invoice-dollar text-hospital-500 text-xl"></i>
-                <h4 class="font-bold text-sm text-slate-800">Laporan Penggunaan & Topup</h4>
-                <p class="text-xs text-slate-500">Audit kewangan kad</p>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- PEMEGANG KAD VIEW -->
-        <section id="view-holders" class="tab-view hidden space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
-                  <tr>
-                    <th class="p-3">ID Pemegang</th>
-                    <th class="p-3">Nama Pemegang</th>
-                    <th class="p-3">ID Kad</th>
-                    <th class="p-3">Kenderaan</th>
-                    <th class="p-3">Tarikh Mula</th>
-                    <th class="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="holdersTableBody" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- PENGGUNA VIEW (ADMIN ONLY) -->
-        <section id="view-users" class="tab-view hidden space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-base font-bold text-slate-800">Pengurusan Pengguna</h3>
-            <button onclick="openUserModal()" class="bg-hospital-500 hover:bg-hospital-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
-              <i class="fa-solid fa-user-plus"></i> Tambah Pengguna
-            </button>
-          </div>
-          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
-                  <tr>
-                    <th class="p-3">ID Pengguna</th>
-                    <th class="p-3">Nama</th>
-                    <th class="p-3">Jawatan / Unit</th>
-                    <th class="p-3">Peranan</th>
-                    <th class="p-3">Status</th>
-                    <th class="p-3 text-right">Tindakan</th>
-                  </tr>
-                </thead>
-                <tbody id="usersTableBody" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- AUDIT LOGS VIEW (ADMIN ONLY) -->
-        <section id="view-auditLogs" class="tab-view hidden space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-100">
-                  <tr>
-                    <th class="p-3">Timestamp</th>
-                    <th class="p-3">Pengguna</th>
-                    <th class="p-3">Aktiviti</th>
-                    <th class="p-3">Modul</th>
-                    <th class="p-3">Butiran</th>
-                    <th class="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="auditLogsTableBody" class="divide-y divide-slate-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
       </main>
     </div>
   </div>
 
-  <!-- MODALS -->
-  <!-- MODAL KAD -->
-  <div id="cardModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-100 space-y-4">
-      <h3 class="text-base font-bold text-slate-800" id="cardModalTitle">Tambah Kad Touch 'n Go</h3>
-      <form id="cardModalForm" onsubmit="handleSaveCard(event)" class="space-y-3">
-        <input type="hidden" id="modalCardId">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nombor Kad Penuh (10-12 Digit)</label>
-          <input type="text" id="modalCardNo" required placeholder="010123456789" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Kenderaan Tetap (Jika Ada)</label>
-          <select id="modalCardVehicle" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-            <option value="-">-- Tiada Kenderaan Khusus --</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Baki Permulaan (RM)</label>
-          <input type="number" step="0.01" id="modalCardBalance" placeholder="0.00" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Simpanan</label>
-          <input type="text" id="modalCardLocation" value="Bilik Penyelia" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeModal('cardModal')" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-medium text-slate-600">Batal</button>
-          <button type="submit" class="px-4 py-2 bg-hospital-500 text-white rounded-xl text-xs font-medium">Simpan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT LOGIK APPLIKASI -->
+  <!-- JAVASCRIPT LOGIC -->
   <script>
-    // GLOBAL STATE
     let currentUser = null;
-    let dbData = {
-      cards: [],
-      vehicles: [],
-      users: [],
-      holders: [],
-      issues: [],
-      recentTransactions: [],
-      recentActivities: [],
-      complaints: []
-    };
-    let chartInstance = null;
+    let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
 
-    // JSONP API BRIDGE
     function callApi(action, payload = {}) {
       showLoading();
       return new Promise((resolve, reject) => {
         const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
         window[callbackName] = function(data) {
           delete window[callbackName];
-          document.body.removeChild(script);
+          if (document.body.contains(script)) document.body.removeChild(script);
           hideLoading();
-          if (data && data.success !== undefined) {
-            resolve(data);
-          } else {
-            reject(data);
-          }
+          if (data && data.success !== undefined) resolve(data);
+          else reject(data);
         };
 
         const script = document.createElement('script');
         let src = `${API_URL}?action=${encodeURIComponent(action)}&callback=${callbackName}`;
-        if (payload) {
-          src += `&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-        }
+        if (payload) src += `&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+        
         script.src = src;
         script.onerror = function() {
           delete window[callbackName];
-          document.body.removeChild(script);
+          if (document.body.contains(script)) document.body.removeChild(script);
           hideLoading();
-          showError("Gagal berhubung dengan pelayan. Sila semak sambungan rangkaian.");
+          showError("Ralat API_URL / Rangkaian.");
           reject(new Error("Network Error"));
         };
         document.body.appendChild(script);
       });
     }
 
-    // INITIALIZATION
-    window.addEventListener('DOMContentLoaded', () => {
-      const today = new Date().toISOString().split('T')[0];
-      if (document.getElementById('txDate')) document.getElementById('txDate').value = today;
-      if (document.getElementById('topupDate')) document.getElementById('topupDate').value = today;
-      if (document.getElementById('compDate')) document.getElementById('compDate').value = today;
-    });
-
-    // LOGIN HANDLER
     async function handleLoginSubmit(e) {
       e.preventDefault();
       const userId = document.getElementById('loginUserId').value.trim();
@@ -815,279 +236,68 @@
     function setupUserInterface() {
       document.getElementById('navUserName').innerText = currentUser.NAMA_PENGGUNA;
       document.getElementById('navUserRole').innerText = currentUser.PERANAN;
-      document.getElementById('navUserAvatar').innerText = currentUser.NAMA_PENGGUNA.charAt(0);
       document.getElementById('welcomeUser').innerText = "Selamat Datang, " + currentUser.NAMA_PENGGUNA;
-
-      if (currentUser.PERANAN !== 'ADMIN') {
-        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-      } else {
-        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-      }
     }
 
     function handleLogout() {
       currentUser = null;
       document.getElementById('appContainer').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('loginUserId').value = '';
-      document.getElementById('loginPin').value = '';
     }
 
-    // REFRESH DATA
     async function refreshData() {
       try {
         const res = await callApi('getInitialData', {});
         if (res.success) {
           dbData = res.data;
-          renderDashboard();
           renderCardsTable();
-          renderVehiclesTable();
-          renderHoldersTable();
-          renderHistoryTable();
-          renderUsersTable();
-          renderAuditLogsTable();
           populateDropdowns();
         }
       } catch (e) {
-        showError("Gagal memuatkan data dari pelayan.");
+        showError("Gagal memuatkan data.");
       }
     }
 
-    // RENDER DASHBOARD
-    function renderDashboard() {
-      const stats = dbData.stats || {};
-      document.getElementById('dashTotalBalance').innerText = formatCurrency(stats.totalBalance || 0);
-      document.getElementById('statTotalCards').innerText = stats.totalCards || 0;
-      document.getElementById('statActiveCards').innerText = stats.activeCards || 0;
-      document.getElementById('statInStoreCards').innerText = stats.inStoreCards || 0;
-      document.getElementById('statUsedCards').innerText = stats.usedCards || 0;
-      document.getElementById('statActiveComplaints').innerText = stats.activeComplaints || 0;
-      document.getElementById('statLostDamagedCards').innerText = (stats.lostCards || 0) + (stats.damagedCards || 0);
-
-      document.getElementById('dashMonthlyUsage').innerText = formatCurrency(stats.monthlyUsageValue || 0);
-      document.getElementById('dashMonthlyTopup').innerText = formatCurrency(stats.monthlyTopupValue || 0);
-
-      const txBody = document.getElementById('dashRecentTxBody');
-      txBody.innerHTML = '';
-      if (dbData.recentTransactions && dbData.recentTransactions.length > 0) {
-        dbData.recentTransactions.forEach(t => {
-          txBody.innerHTML += `
-            <tr class="border-b border-slate-50">
-              <td class="p-2 font-mono font-bold text-slate-700">${t.NO_KAD_DISPLAY}</td>
-              <td class="p-2">${escapeHtml(t.NAMA_PENGGUNA)}</td>
-              <td class="p-2">${escapeHtml(t.LOKASI)}</td>
-              <td class="p-2 text-right font-bold text-rose-600">${formatCurrency(t.JUMLAH)}</td>
-            </tr>
-          `;
-        });
-      } else {
-        txBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Tiada transaksi terkini</td></tr>';
-      }
-
-      renderCharts(stats);
-    }
-
-    function renderCharts(stats) {
-      const ctx = document.getElementById('chartStatus').getContext('2d');
-      if (chartInstance) chartInstance.destroy();
-
-      chartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Dalam Simpanan', 'Sedang Digunakan', 'Disekat / Hilang / Rosak'],
-          datasets: [{
-            data: [
-              stats.inStoreCards || 0,
-              stats.usedCards || 0,
-              (stats.blockedCards || 0) + (stats.lostCards || 0) + (stats.damagedCards || 0)
-            ],
-            backgroundColor: ['#10b981', '#3b82f6', '#f43f5e']
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-    }
-
-    // RENDER TABLES
     function renderCardsTable() {
       const tbody = document.getElementById('cardsTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       dbData.cards.forEach(c => {
         tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-semibold text-slate-700">${c.ID_KAD}</td>
-            <td class="p-3 font-mono font-bold">${c.NO_KAD_DISPLAY}</td>
-            <td class="p-3">${c.NO_PENDAFTARAN || '-'}</td>
-            <td class="p-3">${escapeHtml(c.PEMEGANG_SEMASA || '-')}</td>
-            <td class="p-3 font-bold text-slate-800">${formatCurrency(c.BAKI_SEMASA)}</td>
-            <td class="p-3">${getStatusBadge(c.STATUS_KAD)}</td>
-            <td class="p-3 text-right">
-              <button onclick="changeCardStatus('${c.ID_KAD}')" class="text-xs bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-slate-600 font-medium">Status</button>
-            </td>
+          <tr class="border-b">
+            <td class="p-3 font-bold">${c.ID_KAD}</td>
+            <td class="p-3 font-mono">${c.NO_KAD_DISPLAY || c.NO_KAD}</td>
+            <td class="p-3">${c.PEMEGANG_SEMASA || '-'}</td>
+            <td class="p-3">RM ${parseFloat(c.BAKI_SEMASA || 0).toFixed(2)}</td>
+            <td class="p-3">${c.STATUS_KAD}</td>
           </tr>
         `;
       });
     }
 
-    function renderVehiclesTable() {
-      const tbody = document.getElementById('vehiclesTableBody');
-      tbody.innerHTML = '';
-      dbData.vehicles.forEach(v => {
-        const hasCard = dbData.cards.some(c => c.ID_KENDERAAN === v.ID_KENDERAAN);
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-bold text-slate-800">${v.NO_PENDAFTARAN}</td>
-            <td class="p-3">${escapeHtml(v.NAMA_KENDERAAN)}</td>
-            <td class="p-3">${escapeHtml(v.JENIS_KENDERAAN)}</td>
-            <td class="p-3">${escapeHtml(v.UNIT)}</td>
-            <td class="p-3">${hasCard ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold">Ada Kad TNG</span>' : '<span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-500">Tiada Kad</span>'}</td>
-            <td class="p-3 text-right">
-              <span class="text-xs text-slate-400">AKTIF</span>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    function renderHoldersTable() {
-      const tbody = document.getElementById('holdersTableBody');
-      tbody.innerHTML = '';
-      (dbData.holders || []).forEach(h => {
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-mono">${h.ID_PEMEGANG}</td>
-            <td class="p-3 font-semibold">${escapeHtml(h.NAMA_PENGGUNA)}</td>
-            <td class="p-3">${h.ID_KAD}</td>
-            <td class="p-3">${h.NO_PENDAFTARAN}</td>
-            <td class="p-3">${h.TARIKH_MULA}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700">${h.STATUS}</span></td>
-          </tr>
-        `;
-      });
-    }
-
-    function renderHistoryTable() {
-      const tbody = document.getElementById('historyTableBody');
-      tbody.innerHTML = '';
-      (dbData.issues || []).forEach(i => {
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 text-slate-500">${i.TIMESTAMP}</td>
-            <td class="p-3 font-mono font-bold">**** ${i.NO_KAD_4_DIGIT}</td>
-            <td class="p-3 font-semibold">${escapeHtml(i.NAMA_PENGGUNA)}</td>
-            <td class="p-3"><span class="font-bold text-hospital-800">[${i.JENIS_TRANSAKSI}]</span> ${escapeHtml(i.TUJUAN)}</td>
-            <td class="p-3 text-slate-500">${escapeHtml(i.NAMA_PEGAWAI_PENYERAH || '-')}</td>
-            <td class="p-3">${getStatusBadge(i.STATUS_SELEPAS)}</td>
-          </tr>
-        `;
-      });
-    }
-
-    function renderUsersTable() {
-      const tbody = document.getElementById('usersTableBody');
-      tbody.innerHTML = '';
-      (dbData.users || []).forEach(u => {
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-mono">${u.ID_PENGGUNA}</td>
-            <td class="p-3 font-semibold">${escapeHtml(u.NAMA_PENGGUNA)}</td>
-            <td class="p-3">${escapeHtml(u.JAWATAN)} (${escapeHtml(u.UNIT)})</td>
-            <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 font-bold text-slate-700 rounded">${u.PERANAN}</span></td>
-            <td class="p-3"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded font-semibold">${u.STATUS}</span></td>
-            <td class="p-3 text-right">
-              <button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-pen"></i></button>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    function renderAuditLogsTable() {
-      const tbody = document.getElementById('auditLogsTableBody');
-      tbody.innerHTML = '';
-      (dbData.recentActivities || []).forEach(l => {
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 text-slate-400 font-mono">${l.TIMESTAMP}</td>
-            <td class="p-3 font-semibold">${escapeHtml(l.NAMA_PENGGUNA)} (${l.PERANAN})</td>
-            <td class="p-3 font-bold text-hospital-800">${l.AKTIVITI}</td>
-            <td class="p-3">${l.MODUL}</td>
-            <td class="p-3">${escapeHtml(l.BUTIRAN)}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs ${l.STATUS === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${l.STATUS}</span></td>
-          </tr>
-        `;
-      });
-    }
-
-    // DROPDOWN POPULATORS
     function populateDropdowns() {
       const issueSelect = document.getElementById('issueCardId');
-      issueSelect.innerHTML = '<option value="">-- Pilih Kad Dalam Simpanan --</option>';
-      dbData.cards.filter(c => c.STATUS_KAD === 'DALAM SIMPANAN').forEach(c => {
-        issueSelect.innerHTML += `<option value="${c.ID_KAD}">${c.NO_KAD_DISPLAY} (${c.NO_PENDAFTARAN || 'Tiada Kenderaan'})</option>`;
-      });
+      if (issueSelect) {
+        issueSelect.innerHTML = '<option value="">-- Pilih Kad --</option>';
+        dbData.cards.filter(c => String(c.STATUS_KAD).toUpperCase() === 'DALAM SIMPANAN').forEach(c => {
+          issueSelect.innerHTML += `<option value="${c.ID_KAD}">${c.ID_KAD}</option>`;
+        });
+      }
 
       const userSelect = document.getElementById('issueUserId');
-      userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
-      dbData.users.filter(u => u.STATUS === 'AKTIF').forEach(u => {
-        userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${escapeHtml(u.NAMA_PENGGUNA)} (${u.JAWATAN})</option>`;
-      });
+      if (userSelect) {
+        userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
+        dbData.users.filter(u => String(u.STATUS).toUpperCase() === 'AKTIF').forEach(u => {
+          userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${u.NAMA_PENGGUNA}</option>`;
+        });
+      }
 
       const returnSelect = document.getElementById('returnCardId');
-      returnSelect.innerHTML = '<option value="">-- Pilih Kad Sedang Digunakan --</option>';
-      dbData.cards.filter(c => c.STATUS_KAD === 'SEDANG DIGUNAKAN').forEach(c => {
-        returnSelect.innerHTML += `<option value="${c.ID_KAD}">${c.NO_KAD_DISPLAY} - Pemegang: ${escapeHtml(c.PEMEGANG_SEMASA || 'Tidak diketahui')}</option>`;
-      });
-
-      ['txCardId', 'topupCardId', 'compCardId', 'modalCardVehicle'].forEach(id => {
-        const select = document.getElementById(id);
-        if (!select) return;
-        if (id === 'modalCardVehicle') {
-          select.innerHTML = '<option value="-">-- Tiada Kenderaan Khusus --</option>';
-          dbData.vehicles.forEach(v => { select.innerHTML += `<option value="${v.ID_KENDERAAN}">${v.NO_PENDAFTARAN} - ${escapeHtml(v.NAMA_KENDERAAN)}</option>`; });
-        } else {
-          select.innerHTML = '<option value="">-- Pilih Kad --</option>';
-          dbData.cards.forEach(c => { select.innerHTML += `<option value="${c.ID_KAD}">${c.NO_KAD_DISPLAY} (${c.NO_PENDAFTARAN || 'Jabatan'})</option>`; });
-        }
-      });
-    }
-
-    // FORM ACTION HANDLERS
-    function updateIssueFormDetails() {
-      const id = document.getElementById('issueCardId').value;
-      const card = dbData.cards.find(c => c.ID_KAD === id);
-      if (card) {
-        document.getElementById('issueVehicleReg').value = card.NO_PENDAFTARAN || '-';
-        document.getElementById('issueVehicleId').value = card.ID_KENDERAAN || '-';
-        document.getElementById('issueCardBalance').value = formatCurrency(card.BAKI_SEMASA);
-      }
-    }
-
-    function updateReturnFormDetails() {
-      const id = document.getElementById('returnCardId').value;
-      const card = dbData.cards.find(c => c.ID_KAD === id);
-      const submitBtn = document.querySelector('#returnCardForm button[type="submit"]');
-
-      if (card) {
-        document.getElementById('returnHolderName').value = card.PEMEGANG_SEMASA || '-';
-        document.getElementById('returnCardBalance').value = formatCurrency(card.BAKI_SEMASA);
-
-        const isCurrentHolder = currentUser && (
-          currentUser.NAMA_PENGGUNA === card.PEMEGANG_SEMASA || 
-          currentUser.PERANAN === 'ADMIN'
-        );
-
-        if (!isCurrentHolder && card.PEMEGANG_SEMASA) {
-          showError("Amaran: Hanya " + card.PEMEGANG_SEMASA + " sahaja yang dibenarkan membuat pemulangan kad ini.");
-          submitBtn.disabled = true;
-          submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      } else {
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      if (returnSelect) {
+        returnSelect.innerHTML = '<option value="">-- Pilih Kad --</option>';
+        dbData.cards.filter(c => String(c.STATUS_KAD).toUpperCase() === 'SEDANG DIGUNAKAN').forEach(c => {
+          returnSelect.innerHTML += `<option value="${c.ID_KAD}">${c.ID_KAD} - ${c.PEMEGANG_SEMASA}</option>`;
+        });
       }
     }
 
@@ -1095,130 +305,58 @@
       e.preventDefault();
       const cardId = document.getElementById('issueCardId').value;
       const userId = document.getElementById('issueUserId').value;
-      const card = dbData.cards.find(c => c.ID_KAD === cardId);
-      const user = dbData.users.find(u => u.ID_PENGGUNA === userId);
+      const user = dbData.users.find(u => String(u.ID_PENGGUNA) === String(userId));
 
-      showConfirmModal("Pengeluaran Kad", `Pasti mahu mengeluarkan kad ****${card.NO_KAD_AKHIR_4_DIGIT} kepada ${user.NAMA_PENGGUNA}?`, async () => {
-        const payload = {
-          idKad: cardId,
-          idPengguna: userId,
-          namaPengguna: user.NAMA_PENGGUNA,
-          idKenderaan: document.getElementById('issueVehicleId').value,
-          noPendaftaran: document.getElementById('issueVehicleReg').value,
-          tujuan: document.getElementById('issuePurpose').value,
-          idPegawaiPenyerah: currentUser.ID_PENGGUNA,
-          namaPegawaiPenyerah: currentUser.NAMA_PENGGUNA,
-          catatan: document.getElementById('issueNotes').value
-        };
+      const payload = {
+        idKad: cardId,
+        idPengguna: userId,
+        namaPengguna: user ? user.NAMA_PENGGUNA : '',
+        idPegawaiPenyerah: currentUser.ID_PENGGUNA,
+        namaPegawaiPenyerah: currentUser.NAMA_PENGGUNA
+      };
 
-        const res = await callApi('issueCard', payload);
-        if (res.success) {
-          showSuccess(res.message);
-          document.getElementById('issueCardForm').reset();
-          refreshData();
-          switchTab('dashboard');
-        } else {
-          showError(res.message);
-        }
-      });
+      const res = await callApi('issueCard', payload);
+      if (res.success) { showSuccess(res.message); refreshData(); switchTab('dashboard'); }
+      else showError(res.message);
     }
 
     async function handleReturnCardSubmit(e) {
       e.preventDefault();
       const cardId = document.getElementById('returnCardId').value;
-      const card = dbData.cards.find(c => c.ID_KAD === cardId);
-
-      if (currentUser.PERANAN !== 'ADMIN' && card.PEMEGANG_SEMASA !== currentUser.NAMA_PENGGUNA) {
-        showError("Akses Ditolak: Anda bukan pemegang kad ini. Hanya " + card.PEMEGANG_SEMASA + " sahaja boleh pulangkan.");
-        return;
-      }
-
-      showConfirmModal("Pemulangan Kad", `Pasti mahu menerima pemulangan kad ****${card.NO_KAD_AKHIR_4_DIGIT}?`, async () => {
-        const payload = {
-          idKad: cardId,
-          idPegawaiPenerima: currentUser.ID_PENGGUNA,
-          namaPegawaiPenerima: currentUser.NAMA_PENGGUNA,
-          peranan: currentUser.PERANAN,
-          catatan: document.getElementById('returnNotes').value
-        };
-
-        const res = await callApi('returnCard', payload);
-        if (res.success) {
-          showSuccess(res.message);
-          document.getElementById('returnCardForm').reset();
-          refreshData();
-          switchTab('dashboard');
-        } else {
-          showError(res.message);
-        }
-      });
-    }
-
-    async function handleTransactionSubmit(e) {
-      e.preventDefault();
-      const payload = {
-        idKad: document.getElementById('txCardId').value,
-        tarikh: formatDateStr(document.getElementById('txDate').value),
-        masa: document.getElementById('txTime').value,
-        jenisTransaksi: document.getElementById('txType').value,
-        jumlah: document.getElementById('txAmount').value,
-        lokasi: document.getElementById('txLocation').value,
-        noResit: document.getElementById('txReceipt').value,
-        tujuan: document.getElementById('txPurpose').value,
-        idPengguna: currentUser.ID_PENGGUNA,
-        namaPengguna: currentUser.NAMA_PENGGUNA
-      };
-
-      const res = await callApi('saveTransaction', payload);
-      if (res.success) {
-        showSuccess(res.message);
-        document.getElementById('transactionForm').reset();
-        refreshData();
-        switchTab('dashboard');
-      } else {
-        showError(res.message);
-      }
-    }
-
-    async function handleTopupSubmit(e) {
-      e.preventDefault();
-      const payload = {
-        idKad: document.getElementById('topupCardId').value,
-        tarikh: formatDateStr(document.getElementById('topupDate').value),
-        jumlah: document.getElementById('topupAmount').value,
-        kaedah: document.getElementById('topupMethod').value,
-        noRujukan: document.getElementById('topupRef').value,
-        catatan: document.getElementById('topupNotes').value,
-        idPengguna: currentUser.ID_PENGGUNA,
-        namaPengguna: currentUser.NAMA_PENGGUNA
-      };
-
-      const res = await callApi('topupCard', payload);
-      if (res.success) {
-        showSuccess(res.message);
-        document.getElementById('topupForm').reset();
-        refreshData();
-        switchTab('dashboard');
-      } else {
-        showError(res.message);
-      }
-    }
-
-    async function handleComplaintSubmit(e) {
-      e.preventDefault();
-      const cardId = document.getElementById('compCardId').value;
-      const card = dbData.cards.find(c => c.ID_KAD === cardId);
 
       const payload = {
         idKad: cardId,
-        noKad4Digit: card ? card.NO_KAD_AKHIR_4_DIGIT : '',
-        jenisAduan: document.getElementById('compType').value,
-        tarikhKejadian: formatDateStr(document.getElementById('compDate').value),
-        dilaporkanOleh: currentUser.NAMA_PENGGUNA,
-        idPengguna: currentUser.ID_PENGGUNA,
-        butiran: document.getElementById('compDetails').value
+        idPegawaiPenerima: currentUser.ID_PENGGUNA,
+        namaPegawaiPenerima: currentUser.NAMA_PENGGUNA,
+        peranan: currentUser.PERANAN
       };
 
-      const res = await callApi('saveComplaint', payload);
-      if (res.success) {
-        showSuccess(r
+      const res = await callApi('returnCard', payload);
+      if (res.success) { showSuccess(res.message); refreshData(); switchTab('dashboard'); }
+      else showError(res.message);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      const selectedView = document.getElementById('view-' + tabId);
+      if (selectedView) selectedView.classList.remove('hidden');
+    }
+
+    function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
+    function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
+    function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`;
+      toast.innerHTML = `<span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3500);
+    }
+
+    function showSuccess(msg) { showToast(msg, 'success'); }
+    function showError(msg) { showToast(msg, 'error'); }
+  </script>
+</body>
+</html>
