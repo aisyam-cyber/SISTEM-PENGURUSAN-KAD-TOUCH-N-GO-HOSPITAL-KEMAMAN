@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycby3CFHTgu-upazIsVNqdA3EnEznTHjnM682_9vRqTHutKEVgSzFImGd6ivYGIUVd-U84A/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbycuPdk8mWCIAXU0RXdHzP-yPaSwIUQgnD5mE4zIxb4Sl-PnfN6FNBwg7iRscs88ySdEA/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -132,8 +132,6 @@
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad</h3>
             <form id="issueCardForm" onsubmit="handleIssueCardSubmit(event)" class="space-y-4">
-              
-              <!-- 1. PILIH KENDERAAN -->
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">1. Pilih Kenderaan</label>
                 <select id="issueVehicleSelect" required onchange="autoMatchCardByVehicle()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800">
@@ -156,7 +154,8 @@
                 </div>
               </div>
 
-              <!-- 2. PILIH PENYELIA PENYERAH -->
+              <div id="cardStatusWarning" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold"></div>
+
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">2. Pilih Penyelia Penyerah Kad</label>
                 <select id="issueSupervisorId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800">
@@ -164,7 +163,6 @@
                 </select>
               </div>
 
-              <!-- 3. PILIH PEMANDU PENERIMA -->
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">3. Pilih Pemandu Penerima Kad</label>
                 <select id="issueUserId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
@@ -172,7 +170,6 @@
                 </select>
               </div>
 
-              <!-- 4. TUJUAN / DESTINASI -->
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">4. Tujuan / Destinasi Tugasan</label>
                 <input type="text" id="issuePurpose" required placeholder="Contoh: Tugasan Rasmi ke HSB" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm">
@@ -204,7 +201,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- LOGIK JAVASCRIPT -->
   <script>
     let currentUser = null;
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
@@ -302,24 +299,22 @@
     }
 
     function populateDropdowns() {
-      // 1. POPULATE KENDERAAN (KAD DALAM SIMPANAN)
+      // 1. POPULATE KENDERAAN (TARIK DARI TAB VEHICLES)
       const vehicleSelect = document.getElementById('issueVehicleSelect');
       if (vehicleSelect) {
         vehicleSelect.innerHTML = '<option value="">-- Pilih No. Pendaftaran Kenderaan --</option>';
-        const availableCards = dbData.cards.filter(c => String(c.STATUS_KAD).toUpperCase() === 'DALAM SIMPANAN');
-        availableCards.forEach(c => {
-          const v = dbData.vehicles.find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
-          const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || 'Tanpa No Plat');
-          const vName = v ? v.NAMA_KENDERAAN : '';
-          vehicleSelect.innerHTML += `<option value="${c.ID_KAD}">${regNo} ${vName ? ' - ' + vName : ''}</option>`;
+        (dbData.vehicles || []).forEach(v => {
+          const regNo = v.NO_PENDAFTARAN || 'Tanpa No Plat';
+          const vName = v.NAMA_KENDERAAN || '';
+          vehicleSelect.innerHTML += `<option value="${v.ID_KENDERAAN}">${regNo} ${vName ? ' - ' + vName : ''}</option>`;
         });
       }
 
-      // 2. POPULATE PENYELIA PENYERAH (JAWATAN HAS 'PENYELIA' ATAU PERANAN HAS 'ADMIN')
+      // 2. POPULATE PENYELIA PENYERAH (DINAMIK DARI TAB USERS)
       const supervisorSelect = document.getElementById('issueSupervisorId');
       if (supervisorSelect) {
         supervisorSelect.innerHTML = '<option value="">-- Pilih Nama Penyelia --</option>';
-        const supervisors = dbData.users.filter(u => 
+        const supervisors = (dbData.users || []).filter(u => 
           String(u.STATUS).toUpperCase() === 'AKTIF' && 
           (String(u.JAWATAN).toUpperCase().includes('PENYELIA') || String(u.PERANAN).toUpperCase() === 'ADMIN')
         );
@@ -328,15 +323,14 @@
         });
       }
 
-      // 3. POPULATE PEMANDU PENERIMA
+      // 3. POPULATE PEMANDU PENERIMA (DINAMIK DARI TAB USERS)
       const userSelect = document.getElementById('issueUserId');
       if (userSelect) {
         userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
-        dbData.users.filter(u => String(u.STATUS).toUpperCase() === 'AKTIF').forEach(u => {
+        (dbData.users || []).filter(u => String(u.STATUS).toUpperCase() === 'AKTIF').forEach(u => {
           userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${u.NAMA_PENGGUNA} (${u.ID_PENGGUNA})</option>`;
         });
         
-        // Auto-select pengguna log masuk jika pemandu
         if (currentUser && currentUser.PERANAN !== 'ADMIN') {
           userSelect.value = currentUser.ID_PENGGUNA;
         }
@@ -352,28 +346,49 @@
       }
     }
 
-    // AUTO-MATCH KAD DENGAN KENDERAAN
+    // AUTO-MATCH KAD BERDASARKAN KENDERAAN DIPILIH DENGAN SEMAKAN STATUS
     function autoMatchCardByVehicle() {
-      const selectedCardId = document.getElementById('issueVehicleSelect').value;
-      const card = dbData.cards.find(c => String(c.ID_KAD) === String(selectedCardId));
+      const selectedVehicleId = document.getElementById('issueVehicleSelect').value;
+      const vehicle = dbData.vehicles.find(v => String(v.ID_KENDERAAN) === String(selectedVehicleId));
+      const card = dbData.cards.find(c => String(c.ID_KENDERAAN) === String(selectedVehicleId));
+      
       const submitBtn = document.getElementById('btnSubmitIssue');
+      const warningDiv = document.getElementById('cardStatusWarning');
 
-      if (card) {
-        const v = dbData.vehicles.find(veh => String(veh.ID_KENDERAAN) === String(card.ID_KENDERAAN));
-        const regNo = v ? v.NO_PENDAFTARAN : (card.NO_PENDAFTARAN || '-');
-
+      if (vehicle && card) {
+        const regNo = vehicle.NO_PENDAFTARAN || '-';
         document.getElementById('issueCardId').value = card.ID_KAD;
         document.getElementById('issueCardDisplay').value = `${card.NO_KAD_DISPLAY || card.NO_KAD} (${card.ID_KAD})`;
         document.getElementById('issueVehicleReg').value = regNo;
-        document.getElementById('issueVehicleId').value = card.ID_KENDERAAN || '-';
+        document.getElementById('issueVehicleId').value = vehicle.ID_KENDERAAN;
         document.getElementById('issueCardBalance').value = "RM " + parseFloat(card.BAKI_SEMASA || 0).toFixed(2);
-        submitBtn.disabled = false;
+
+        const status = String(card.STATUS_KAD).toUpperCase();
+        if (status === 'DALAM SIMPANAN') {
+          warningDiv.classList.add('hidden');
+          submitBtn.disabled = false;
+        } else {
+          warningDiv.innerText = `Amaran: Kad TNG bagi kenderaan ${regNo} sedang berstatus '${status}'. Hanya kad 'DALAM SIMPANAN' boleh dikeluarkan.`;
+          warningDiv.classList.remove('hidden');
+          submitBtn.disabled = true;
+        }
+      } else if (vehicle && !card) {
+        document.getElementById('issueCardId').value = '';
+        document.getElementById('issueCardDisplay').value = 'Tiada Kad TNG Ditetapkan';
+        document.getElementById('issueVehicleReg').value = vehicle.NO_PENDAFTARAN;
+        document.getElementById('issueVehicleId').value = vehicle.ID_KENDERAAN;
+        document.getElementById('issueCardBalance').value = 'RM 0.00';
+
+        warningDiv.innerText = `Amaran: Kenderaan ${vehicle.NO_PENDAFTARAN} belum dipadankan dengan mana-mana Kad Touch 'n Go.`;
+        warningDiv.classList.remove('hidden');
+        submitBtn.disabled = true;
       } else {
         document.getElementById('issueCardId').value = '';
         document.getElementById('issueCardDisplay').value = '';
         document.getElementById('issueVehicleReg').value = '';
         document.getElementById('issueVehicleId').value = '';
         document.getElementById('issueCardBalance').value = '';
+        warningDiv.classList.add('hidden');
         submitBtn.disabled = true;
       }
     }
