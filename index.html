@@ -29,18 +29,6 @@
   </div>
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- MODAL PENGESAHAN -->
-  <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 m-4 border border-slate-100">
-      <h3 class="text-lg font-bold text-slate-800 mb-2" id="confirmTitle">Pengesahan</h3>
-      <p class="text-slate-600 text-sm mb-6" id="confirmMessage">Teruskan tindakan ini?</p>
-      <div class="flex justify-end gap-3">
-        <button onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl text-slate-600 bg-slate-100 text-sm">Batal</button>
-        <button id="confirmBtnAction" class="px-4 py-2 rounded-xl text-white bg-hospital-500 text-sm font-medium">Teruskan</button>
-      </div>
-    </div>
-  </div>
-
   <!-- PAPARAN LOG MASUK -->
   <div id="loginScreen" class="fixed inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-navy-900 via-hospital-900 to-slate-900 p-4">
     <div class="bg-white rounded-3xl shadow-2xl border border-white/20 p-8 max-w-md w-full space-y-6">
@@ -81,6 +69,8 @@
           <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go</button>
           <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Keluarkan Kad</button>
           <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
+          <!-- MENU BAHARU ANALISIS BULANAN -->
+          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Analisis Bulanan</button>
         </nav>
       </div>
       <div class="p-4 border-t border-slate-800">
@@ -169,7 +159,7 @@
               </div>
               <ul class="text-xs space-y-2 text-slate-300">
                 <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Setiap pengeluaran & pemulangan kad <strong>WAJIB</strong> direkodkan melalui sistem.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Masukkan jumlah <strong>TOL (RM)</strong> & <strong>PARKIR (RM)</strong> semasa borang pemulangan kad diisi.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Masukkan jumlah <strong>TOL (RM)</strong> & <strong>PARKIR (RM)</strong> semasa pemulangan kad diisi.</li>
                 <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit rasmi hendaklah disimpan untuk tujuan pengesahan audit kewangan.</li>
               </ul>
             </div>
@@ -185,6 +175,74 @@
               </thead>
               <tbody id="cardsTableBody"></tbody>
             </table>
+          </div>
+        </section>
+
+        <!-- TAB BAHARU: ANALISIS & LAPORAN BULANAN DENGAN PENAPIS -->
+        <section id="view-analytics" class="tab-view hidden space-y-6">
+          <!-- BAR PENAPIS (FILTER BAR) -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-base font-bold text-slate-800">Analisis Perbelanjaan Kad</h3>
+              <p class="text-xs text-slate-500">Saringan data mengikut bulan kewangan Hospital Kemaman</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <select id="filterMonth" onchange="renderAnalyticsCharts()" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
+                <option value="ALL">-- Semua Bulan --</option>
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Mac</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Jun</option>
+                <option value="07">Julai</option>
+                <option value="08">Ogos</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Disember</option>
+              </select>
+
+              <select id="filterYear" onchange="renderAnalyticsCharts()" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+              </select>
+
+              <button onclick="resetAnalyticsFilter()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- KAD RINGKASAN KOS PERBELANJAAN TERPENAPIS -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perbelanjaan</p>
+              <p class="text-2xl font-bold text-hospital-900 mt-1" id="anaTotalCost">RM 0.00</p>
+              <span class="text-[11px] text-slate-400">Tol + Parkir Bulanan</span>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Perbelanjaan Tol</p>
+              <p class="text-2xl font-bold text-emerald-600 mt-1" id="anaTollCost">RM 0.00</p>
+              <span class="text-[11px] text-emerald-500">Penggunaan Lebuhraya</span>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 uppercase">Perbelanjaan Parkir</p>
+              <p class="text-2xl font-bold text-amber-600 mt-1" id="anaParkingCost">RM 0.00</p>
+              <span class="text-[11px] text-amber-500">Bayaran Parkir Hospital/Lokasi</span>
+            </div>
+          </div>
+
+          <!-- GRAF INTERAKTIF -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4">Pecahan Nisbah (Tol vs Parkir)</h4>
+              <div class="max-w-xs mx-auto"><canvas id="chartCostBreakdown"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4">Jumlah Perjalanan Mengikut Bulan</h4>
+              <canvas id="chartMonthlyTrend"></canvas>
+            </div>
           </div>
         </section>
 
@@ -240,7 +298,7 @@
           </div>
         </section>
 
-        <!-- PULANGKAN KAD (RUANG TOL, PARKIR & BAKI KAD REKA BENTUK BAHARU) -->
+        <!-- PULANGKAN KAD -->
         <section id="view-returnCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pemulangan Kad</h3>
@@ -261,7 +319,6 @@
                 </div>
               </div>
 
-              <!-- INPUT TOL, PARKIR DAN AUTOMATIK KIRA BAKI -->
               <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
@@ -291,7 +348,8 @@
   <!-- LOGIK JAVASCRIPT -->
   <script>
     let currentUser = null;
-    let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
+    let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [], recentTransactions: [] };
+    let chartPieInstance = null, chartBarInstance = null;
 
     function callApi(action, payload = {}) {
       showLoading();
@@ -363,6 +421,7 @@
           renderDashboard();
           renderCardsTable();
           populateDropdowns();
+          renderAnalyticsCharts();
         }
       } catch (e) {
         showError("Gagal memuatkan data.");
@@ -405,6 +464,82 @@
       document.getElementById('dashCardsAvailable').innerText = availCount;
       document.getElementById('dashCardsInUse').innerText = usedCount;
       document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
+    }
+
+    // LOGIK GRAF INTERAKTIF & PENAPIS BULANAN
+    function renderAnalyticsCharts() {
+      const selectedMonth = document.getElementById('filterMonth').value;
+      const selectedYear = document.getElementById('filterYear').value;
+
+      let totalToll = 0, totalPark = 0;
+      const monthlyCounts = Array(12).fill(0);
+
+      // KIRA BERDASARKAN TRANS AKSI TERKINI ATAU ISSUES
+      (dbData.issues || []).forEach(iss => {
+        if (!iss.TIMESTAMP) return;
+        const parts = String(iss.TIMESTAMP).split('/');
+        if (parts.length >= 3) {
+          const m = parts[1].padStart(2, '0');
+          const y = parts[2].split(',')[0].trim();
+
+          if (y === selectedYear) {
+            const mIndex = parseInt(m, 10) - 1;
+            if (mIndex >= 0 && mIndex < 12) monthlyCounts[mIndex]++;
+          }
+
+          if ((selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear) {
+            const txt = String(iss.TUJUAN || "");
+            const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
+            const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
+
+            if (tollMatch) totalToll += parseFloat(tollMatch[1]) || 0;
+            if (parkMatch) totalPark += parseFloat(parkMatch[1]) || 0;
+          }
+        }
+      });
+
+      const grandTotal = totalToll + totalPark;
+      document.getElementById('anaTotalCost').innerText = "RM " + grandTotal.toFixed(2);
+      document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
+      document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
+
+      // JANAKAN CARTA PAI (TOL VS PARKIR)
+      const ctxPie = document.getElementById('chartCostBreakdown').getContext('2d');
+      if (chartPieInstance) chartPieInstance.destroy();
+      chartPieInstance = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['Tol (RM)', 'Parkir (RM)'],
+          datasets: [{
+            data: [totalToll, totalPark],
+            backgroundColor: ['#10b981', '#f59e0b']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      // JANAKAN CARTA BAR (PERJALANAN BULANAN)
+      const ctxBar = document.getElementById('chartMonthlyTrend').getContext('2d');
+      if (chartBarInstance) chartBarInstance.destroy();
+      chartBarInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'],
+          datasets: [{
+            label: 'Bil. Perjalanan Rasmi (' + selectedYear + ')',
+            data: monthlyCounts,
+            backgroundColor: '#0284c7',
+            borderRadius: 6
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function resetAnalyticsFilter() {
+      document.getElementById('filterMonth').value = 'ALL';
+      document.getElementById('filterYear').value = '2026';
+      renderAnalyticsCharts();
     }
 
     function renderCardsTable() {
@@ -605,6 +740,10 @@
       document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
       const selectedView = document.getElementById('view-' + tabId);
       if (selectedView) selectedView.classList.remove('hidden');
+
+      if (tabId === 'analytics') {
+        renderAnalyticsCharts();
+      }
     }
 
     function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
