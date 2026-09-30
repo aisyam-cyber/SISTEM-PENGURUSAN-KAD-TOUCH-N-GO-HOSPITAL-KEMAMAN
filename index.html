@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbyMrEn327bJJX52Oh47LQC8JLCnupDBAfOs8T7iBg_H0ock3v1NXR3Gmf5LLE5WtDiXjg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw7-XhP3SwjESculmpkZNm-0tMhGnp1990kXoTFY9kFkFhf_CglAzDMsfc9pkWVu_8TEw/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -179,7 +179,6 @@
 
         <!-- TAB BAHARU: ANALISIS & AUDIT KKM HOLISTIK -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
-          <!-- BAR PENAPIS -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h3 class="text-base font-bold text-slate-800">Laporan Analisis & Audit Kewangan KKM</h3>
@@ -213,7 +212,6 @@
             </div>
           </div>
 
-          <!-- KAD RINGKASAN KOS PERBELANJAAN -->
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
               <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perbelanjaan</p>
@@ -237,22 +235,18 @@
             </div>
           </div>
 
-          <!-- GRAF INTERAKTIF ANALISIS AUDIT KKM -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- CARTA 1: KENDERAAN PALING BANYAK BERGERAK -->
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
               <h4 class="text-xs font-bold text-slate-700 uppercase mb-4"><i class="fa-solid fa-truck-medical text-hospital-500 mr-2"></i>Kenderaan Paling Banyak Bergerak (Bil. Perjalanan)</h4>
               <canvas id="chartTopVehicles"></canvas>
             </div>
 
-            <!-- CARTA 2: NISBAH PERBELANJAAN (TOL VS PARKIR) -->
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
               <h4 class="text-xs font-bold text-slate-700 uppercase mb-4"><i class="fa-solid fa-chart-pie text-amber-500 mr-2"></i>Nisbah Perbelanjaan (Tol vs Parkir)</h4>
               <div class="max-w-xs mx-auto"><canvas id="chartCostBreakdown"></canvas></div>
             </div>
           </div>
 
-          <!-- JADUAL PEMANDU PALING AKTIF & AUDIT TRAIL RINGKAS -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h4 class="text-xs font-bold text-slate-700 uppercase border-b pb-2"><i class="fa-solid fa-users text-purple-500 mr-2"></i>Statistik Penggunaan Kad Mengikut Pemandu</h4>
             <div class="overflow-x-auto max-h-48 custom-scrollbar">
@@ -488,7 +482,7 @@
       document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
     }
 
-    // LOGIK GRAF ANALISIS KENDERAAN & AUDIT KKM
+    // LOGIK GRAF ANALISIS KENDERAAN & AUDIT KKM (PENECAMAN NOMBOR PLAT TEPAT)
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -507,17 +501,18 @@
           if ((selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear) {
             totalTrips++;
 
-            // Merekodkan pemandu yang mengambil kad
             const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
             driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
 
-            // Merekodkan pergerakan kenderaan dari teks tujuan
+            // HANYA KIRA KENDERAAN JIKA ADA NO PLAT [...] YANG SAH
             const txt = String(iss.TUJUAN || "");
             const vehMatch = txt.match(/\[(.*?)\]/);
-            const regNo = vehMatch ? vehMatch[1] : "Kenderaan Lain";
-            vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
+            
+            if (vehMatch && vehMatch[1] && vehMatch[1].trim() !== '-' && vehMatch[1].trim() !== '') {
+              const regNo = vehMatch[1].trim();
+              vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
+            }
 
-            // Kira kos Tol & Parkir
             const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
             const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
 
@@ -533,7 +528,6 @@
       document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
       document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
 
-      // 1. CARTA BAR: KENDERAAN PALING BANYAK BERGERAK
       const vehLabels = Object.keys(vehicleTripCounts);
       const vehData = Object.values(vehicleTripCounts);
 
@@ -542,7 +536,7 @@
       chartVehicleInstance = new Chart(ctxVeh, {
         type: 'bar',
         data: {
-          labels: vehLabels.length ? vehLabels : ['Tiada Data'],
+          labels: vehLabels.length ? vehLabels : ['Tiada Pergerakan Kenderaan'],
           datasets: [{
             label: 'Kekerapan Perjalanan',
             data: vehData.length ? vehData : [0],
@@ -550,10 +544,13 @@
             borderRadius: 6
           }]
         },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: { 
+          responsive: true, 
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
       });
 
-      // 2. CARTA PAI: NISBAH PERBELANJAAN
       const ctxPie = document.getElementById('chartCostBreakdown').getContext('2d');
       if (chartPieInstance) chartPieInstance.destroy();
       chartPieInstance = new Chart(ctxPie, {
@@ -568,7 +565,6 @@
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
 
-      // 3. JADUAL PEMANDU PALING AKTIF
       const driverBody = document.getElementById('anaDriverTableBody');
       driverBody.innerHTML = '';
       const driverKeys = Object.keys(driverTripCounts);
