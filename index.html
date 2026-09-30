@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/macros/s/AKfycbyu1hfb_Jil0YxGWVncqoEQlNDuV2diRKqtdP9QDPpc89GRVqBnwXurOPzOW4MT1CjDLg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxQylBZydOYk-AN9iSIrGp4nJlxeRwmsxFoUj_p6aPAOoxAZ46foh7vIj7Cfr0Xrh3r3Q/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -169,8 +169,8 @@
               </div>
               <ul class="text-xs space-y-2 text-slate-300">
                 <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Setiap pengeluaran & pemulangan kad <strong>WAJIB</strong> direkodkan melalui sistem.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Kad Touch 'n Go adalah khusus untuk <strong>kenderaan jabatan sahaja</strong> (Tol & Parkir).</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit bayaran parkir / tol hendaklah disimpan untuk tujuan audit kewangan.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Masukkan jumlah <strong>TOL (RM)</strong> & <strong>PARKIR (RM)</strong> semasa borang pemulangan kad diisi.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit rasmi hendaklah disimpan untuk tujuan pengesahan audit kewangan.</li>
               </ul>
             </div>
           </div>
@@ -188,7 +188,7 @@
           </div>
         </section>
 
-        <!-- KELUARKAN KAD (DENGAN RUANG PARKIR RM CADANGAN PENGARAH) -->
+        <!-- KELUARKAN KAD -->
         <section id="view-issueCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pengeluaran Kad</h3>
@@ -200,7 +200,6 @@
                 </select>
               </div>
 
-              <!-- PADANAN KAD AUTOMATIK -->
               <div class="grid grid-cols-2 gap-4 bg-sky-50 p-4 rounded-xl border border-sky-100">
                 <div>
                   <label class="block text-xs font-semibold text-hospital-800 mb-1">Kad TNG Padanan Auto</label>
@@ -231,12 +230,6 @@
                 </select>
               </div>
 
-              <!-- RUANG PARKIR (RM) TAMBAHAN UNTUK KEPERLUAN PENGARAH -->
-              <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-200/60">
-                <label class="block text-xs font-bold text-amber-900 mb-1"><i class="fa-solid fa-square-parking text-amber-600 mr-1"></i> Anggaran / Bayaran Parkir (RM) <span class="text-slate-500 font-normal">(Sila isi jika berkaitan)</span></label>
-                <input type="number" step="0.10" min="0" id="issueParkingAmount" placeholder="0.00" class="w-full p-2.5 bg-white border border-amber-200 rounded-xl text-sm font-bold text-amber-800 focus:ring-2 focus:ring-amber-500 outline-none">
-              </div>
-
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">4. Tujuan / Destinasi Tugasan</label>
                 <input type="text" id="issuePurpose" required placeholder="Contoh: Tugasan Rasmi ke HSB" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm">
@@ -247,7 +240,7 @@
           </div>
         </section>
 
-        <!-- PULANGKAN KAD -->
+        <!-- PULANGKAN KAD (RUANG TOL, PARKIR & BAKI KAD REKA BENTUK BAHARU) -->
         <section id="view-returnCard" class="tab-view hidden max-w-2xl mx-auto">
           <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 border-b pb-3">Borang Pemulangan Kad</h3>
@@ -256,18 +249,38 @@
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Kad Untuk Dipulangkan</label>
                 <select id="returnCardId" required onchange="updateReturnFormDetails()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
-                <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-500">
-              </div>
               
-              <!-- TAMBAHAN RUANG INPUT PARKIR SEBENAR KETIKA PEMULANGAN -->
-              <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-200/60">
-                <label class="block text-xs font-bold text-amber-900 mb-1"><i class="fa-solid fa-square-parking text-amber-600 mr-1"></i> Jumlah Bayaran Parkir Sebenar (RM)</label>
-                <input type="number" step="0.10" min="0" id="returnParkingAmount" placeholder="0.00" class="w-full p-2.5 bg-white border border-amber-200 rounded-xl text-sm font-bold text-amber-800 outline-none">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
+                  <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-500 font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Baki Sebelum Gunakan Kad</label>
+                  <input type="text" id="returnOriginalBalance" readonly placeholder="RM 0.00" class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-700 font-bold">
+                </div>
               </div>
 
-              <button type="submit" id="btnSubmitReturn" class="w-full py-3 bg-amber-600 text-white rounded-xl font-semibold text-sm">Pulangkan Kad</button>
+              <!-- INPUT TOL, PARKIR DAN AUTOMATIK KIRA BAKI -->
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">TOL (RM)</label>
+                    <input type="number" step="0.01" min="0" id="returnTollAmount" value="0.00" oninput="calculateReturnBalance()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-hospital-500 outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">PARKIR (RM)</label>
+                    <input type="number" step="0.01" min="0" id="returnParkingAmount" value="0.00" oninput="calculateReturnBalance()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-hospital-500 outline-none">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-hospital-800 uppercase mb-1">BAKI KAD TNG (RM)</label>
+                  <input type="text" id="returnCalculatedBalance" readonly placeholder="0.00" class="w-full p-3 bg-white border border-slate-300 rounded-xl text-base font-bold text-slate-800 shadow-inner">
+                </div>
+              </div>
+
+              <button type="submit" id="btnSubmitReturn" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold text-sm transition">Pulangkan Kad & Kemaskini Baki</button>
             </form>
           </div>
         </section>
@@ -404,7 +417,7 @@
             <td class="p-3 font-bold">${c.ID_KAD}</td>
             <td class="p-3 font-mono">${c.NO_KAD_DISPLAY || c.NO_KAD}</td>
             <td class="p-3">${c.PEMEGANG_SEMASA || '-'}</td>
-            <td class="p-3">RM ${parseFloat(c.BAKI_SEMASA || 0).toFixed(2)}</td>
+            <td class="p-3 font-bold text-emerald-600">RM ${parseFloat(c.BAKI_SEMASA || 0).toFixed(2)}</td>
             <td class="p-3">${c.STATUS_KAD}</td>
           </tr>
         `;
@@ -507,7 +520,14 @@
       const submitBtn = document.getElementById('btnSubmitReturn');
 
       if (card) {
+        const bal = parseFloat(card.BAKI_SEMASA || 0);
         document.getElementById('returnHolderName').value = card.PEMEGANG_SEMASA || '-';
+        document.getElementById('returnOriginalBalance').value = "RM " + bal.toFixed(2);
+        
+        document.getElementById('returnTollAmount').value = "0.00";
+        document.getElementById('returnParkingAmount').value = "0.00";
+        calculateReturnBalance();
+
         const isCurrentHolder = currentUser && (
           String(currentUser.NAMA_PENGGUNA).trim().toUpperCase() === String(card.PEMEGANG_SEMASA).trim().toUpperCase() || 
           String(currentUser.PERANAN).toUpperCase() === 'ADMIN'
@@ -524,12 +544,24 @@
       }
     }
 
+    function calculateReturnBalance() {
+      const id = document.getElementById('returnCardId').value;
+      const card = dbData.cards.find(c => String(c.ID_KAD) === String(id));
+      if (!card) return;
+
+      const origBal = parseFloat(card.BAKI_SEMASA || 0);
+      const tollAmt = parseFloat(document.getElementById('returnTollAmount').value) || 0;
+      const parkAmt = parseFloat(document.getElementById('returnParkingAmount').value) || 0;
+
+      const newBal = origBal - (tollAmt + parkAmt);
+      document.getElementById('returnCalculatedBalance').value = newBal.toFixed(2);
+    }
+
     async function handleIssueCardSubmit(e) {
       e.preventDefault();
       const cardId = document.getElementById('issueCardId').value;
       const supervisorId = document.getElementById('issueSupervisorId').value;
       const driverId = document.getElementById('issueUserId').value;
-      const parkingAmt = document.getElementById('issueParkingAmount').value || '0.00';
       
       const supervisor = dbData.users.find(u => String(u.ID_PENGGUNA) === String(supervisorId));
       const driver = dbData.users.find(u => String(u.ID_PENGGUNA) === String(driverId));
@@ -540,7 +572,6 @@
         namaPengguna: driver ? driver.NAMA_PENGGUNA : currentUser.NAMA_PENGGUNA,
         noPendaftaran: document.getElementById('issueVehicleReg').value,
         tujuan: document.getElementById('issuePurpose').value,
-        parkingAmount: parkingAmt, // MENGHANTAR NILAI PARKIR (RM)
         idPegawaiPenyerah: supervisorId,
         namaPegawaiPenyerah: supervisor ? supervisor.NAMA_PENGGUNA : currentUser.NAMA_PENGGUNA
       };
@@ -553,13 +584,15 @@
     async function handleReturnCardSubmit(e) {
       e.preventDefault();
       const cardId = document.getElementById('returnCardId').value;
-      const parkingAmt = document.getElementById('returnParkingAmount').value || '0.00';
+      const tollAmt = document.getElementById('returnTollAmount').value || '0.00';
+      const parkAmt = document.getElementById('returnParkingAmount').value || '0.00';
 
       const payload = {
         idKad: cardId,
         idPegawaiPenerima: currentUser.ID_PENGGUNA,
         namaPegawaiPenerima: currentUser.NAMA_PENGGUNA,
-        parkingAmount: parkingAmt, // MENGHANTAR PARKIR SEBENAR DIPULANGKAN
+        tollAmount: tollAmt,
+        parkingAmount: parkAmt,
         peranan: currentUser.PERANAN
       };
 
@@ -582,13 +615,18 @@
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`;
-      toast.innerHTML = `<span>${msg}</span>`;
+      toast.innerHTML = `<span>${escapeHtml(msg)}</span>`;
       container.appendChild(toast);
       setTimeout(() => { toast.remove(); }, 3500);
     }
 
     function showSuccess(msg) { showToast(msg, 'success'); }
     function showError(msg) { showToast(msg, 'error'); }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
   </script>
 </body>
 </html>
