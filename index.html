@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycby7QzhI4PPBnLKsm9x7N4lJcENVnICa0T40SjPhOn2UbESjXHSzS9qglW7OBaKAWK7xmw/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbx7lolXtIXcbm2D5smjf9AmP6PUSBH4PZXz1S4dtmeRWv2cXkzNmu0mmwT8h_x1AxAn/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -101,12 +101,12 @@
               <p class="text-slate-300 text-sm mt-1">Sistem Kawalan & Pengurusan Kad Touch 'n Go Hospital Kemaman</p>
             </div>
             <div class="bg-white/10 px-4 py-2 rounded-2xl border border-white/10 text-right">
-              <span class="text-xs text-slate-300 block uppercase">Baki Keseluruhan Kad</span>
+              <span class="text-xs text-slate-300 block uppercase">JUMLAH BAKI DISAHKAN</span>
               <span class="text-xl font-bold text-emerald-400" id="dashTotalBalance">RM 0.00</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
               <div>
                 <p class="text-xs font-semibold text-slate-500 uppercase">Kad Sedia Digunakan</p>
@@ -125,15 +125,23 @@
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
               <div>
-                <p class="text-xs font-semibold text-slate-500 uppercase">Perlu Top-Up Immediate</p>
+                <p class="text-xs font-semibold text-slate-500 uppercase">KAD PERLU AUTO TOP-UP</p>
                 <p class="text-2xl font-bold text-rose-600 mt-1" id="dashLowBalanceCount">0</p>
-                <p class="text-[11px] text-rose-500 font-medium">Baki Kurang RM 30.00</p>
+                <p class="text-[11px] text-rose-500 font-medium">Baki < RM 50.00</p>
               </div>
               <div class="p-3 bg-rose-100 text-rose-600 rounded-2xl"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
             </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">KAD BELUM DISEMAK</p>
+                <p class="text-2xl font-bold text-slate-600 mt-1" id="dashUncheckedBalanceCount">0</p>
+                <p class="text-[11px] text-slate-400 font-medium">Baki Belum Diisi</p>
+              </div>
+              <div class="p-3 bg-slate-100 text-slate-600 rounded-2xl"><i class="fa-solid fa-circle-question text-xl"></i></div>
+            </div>
           </div>
 
-          <!-- SENARAI KAD BELUM DIPULANGKAN (REKA BENTUK MENARIK & MAX 10 PER PAGE) -->
+          <!-- SENARAI KAD BELUM DIPULANGKAN -->
           <div class="bg-white rounded-3xl border border-amber-200 shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-6 py-4 flex items-center justify-between text-white">
               <div class="flex items-center gap-3">
@@ -163,7 +171,6 @@
               </table>
             </div>
 
-            <!-- FOOTER PAGINATION MAKSIMUM 10 REKOD -->
             <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500">
               <span id="pendingPageInfo">Menunjukkan 0 daripada 0 rekod</span>
               <div class="flex gap-2">
@@ -176,16 +183,16 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
               <div class="flex items-center justify-between border-b pb-2">
-                <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-wallet text-amber-500 mr-2"></i>Kad Baki Rendah (Threshold < RM 30)</h3>
+                <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-wallet text-amber-500 mr-2"></i>Senarai Kad Perlu Auto Top-Up (Baki < RM 50)</h3>
                 <span class="text-xs px-2 py-0.5 bg-rose-100 text-rose-700 rounded-md font-semibold">Tindakan Penyelia</span>
               </div>
               <div class="overflow-x-auto max-h-48 custom-scrollbar">
                 <table class="w-full text-left text-xs">
                   <thead class="bg-slate-50 text-slate-500 font-semibold">
-                    <tr><th class="p-2">No Kenderaan</th><th class="p-2">ID Kad</th><th class="p-2 text-right">Baki Semasa</th></tr>
+                    <tr><th class="p-2">No Kenderaan</th><th class="p-2">ID Kad</th><th class="p-2 text-right">Baki Sebenar</th><th class="p-2 text-center">Status Auto Top-Up</th></tr>
                   </thead>
                   <tbody id="dashLowBalBody">
-                    <tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada kad baki rendah</td></tr>
+                    <tr><td colspan="4" class="p-3 text-center text-slate-400">Tiada kad memerlukan Auto Top-Up</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -194,12 +201,13 @@
             <div class="bg-slate-900 text-slate-200 p-5 rounded-2xl shadow-sm space-y-3">
               <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
                 <i class="fa-solid fa-shield-halved text-hospital-500"></i>
-                <h3 class="text-sm font-bold text-white">Tatacara Pengurusan Kad TnG KKM</h3>
+                <h3 class="text-sm font-bold text-white">Tatacara Tetapan Auto Top-Up KKM</h3>
               </div>
               <ul class="text-xs space-y-2 text-slate-300">
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Setiap proses mengambil & memulangkan kad <strong>WAJIB</strong> direkodkan.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Masukkan jumlah <strong>TOL (RM)</strong> & <strong>PARKIR (RM)</strong> semasa pemulangan kad diisi.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Resit rasmi hendaklah disimpan untuk tujuan pengesahan audit kewangan.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> **Threshold Auto Top-Up**: **RM 50.00**. Status `PERLU AUTO TOP-UP RM500` diaktifkan jika baki < RM50.00.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> **Nilai Auto Top-Up**: **RM 500.00** (Bukan baki tetap kad).</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> **Baki Kosong**: Dipaparkan sebagai `BELUM DISEMAK` (Bukan RM0 atau RM500).</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Rujuk **Portal TNG** (https://tngportal.touchngo.com.my/) untuk mendapatkan Baki Sebenar.</li>
               </ul>
             </div>
           </div>
@@ -210,7 +218,15 @@
           <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-4">
             <table class="w-full text-left text-xs text-slate-600">
               <thead class="bg-slate-50 uppercase font-semibold">
-                <tr><th class="p-3">ID Kad</th><th class="p-3">No. Kad</th><th class="p-3">Pemegang</th><th class="p-3">Baki</th><th class="p-3">Status</th></tr>
+                <tr>
+                  <th class="p-3">ID Kad</th>
+                  <th class="p-3">No. Kad</th>
+                  <th class="p-3">Pemegang</th>
+                  <th class="p-3">Baki Sebenar TNG</th>
+                  <th class="p-3">Status Auto Top-Up (Threshold RM50)</th>
+                  <th class="p-3">Status Kad</th>
+                  <th class="p-3 text-center">Tindakan</th>
+                </tr>
               </thead>
               <tbody id="cardsTableBody"></tbody>
             </table>
@@ -324,7 +340,7 @@
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-hospital-800 mb-1">Baki Semasa Kad</label>
-                  <input type="text" id="issueCardBalance" readonly placeholder="RM 0.00" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-emerald-600">
+                  <input type="text" id="issueCardBalance" readonly placeholder="BELUM DISEMAK" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-emerald-600">
                 </div>
               </div>
 
@@ -371,7 +387,7 @@
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-1">Baki Sebelum Gunakan Kad</label>
-                  <input type="text" id="returnOriginalBalance" readonly placeholder="RM 0.00" class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-700 font-bold">
+                  <input type="text" id="returnOriginalBalance" readonly placeholder="BELUM DISEMAK" class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-700 font-bold">
                 </div>
               </div>
 
@@ -388,8 +404,8 @@
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold text-hospital-800 uppercase mb-1">BAKI KAD TNG (RM)</label>
-                  <input type="text" id="returnCalculatedBalance" readonly placeholder="0.00" class="w-full p-3 bg-white border border-slate-300 rounded-xl text-base font-bold text-slate-800 shadow-inner">
+                  <label class="block text-xs font-bold text-hospital-800 uppercase mb-1">BAKI KAD TNG ANGGARAN (RM)</label>
+                  <input type="text" id="returnCalculatedBalance" readonly placeholder="BELUM DISEMAK" class="w-full p-3 bg-white border border-slate-300 rounded-xl text-base font-bold text-slate-800 shadow-inner">
                 </div>
               </div>
 
@@ -401,13 +417,51 @@
     </div>
   </div>
 
+  <!-- MODAL KEMAS KINI BAKI SEBENAR PORTAL TNG -->
+  <div id="modalUpdateBalance" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 m-4 border border-slate-100 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-base text-hospital-900"><i class="fa-solid fa-wallet text-hospital-500 mr-2"></i>Kemas Kini Baki Sebenar Portal TNG</h3>
+        <button onclick="closeBalanceModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <form id="formUpdateBalance" onsubmit="handleSaveBalanceSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="modalCardId">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Kad TnG / No. Kenderaan</label>
+          <input type="text" id="modalCardDisplay" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl font-bold text-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Baki Sebenar Dipaparkan di Portal TNG (RM)</label>
+          <input type="number" step="0.01" id="modalCardBalance" placeholder="Contoh: 512.36 (Kosongkan jika tiada baki)" class="w-full p-3 bg-white border border-slate-300 rounded-xl font-bold text-emerald-600 text-sm focus:ring-2 focus:ring-hospital-500 outline-none">
+          <p class="text-[11px] text-slate-400 mt-1">*Jika belum disahkan di portal, biarkan kosong untuk dikekalkan sebagai 'BELUM DISEMAK'.</p>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Tarikh Semakan Portal</label>
+          <input type="date" id="modalCheckDate" required class="w-full p-2.5 bg-slate-50 border rounded-xl">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Sumber Baki</label>
+          <select id="modalSource" class="w-full p-2.5 bg-slate-50 border rounded-xl font-semibold">
+            <option value="PORTAL_TNG">PORTAL_TNG (Portal Rasmi Touch 'n Go)</option>
+            <option value="STATEMENT_TNG">STATEMENT_TNG (Penyata Bulanan TNG)</option>
+            <option value="REKOD_MANUAL">REKOD_MANUAL (Resit Semakan)</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeBalanceModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-semibold">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition">Disahkan & Simpan Baki</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- LOGIK JAVASCRIPT -->
   <script>
     let currentUser = null;
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
     let chartPieInstance = null, chartVehicleInstance = null;
 
-    // VARIABEL PAGINATION KAD BELUM DIPULANGKAN
     let pendingCurrentPage = 1;
     const pendingPageSize = 10;
     let pendingCardsList = [];
@@ -490,54 +544,67 @@
     }
 
     function renderDashboard() {
-      let totalBal = 0, availCount = 0, usedCount = 0, lowBalCount = 0;
+      let totalConfirmedBal = 0;
+      let availCount = 0, usedCount = 0;
+      let lowBalCount = 0, uncheckedBalCount = 0;
+
       const lowBalBody = document.getElementById('dashLowBalBody');
       lowBalBody.innerHTML = '';
 
       pendingCardsList = [];
 
       (dbData.cards || []).forEach(c => {
-        const bal = parseFloat(c.BAKI_SEMASA || 0);
-        totalBal += bal;
-
+        const rawBal = c.BAKI_SEMASA;
         const status = String(c.STATUS_KAD).toUpperCase();
+
         if (status === 'DALAM SIMPANAN') availCount++;
         if (status === 'SEDANG DIGUNAKAN') {
           usedCount++;
           pendingCardsList.push(c);
         }
 
-        if (bal < 30.00) {
-          lowBalCount++;
-          const v = (dbData.vehicles || []).find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
-          const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || c.ID_KAD);
-          
-          lowBalBody.innerHTML += `
-            <tr class="border-b border-slate-100">
-              <td class="p-2 font-bold text-slate-700">${regNo}</td>
-              <td class="p-2 text-slate-500">${c.ID_KAD}</td>
-              <td class="p-2 text-right font-bold text-rose-600">RM ${bal.toFixed(2)}</td>
-            </tr>
-          `;
+        if (rawBal !== "" && rawBal !== null && rawBal !== undefined && String(rawBal).toUpperCase() !== 'BELUM DISEMAK') {
+          const numericBal = parseFloat(rawBal);
+          if (!isNaN(numericBal)) {
+            totalConfirmedBal += numericBal;
+
+            if (numericBal < 50.00) {
+              lowBalCount++;
+              const v = (dbData.vehicles || []).find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
+              const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || c.ID_KAD);
+              
+              lowBalBody.innerHTML += `
+                <tr class="border-b border-slate-100">
+                  <td class="p-2 font-bold text-slate-700">${regNo}</td>
+                  <td class="p-2 text-slate-500">${c.ID_KAD}</td>
+                  <td class="p-2 text-right font-bold text-rose-600">RM ${numericBal.toFixed(2)}</td>
+                  <td class="p-2 text-center font-bold text-xs"><span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded">PERLU AUTO TOP-UP RM500</span></td>
+                </tr>
+              `;
+            }
+          } else {
+            uncheckedBalCount++;
+          }
+        } else {
+          uncheckedBalCount++;
         }
       });
 
       if (lowBalCount === 0) {
-        lowBalBody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada kad baki rendah (< RM 30)</td></tr>';
+        lowBalBody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">Tiada kad memerlukan Auto Top-Up (Semua Baki >= RM50.00)</td></tr>';
       }
 
-      document.getElementById('dashTotalBalance').innerText = "RM " + totalBal.toFixed(2);
+      document.getElementById('dashTotalBalance').innerText = "RM " + totalConfirmedBal.toFixed(2);
       document.getElementById('dashCardsAvailable').innerText = availCount;
       document.getElementById('dashCardsInUse').innerText = usedCount;
       document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
+      document.getElementById('dashUncheckedBalanceCount').innerText = uncheckedBalCount;
       document.getElementById('badgePendingCount').innerText = usedCount + " Kad";
 
-      // RENDERING KAD BELUM DIPULANGKAN
       pendingCurrentPage = 1;
       renderPendingCardsPage();
     }
 
-    // FUNGSI PAGINATION (MAKSIMUM 10 REKOD PER PAGE)
     function renderPendingCardsPage() {
       const tbody = document.getElementById('dashPendingCardsBody');
       tbody.innerHTML = '';
@@ -563,8 +630,7 @@
         const v = (dbData.vehicles || []).find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
         const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || '-');
         
-        // Cari timestamp pengambilan dari log ISSUES
-        const lastIssue = (dbData.issues || []).find(iss => String(iss.ID_KAD) === String(c.ID_KAD) && String(iss.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN');
+        const lastIssue = (dbData.issues || []).find(iss => String(iss.ID_KAD) === String(c.ID_KENDERAAN || c.ID_KAD) && String(iss.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN');
         const issueTime = lastIssue ? lastIssue.TIMESTAMP : '-';
 
         tbody.innerHTML += `
@@ -590,6 +656,78 @@
     function changePendingPage(dir) {
       pendingCurrentPage += dir;
       renderPendingCardsPage();
+    }
+
+    function renderCardsTable() {
+      const tbody = document.getElementById('cardsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      dbData.cards.forEach(c => {
+        const rawBal = c.BAKI_SEMASA;
+        let balTxt = '<span class="text-slate-400 font-medium">BELUM DISEMAK</span>';
+        let statusAuto = '<span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]">BELUM DISEMAK</span>';
+
+        if (rawBal !== "" && rawBal !== null && rawBal !== undefined && String(rawBal).toUpperCase() !== 'BELUM DISEMAK') {
+          const num = parseFloat(rawBal);
+          if (!isNaN(num)) {
+            balTxt = `<span class="font-bold ${num < 50 ? 'text-rose-600' : 'text-emerald-600'}">RM ${num.toFixed(2)}</span>`;
+            if (num >= 50.00) {
+              statusAuto = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">TIADA AUTO TOP-UP</span>';
+            } else {
+              statusAuto = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">PERLU AUTO TOP-UP RM500</span>';
+            }
+          }
+        }
+
+        tbody.innerHTML += `
+          <tr class="border-b">
+            <td class="p-3 font-bold">${c.ID_KAD}</td>
+            <td class="p-3 font-mono">${c.NO_KAD_DISPLAY || c.NO_KAD}</td>
+            <td class="p-3">${c.PEMEGANG_SEMASA || '-'}</td>
+            <td class="p-3">${balTxt}</td>
+            <td class="p-3">${statusAuto}</td>
+            <td class="p-3">${c.STATUS_KAD}</td>
+            <td class="p-3 text-center">
+              <button onclick="openBalanceModal('${c.ID_KAD}', '${c.NO_PENDAFTARAN || c.ID_KAD}', '${c.BAKI_SEMASA || ''}')" class="px-3 py-1 bg-hospital-500 hover:bg-hospital-800 text-white rounded-lg text-xs font-semibold transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Kemas Kini Baki
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openBalanceModal(idKad, display, currentBal) {
+      document.getElementById('modalCardId').value = idKad;
+      document.getElementById('modalCardDisplay').value = `${idKad} (${display})`;
+      document.getElementById('modalCardBalance').value = (currentBal && currentBal !== 'BELUM DISEMAK') ? currentBal : '';
+      document.getElementById('modalCheckDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('modalUpdateBalance').classList.remove('hidden');
+    }
+
+    function closeBalanceModal() {
+      document.getElementById('modalUpdateBalance').classList.add('hidden');
+    }
+
+    async function handleSaveBalanceSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        idKad: document.getElementById('modalCardId').value,
+        bakiSemasa: document.getElementById('modalCardBalance').value,
+        tarikhSemakan: document.getElementById('modalCheckDate').value,
+        sumber: document.getElementById('modalSource').value,
+        idPengguna: currentUser.ID_PENGGUNA,
+        namaPengguna: currentUser.NAMA_PENGGUNA
+      };
+
+      const res = await callApi('updateCardBalance', payload);
+      if (res.success) {
+        showSuccess(res.message);
+        closeBalanceModal();
+        refreshData();
+      } else {
+        showError(res.message);
+      }
     }
 
     function renderAnalyticsCharts() {
@@ -699,23 +837,6 @@
       renderAnalyticsCharts();
     }
 
-    function renderCardsTable() {
-      const tbody = document.getElementById('cardsTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      dbData.cards.forEach(c => {
-        tbody.innerHTML += `
-          <tr class="border-b">
-            <td class="p-3 font-bold">${c.ID_KAD}</td>
-            <td class="p-3 font-mono">${c.NO_KAD_DISPLAY || c.NO_KAD}</td>
-            <td class="p-3">${c.PEMEGANG_SEMASA || '-'}</td>
-            <td class="p-3 font-bold text-emerald-600">RM ${parseFloat(c.BAKI_SEMASA || 0).toFixed(2)}</td>
-            <td class="p-3">${c.STATUS_KAD}</td>
-          </tr>
-        `;
-      });
-    }
-
     function populateDropdowns() {
       const vehicleSelect = document.getElementById('issueVehicleSelect');
       if (vehicleSelect) {
@@ -770,11 +891,15 @@
 
       if (vehicle && card) {
         const regNo = vehicle.NO_PENDAFTARAN || '-';
+        const rawBal = card.BAKI_SEMASA;
+        const balTxt = (rawBal !== "" && rawBal !== null && String(rawBal).toUpperCase() !== 'BELUM DISEMAK' && !isNaN(parseFloat(rawBal))) ? 
+          "RM " + parseFloat(rawBal).toFixed(2) : "BELUM DISEMAK";
+
         document.getElementById('issueCardId').value = card.ID_KAD;
         document.getElementById('issueCardDisplay').value = `${card.NO_KAD_DISPLAY || card.NO_KAD} (${card.ID_KAD})`;
         document.getElementById('issueVehicleReg').value = regNo;
         document.getElementById('issueVehicleId').value = vehicle.ID_KENDERAAN;
-        document.getElementById('issueCardBalance').value = "RM " + parseFloat(card.BAKI_SEMASA || 0).toFixed(2);
+        document.getElementById('issueCardBalance').value = balTxt;
 
         const status = String(card.STATUS_KAD).toUpperCase();
         if (status === 'DALAM SIMPANAN') {
@@ -790,7 +915,7 @@
         document.getElementById('issueCardDisplay').value = 'Tiada Kad TNG Ditetapkan';
         document.getElementById('issueVehicleReg').value = vehicle.NO_PENDAFTARAN;
         document.getElementById('issueVehicleId').value = vehicle.ID_KENDERAAN;
-        document.getElementById('issueCardBalance').value = 'RM 0.00';
+        document.getElementById('issueCardBalance').value = 'BELUM DISEMAK';
 
         warningDiv.innerText = `Amaran: Kenderaan ${vehicle.NO_PENDAFTARAN} belum dipadankan dengan mana-mana Kad Touch 'n Go.`;
         warningDiv.classList.remove('hidden');
@@ -812,9 +937,12 @@
       const submitBtn = document.getElementById('btnSubmitReturn');
 
       if (card) {
-        const bal = parseFloat(card.BAKI_SEMASA || 0);
+        const rawBal = card.BAKI_SEMASA;
+        const balTxt = (rawBal !== "" && rawBal !== null && String(rawBal).toUpperCase() !== 'BELUM DISEMAK' && !isNaN(parseFloat(rawBal))) ? 
+          "RM " + parseFloat(rawBal).toFixed(2) : "BELUM DISEMAK";
+
         document.getElementById('returnHolderName').value = card.PEMEGANG_SEMASA || '-';
-        document.getElementById('returnOriginalBalance').value = "RM " + bal.toFixed(2);
+        document.getElementById('returnOriginalBalance').value = balTxt;
         
         document.getElementById('returnTollAmount').value = "0.00";
         document.getElementById('returnParkingAmount').value = "0.00";
@@ -841,12 +969,17 @@
       const card = dbData.cards.find(c => String(c.ID_KAD) === String(id));
       if (!card) return;
 
-      const origBal = parseFloat(card.BAKI_SEMASA || 0);
+      const rawBal = card.BAKI_SEMASA;
       const tollAmt = parseFloat(document.getElementById('returnTollAmount').value) || 0;
       const parkAmt = parseFloat(document.getElementById('returnParkingAmount').value) || 0;
 
-      const newBal = origBal - (tollAmt + parkAmt);
-      document.getElementById('returnCalculatedBalance').value = newBal.toFixed(2);
+      if (rawBal !== "" && rawBal !== null && String(rawBal).toUpperCase() !== 'BELUM DISEMAK' && !isNaN(parseFloat(rawBal))) {
+        const origBal = parseFloat(rawBal);
+        const newBal = origBal - (tollAmt + parkAmt);
+        document.getElementById('returnCalculatedBalance').value = "RM " + newBal.toFixed(2);
+      } else {
+        document.getElementById('returnCalculatedBalance').value = "BELUM DISEMAK";
+      }
     }
 
     async function handleIssueCardSubmit(e) {
