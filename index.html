@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbx7lolXtIXcbm2D5smjf9AmP6PUSBH4PZXz1S4dtmeRWv2cXkzNmu0mmwT8h_x1AxAn/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbyOAfA0c9Uu6y8zrtfIMIb5NTfAqNJJ9SJDPNowrEdNi4KNmOaFTuP_sB0EQd_9h0y9nQ/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -36,7 +36,7 @@
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-hospital-50 text-hospital-500 mb-2">
           <i class="fa-solid fa-credit-card text-3xl"></i>
         </div>
-        <h1 class="text-xl font-bold text-slate-800">SISTEM PENGURUSAN KAD TOUCH 'N GO</h1>
+        <h1 class="text-xl font-bold text-slate-800">SISTEM REKOD PENGGUNAAN KAD TNG</h1>
         <p class="text-xs font-semibold uppercase text-hospital-800">Hospital Kemaman</p>
       </div>
       <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
@@ -61,15 +61,15 @@
           <div class="w-10 h-10 rounded-xl bg-hospital-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-hospital-user"></i></div>
           <div>
             <h2 class="font-bold text-white text-xs uppercase tracking-wider">HOSPITAL KEMAMAN</h2>
-            <p class="text-[11px] text-hospital-500 font-semibold">Sistem Kad TnG</p>
+            <p class="text-[11px] text-hospital-500 font-semibold">Rekod Penggunaan Kad</p>
           </div>
         </div>
         <nav class="p-3 space-y-1 text-sm custom-scrollbar overflow-y-auto max-h-[calc(100vh-140px)]">
           <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="dashboard"><i class="fa-solid fa-chart-pie w-5 text-hospital-500"></i> Dashboard</button>
-          <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Kad Touch 'n Go</button>
+          <button onclick="switchTab('cards')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="cards"><i class="fa-solid fa-credit-card w-5 text-hospital-500"></i> Senarai Kad TnG</button>
           <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Ambil Kad</button>
           <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
-          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Analisis & Audit KKM</button>
+          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Laporan Penggunaan</button>
         </nav>
       </div>
       <div class="p-4 border-t border-slate-800">
@@ -98,15 +98,15 @@
           <div class="bg-gradient-to-r from-navy-900 via-hospital-900 to-hospital-800 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center">
             <div>
               <h2 class="text-2xl font-bold" id="welcomeUser">Selamat Datang</h2>
-              <p class="text-slate-300 text-sm mt-1">Sistem Kawalan & Pengurusan Kad Touch 'n Go Hospital Kemaman</p>
+              <p class="text-slate-300 text-sm mt-1">Sistem Rekod Perbelanjaan & Penggunaan Kad Touch 'n Go Hospital Kemaman</p>
             </div>
             <div class="bg-white/10 px-4 py-2 rounded-2xl border border-white/10 text-right">
-              <span class="text-xs text-slate-300 block uppercase">JUMLAH BAKI DISAHKAN</span>
-              <span class="text-xl font-bold text-emerald-400" id="dashTotalBalance">RM 0.00</span>
+              <span class="text-xs text-slate-300 block uppercase">Portal Rasmi TNG</span>
+              <a href="https://tngportal.touchngo.com.my/" target="_blank" class="text-xs font-bold text-sky-300 hover:underline"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka Portal TNG</a>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
               <div>
                 <p class="text-xs font-semibold text-slate-500 uppercase">Kad Sedia Digunakan</p>
@@ -122,22 +122,6 @@
                 <p class="text-[11px] text-amber-600 font-medium">Dalam Perjalanan / Tugasan</p>
               </div>
               <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl"><i class="fa-solid fa-truck-medical text-xl"></i></div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-              <div>
-                <p class="text-xs font-semibold text-slate-500 uppercase">KAD PERLU AUTO TOP-UP</p>
-                <p class="text-2xl font-bold text-rose-600 mt-1" id="dashLowBalanceCount">0</p>
-                <p class="text-[11px] text-rose-500 font-medium">Baki < RM 50.00</p>
-              </div>
-              <div class="p-3 bg-rose-100 text-rose-600 rounded-2xl"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-              <div>
-                <p class="text-xs font-semibold text-slate-500 uppercase">KAD BELUM DISEMAK</p>
-                <p class="text-2xl font-bold text-slate-600 mt-1" id="dashUncheckedBalanceCount">0</p>
-                <p class="text-[11px] text-slate-400 font-medium">Baki Belum Diisi</p>
-              </div>
-              <div class="p-3 bg-slate-100 text-slate-600 rounded-2xl"><i class="fa-solid fa-circle-question text-xl"></i></div>
             </div>
           </div>
 
@@ -180,35 +164,44 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-              <div class="flex items-center justify-between border-b pb-2">
-                <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-wallet text-amber-500 mr-2"></i>Senarai Kad Perlu Auto Top-Up (Baki < RM 50)</h3>
-                <span class="text-xs px-2 py-0.5 bg-rose-100 text-rose-700 rounded-md font-semibold">Tindakan Penyelia</span>
+          <!-- BAHARU: SENARAI REKOD PENGGUNAAN KAD TERKINI (PAGINATION 10/PAGE) -->
+          <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex items-center justify-between text-white">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold"><i class="fa-solid fa-receipt text-lg"></i></div>
+                <div>
+                  <h3 class="font-bold text-sm uppercase tracking-wide">Rekod Penggunaan Kad & Perbelanjaan</h3>
+                  <p class="text-xs text-sky-200">Sejarah penggunaan tol, parkir, pemandu dan tujuan tugasan</p>
+                </div>
               </div>
-              <div class="overflow-x-auto max-h-48 custom-scrollbar">
-                <table class="w-full text-left text-xs">
-                  <thead class="bg-slate-50 text-slate-500 font-semibold">
-                    <tr><th class="p-2">No Kenderaan</th><th class="p-2">ID Kad</th><th class="p-2 text-right">Baki Sebenar</th><th class="p-2 text-center">Status Auto Top-Up</th></tr>
-                  </thead>
-                  <tbody id="dashLowBalBody">
-                    <tr><td colspan="4" class="p-3 text-center text-slate-400">Tiada kad memerlukan Auto Top-Up</td></tr>
-                  </tbody>
-                </table>
-              </div>
+              <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/20" id="badgeUsageCount">0 Rekod</span>
             </div>
 
-            <div class="bg-slate-900 text-slate-200 p-5 rounded-2xl shadow-sm space-y-3">
-              <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
-                <i class="fa-solid fa-shield-halved text-hospital-500"></i>
-                <h3 class="text-sm font-bold text-white">Tatacara Tetapan Auto Top-Up KKM</h3>
+            <div class="p-4 overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-700">
+                <thead class="bg-sky-50/60 uppercase font-bold text-hospital-900 border-b border-sky-100">
+                  <tr>
+                    <th class="p-3">Tarikh & Masa</th>
+                    <th class="p-3">Pemandu</th>
+                    <th class="p-3">Kenderaan / ID Kad</th>
+                    <th class="p-3">Tujuan Tugasan</th>
+                    <th class="p-3 text-right">Tol (RM)</th>
+                    <th class="p-3 text-right">Parkir (RM)</th>
+                    <th class="p-3 text-right">Jumlah Guna (RM)</th>
+                  </tr>
+                </thead>
+                <tbody id="dashUsageCardsBody">
+                  <tr><td colspan="7" class="p-4 text-center text-slate-400">Tiada rekod penggunaan ditemui.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500">
+              <span id="usagePageInfo">Menunjukkan 0 daripada 0 rekod</span>
+              <div class="flex gap-2">
+                <button onclick="changeUsagePage(-1)" id="btnUsagePrev" disabled class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">Sebelumnya</button>
+                <button onclick="changeUsagePage(1)" id="btnUsageNext" disabled class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">Seterusnya</button>
               </div>
-              <ul class="text-xs space-y-2 text-slate-300">
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> **Threshold Auto Top-Up**: **RM 50.00**. Status `PERLU AUTO TOP-UP RM500` diaktifkan jika baki < RM50.00.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> **Nilai Auto Top-Up**: **RM 500.00** (Bukan baki tetap kad).</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> **Baki Kosong**: Dipaparkan sebagai `BELUM DISEMAK` (Bukan RM0 atau RM500).</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-0.5"></i> Rujuk **Portal TNG** (https://tngportal.touchngo.com.my/) untuk mendapatkan Baki Sebenar.</li>
-              </ul>
             </div>
           </div>
         </section>
@@ -221,11 +214,9 @@
                 <tr>
                   <th class="p-3">ID Kad</th>
                   <th class="p-3">No. Kad</th>
-                  <th class="p-3">Pemegang</th>
-                  <th class="p-3">Baki Sebenar TNG</th>
-                  <th class="p-3">Status Auto Top-Up (Threshold RM50)</th>
+                  <th class="p-3">Kenderaan Padanan</th>
+                  <th class="p-3">Pemegang Semasa</th>
                   <th class="p-3">Status Kad</th>
-                  <th class="p-3 text-center">Tindakan</th>
                 </tr>
               </thead>
               <tbody id="cardsTableBody"></tbody>
@@ -233,12 +224,12 @@
           </div>
         </section>
 
-        <!-- ANALISIS VIEW -->
+        <!-- LAPORAN VIEW -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 class="text-base font-bold text-slate-800">Laporan Analisis & Audit Kewangan KKM</h3>
-              <p class="text-xs text-slate-500">Saringan pergerakan kenderaan & perbelanjaan kad mengikut bulan</p>
+              <h3 class="text-base font-bold text-slate-800">Laporan Analisis Perbelanjaan Kad</h3>
+              <p class="text-xs text-slate-500">Saringan penggunaan Tol & Parkir mengikut bulan kewangan</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
               <select id="filterMonth" onchange="renderAnalyticsCharts()" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
@@ -330,18 +321,12 @@
                 </select>
               </div>
 
-              <div class="grid grid-cols-2 gap-4 bg-sky-50 p-4 rounded-xl border border-sky-100">
-                <div>
-                  <label class="block text-xs font-semibold text-hospital-800 mb-1">Kad TNG Padanan Auto</label>
-                  <input type="text" id="issueCardDisplay" readonly placeholder="Pilih kenderaan di atas" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-hospital-900">
-                  <input type="hidden" id="issueCardId">
-                  <input type="hidden" id="issueVehicleReg">
-                  <input type="hidden" id="issueVehicleId">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-hospital-800 mb-1">Baki Semasa Kad</label>
-                  <input type="text" id="issueCardBalance" readonly placeholder="BELUM DISEMAK" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-emerald-600">
-                </div>
+              <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+                <label class="block text-xs font-semibold text-hospital-800 mb-1">Kad TNG Padanan Auto</label>
+                <input type="text" id="issueCardDisplay" readonly placeholder="Pilih kenderaan di atas" class="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-sm font-bold text-hospital-900">
+                <input type="hidden" id="issueCardId">
+                <input type="hidden" id="issueVehicleReg">
+                <input type="hidden" id="issueVehicleId">
               </div>
 
               <div id="cardStatusWarning" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold"></div>
@@ -380,79 +365,30 @@
                 <select id="returnCardId" required onchange="updateReturnFormDetails()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm"></select>
               </div>
               
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
-                  <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-500 font-semibold">
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-1">Baki Sebelum Gunakan Kad</label>
-                  <input type="text" id="returnOriginalBalance" readonly placeholder="BELUM DISEMAK" class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-700 font-bold">
-                </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Pemegang Semasa</label>
+                <input type="text" id="returnHolderName" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl text-sm text-slate-500 font-semibold">
               </div>
 
               <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <h4 class="text-xs font-bold text-slate-700 uppercase">Rekod Amaun Penggunaan Kad</h4>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">TOL (RM)</label>
-                    <input type="number" step="0.01" min="0" id="returnTollAmount" value="0.00" oninput="calculateReturnBalance()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-hospital-500 outline-none">
+                    <input type="number" step="0.01" min="0" id="returnTollAmount" value="0.00" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-hospital-500 outline-none">
                   </div>
                   <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">PARKIR (RM)</label>
-                    <input type="number" step="0.01" min="0" id="returnParkingAmount" value="0.00" oninput="calculateReturnBalance()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-hospital-500 outline-none">
+                    <input type="number" step="0.01" min="0" id="returnParkingAmount" value="0.00" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-hospital-500 outline-none">
                   </div>
-                </div>
-
-                <div>
-                  <label class="block text-xs font-bold text-hospital-800 uppercase mb-1">BAKI KAD TNG ANGGARAN (RM)</label>
-                  <input type="text" id="returnCalculatedBalance" readonly placeholder="BELUM DISEMAK" class="w-full p-3 bg-white border border-slate-300 rounded-xl text-base font-bold text-slate-800 shadow-inner">
                 </div>
               </div>
 
-              <button type="submit" id="btnSubmitReturn" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold text-sm transition">Pulangkan Kad & Kemaskini Baki</button>
+              <button type="submit" id="btnSubmitReturn" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold text-sm transition">Pulangkan Kad & Rekodkan Penggunaan</button>
             </form>
           </div>
         </section>
       </main>
-    </div>
-  </div>
-
-  <!-- MODAL KEMAS KINI BAKI SEBENAR PORTAL TNG -->
-  <div id="modalUpdateBalance" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 m-4 border border-slate-100 space-y-4">
-      <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-bold text-base text-hospital-900"><i class="fa-solid fa-wallet text-hospital-500 mr-2"></i>Kemas Kini Baki Sebenar Portal TNG</h3>
-        <button onclick="closeBalanceModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-      </div>
-
-      <form id="formUpdateBalance" onsubmit="handleSaveBalanceSubmit(event)" class="space-y-4 text-xs">
-        <input type="hidden" id="modalCardId">
-        <div>
-          <label class="block font-semibold text-slate-600 mb-1">Kad TnG / No. Kenderaan</label>
-          <input type="text" id="modalCardDisplay" readonly class="w-full p-2.5 bg-slate-100 border rounded-xl font-bold text-slate-800">
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-600 mb-1">Baki Sebenar Dipaparkan di Portal TNG (RM)</label>
-          <input type="number" step="0.01" id="modalCardBalance" placeholder="Contoh: 512.36 (Kosongkan jika tiada baki)" class="w-full p-3 bg-white border border-slate-300 rounded-xl font-bold text-emerald-600 text-sm focus:ring-2 focus:ring-hospital-500 outline-none">
-          <p class="text-[11px] text-slate-400 mt-1">*Jika belum disahkan di portal, biarkan kosong untuk dikekalkan sebagai 'BELUM DISEMAK'.</p>
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-600 mb-1">Tarikh Semakan Portal</label>
-          <input type="date" id="modalCheckDate" required class="w-full p-2.5 bg-slate-50 border rounded-xl">
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-600 mb-1">Sumber Baki</label>
-          <select id="modalSource" class="w-full p-2.5 bg-slate-50 border rounded-xl font-semibold">
-            <option value="PORTAL_TNG">PORTAL_TNG (Portal Rasmi Touch 'n Go)</option>
-            <option value="STATEMENT_TNG">STATEMENT_TNG (Penyata Bulanan TNG)</option>
-            <option value="REKOD_MANUAL">REKOD_MANUAL (Resit Semakan)</option>
-          </select>
-        </div>
-        <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeBalanceModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-semibold">Batal</button>
-          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition">Disahkan & Simpan Baki</button>
-        </div>
-      </form>
     </div>
   </div>
 
@@ -462,9 +398,15 @@
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
     let chartPieInstance = null, chartVehicleInstance = null;
 
+    // VARIABEL PAGINATION KAD BELUM DIPULANGKAN
     let pendingCurrentPage = 1;
     const pendingPageSize = 10;
     let pendingCardsList = [];
+
+    // VARIABEL PAGINATION REKOD PENGGUNAAN KAD (MAKSIMUM 10 REKOD PER PAGE)
+    let usageCurrentPage = 1;
+    const usagePageSize = 10;
+    let usageCardsList = [];
 
     function callApi(action, payload = {}) {
       showLoading();
@@ -544,65 +486,29 @@
     }
 
     function renderDashboard() {
-      let totalConfirmedBal = 0;
       let availCount = 0, usedCount = 0;
-      let lowBalCount = 0, uncheckedBalCount = 0;
-
-      const lowBalBody = document.getElementById('dashLowBalBody');
-      lowBalBody.innerHTML = '';
-
       pendingCardsList = [];
 
       (dbData.cards || []).forEach(c => {
-        const rawBal = c.BAKI_SEMASA;
         const status = String(c.STATUS_KAD).toUpperCase();
-
         if (status === 'DALAM SIMPANAN') availCount++;
         if (status === 'SEDANG DIGUNAKAN') {
           usedCount++;
           pendingCardsList.push(c);
         }
-
-        if (rawBal !== "" && rawBal !== null && rawBal !== undefined && String(rawBal).toUpperCase() !== 'BELUM DISEMAK') {
-          const numericBal = parseFloat(rawBal);
-          if (!isNaN(numericBal)) {
-            totalConfirmedBal += numericBal;
-
-            if (numericBal < 50.00) {
-              lowBalCount++;
-              const v = (dbData.vehicles || []).find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
-              const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || c.ID_KAD);
-              
-              lowBalBody.innerHTML += `
-                <tr class="border-b border-slate-100">
-                  <td class="p-2 font-bold text-slate-700">${regNo}</td>
-                  <td class="p-2 text-slate-500">${c.ID_KAD}</td>
-                  <td class="p-2 text-right font-bold text-rose-600">RM ${numericBal.toFixed(2)}</td>
-                  <td class="p-2 text-center font-bold text-xs"><span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded">PERLU AUTO TOP-UP RM500</span></td>
-                </tr>
-              `;
-            }
-          } else {
-            uncheckedBalCount++;
-          }
-        } else {
-          uncheckedBalCount++;
-        }
       });
 
-      if (lowBalCount === 0) {
-        lowBalBody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">Tiada kad memerlukan Auto Top-Up (Semua Baki >= RM50.00)</td></tr>';
-      }
-
-      document.getElementById('dashTotalBalance').innerText = "RM " + totalConfirmedBal.toFixed(2);
       document.getElementById('dashCardsAvailable').innerText = availCount;
       document.getElementById('dashCardsInUse').innerText = usedCount;
-      document.getElementById('dashLowBalanceCount').innerText = lowBalCount;
-      document.getElementById('dashUncheckedBalanceCount').innerText = uncheckedBalCount;
       document.getElementById('badgePendingCount').innerText = usedCount + " Kad";
 
       pendingCurrentPage = 1;
       renderPendingCardsPage();
+
+      // RENDERING REKOD PENGGUNAAN KAD
+      prepareUsageCardsList();
+      usageCurrentPage = 1;
+      renderUsageCardsPage();
     }
 
     function renderPendingCardsPage() {
@@ -658,76 +564,107 @@
       renderPendingCardsPage();
     }
 
+    // FUNGSI PENYEDIAAN LIST PENGGUNAAN KAD (HANYA AMBIL TRANSAKSI PEMULANGAN / PENGGUNAAN)
+    function prepareUsageCardsList() {
+      usageCardsList = [];
+      (dbData.issues || []).forEach(iss => {
+        if (String(iss.JENIS_TRANSAKSI).toUpperCase() === 'PEMULANGAN') {
+          const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
+          const txt = String(iss.TUJUAN || "");
+          
+          let regNo = '-';
+          const vehMatch = txt.match(/\[(.*?)\]/);
+          if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
+
+          let tollAmt = 0.00, parkAmt = 0.00;
+          const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
+          const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
+
+          if (tollMatch) tollAmt = parseFloat(tollMatch[1]) || 0;
+          if (parkMatch) parkAmt = parseFloat(parkMatch[1]) || 0;
+
+          const totalUsage = tollAmt + parkAmt;
+
+          usageCardsList.push({
+            timestamp: iss.TIMESTAMP || '-',
+            driver: driverName,
+            vehicleReg: regNo,
+            cardId: iss.ID_KAD || '-',
+            purpose: txt.replace(/\(Tol:.*?\)/, '').trim(),
+            toll: tollAmt,
+            parking: parkAmt,
+            total: totalUsage
+          });
+        }
+      });
+
+      document.getElementById('badgeUsageCount').innerText = usageCardsList.length + " Rekod";
+    }
+
+    // FUNGSI RENDERING PAGINATION REKOD PENGGUNAAN KAD (MAKSIMUM 10 REKOD)
+    function renderUsageCardsPage() {
+      const tbody = document.getElementById('dashUsageCardsBody');
+      tbody.innerHTML = '';
+
+      const total = usageCardsList.length;
+      if (total === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod penggunaan kad ditemui.</td></tr>';
+        document.getElementById('usagePageInfo').innerText = "Menunjukkan 0 daripada 0 rekod";
+        document.getElementById('btnUsagePrev').disabled = true;
+        document.getElementById('btnUsageNext').disabled = true;
+        return;
+      }
+
+      const totalPages = Math.ceil(total / usagePageSize);
+      if (usageCurrentPage > totalPages) usageCurrentPage = totalPages;
+      if (usageCurrentPage < 1) usageCurrentPage = 1;
+
+      const start = (usageCurrentPage - 1) * usagePageSize;
+      const end = Math.min(start + usagePageSize, total);
+      const currentItems = usageCardsList.slice(start, end);
+
+      currentItems.forEach(u => {
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-100 hover:bg-sky-50/30 transition">
+            <td class="p-3 text-slate-500 font-medium">${u.timestamp}</td>
+            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-user-gear text-hospital-500 mr-2"></i>${u.driver}</td>
+            <td class="p-3 font-semibold text-slate-700">${u.vehicleReg} <span class="text-slate-400 text-[10px]">(${u.cardId})</span></td>
+            <td class="p-3 text-slate-600 max-w-xs truncate">${u.purpose}</td>
+            <td class="p-3 text-right font-semibold text-emerald-600">RM ${u.toll.toFixed(2)}</td>
+            <td class="p-3 text-right font-semibold text-amber-600">RM ${u.parking.toFixed(2)}</td>
+            <td class="p-3 text-right font-bold text-hospital-900">RM ${u.total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('usagePageInfo').innerText = `Menunjukkan ${start + 1} hingga ${end} daripada ${total} rekod (Halaman ${usageCurrentPage}/${totalPages})`;
+      document.getElementById('btnUsagePrev').disabled = (usageCurrentPage === 1);
+      document.getElementById('btnUsageNext').disabled = (usageCurrentPage === totalPages);
+    }
+
+    function changeUsagePage(dir) {
+      usageCurrentPage += dir;
+      renderUsageCardsPage();
+    }
+
     function renderCardsTable() {
       const tbody = document.getElementById('cardsTableBody');
       if (!tbody) return;
       tbody.innerHTML = '';
       dbData.cards.forEach(c => {
-        const rawBal = c.BAKI_SEMASA;
-        let balTxt = '<span class="text-slate-400 font-medium">BELUM DISEMAK</span>';
-        let statusAuto = '<span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]">BELUM DISEMAK</span>';
-
-        if (rawBal !== "" && rawBal !== null && rawBal !== undefined && String(rawBal).toUpperCase() !== 'BELUM DISEMAK') {
-          const num = parseFloat(rawBal);
-          if (!isNaN(num)) {
-            balTxt = `<span class="font-bold ${num < 50 ? 'text-rose-600' : 'text-emerald-600'}">RM ${num.toFixed(2)}</span>`;
-            if (num >= 50.00) {
-              statusAuto = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">TIADA AUTO TOP-UP</span>';
-            } else {
-              statusAuto = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">PERLU AUTO TOP-UP RM500</span>';
-            }
-          }
-        }
+        const v = (dbData.vehicles || []).find(veh => String(veh.ID_KENDERAAN) === String(c.ID_KENDERAAN));
+        const regNo = v ? v.NO_PENDAFTARAN : (c.NO_PENDAFTARAN || '-');
 
         tbody.innerHTML += `
           <tr class="border-b">
             <td class="p-3 font-bold">${c.ID_KAD}</td>
             <td class="p-3 font-mono">${c.NO_KAD_DISPLAY || c.NO_KAD}</td>
+            <td class="p-3 font-semibold">${regNo}</td>
             <td class="p-3">${c.PEMEGANG_SEMASA || '-'}</td>
-            <td class="p-3">${balTxt}</td>
-            <td class="p-3">${statusAuto}</td>
             <td class="p-3">${c.STATUS_KAD}</td>
-            <td class="p-3 text-center">
-              <button onclick="openBalanceModal('${c.ID_KAD}', '${c.NO_PENDAFTARAN || c.ID_KAD}', '${c.BAKI_SEMASA || ''}')" class="px-3 py-1 bg-hospital-500 hover:bg-hospital-800 text-white rounded-lg text-xs font-semibold transition">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> Kemas Kini Baki
-              </button>
-            </td>
           </tr>
         `;
       });
-    }
-
-    function openBalanceModal(idKad, display, currentBal) {
-      document.getElementById('modalCardId').value = idKad;
-      document.getElementById('modalCardDisplay').value = `${idKad} (${display})`;
-      document.getElementById('modalCardBalance').value = (currentBal && currentBal !== 'BELUM DISEMAK') ? currentBal : '';
-      document.getElementById('modalCheckDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('modalUpdateBalance').classList.remove('hidden');
-    }
-
-    function closeBalanceModal() {
-      document.getElementById('modalUpdateBalance').classList.add('hidden');
-    }
-
-    async function handleSaveBalanceSubmit(e) {
-      e.preventDefault();
-      const payload = {
-        idKad: document.getElementById('modalCardId').value,
-        bakiSemasa: document.getElementById('modalCardBalance').value,
-        tarikhSemakan: document.getElementById('modalCheckDate').value,
-        sumber: document.getElementById('modalSource').value,
-        idPengguna: currentUser.ID_PENGGUNA,
-        namaPengguna: currentUser.NAMA_PENGGUNA
-      };
-
-      const res = await callApi('updateCardBalance', payload);
-      if (res.success) {
-        showSuccess(res.message);
-        closeBalanceModal();
-        refreshData();
-      } else {
-        showError(res.message);
-      }
     }
 
     function renderAnalyticsCharts() {
@@ -891,15 +828,11 @@
 
       if (vehicle && card) {
         const regNo = vehicle.NO_PENDAFTARAN || '-';
-        const rawBal = card.BAKI_SEMASA;
-        const balTxt = (rawBal !== "" && rawBal !== null && String(rawBal).toUpperCase() !== 'BELUM DISEMAK' && !isNaN(parseFloat(rawBal))) ? 
-          "RM " + parseFloat(rawBal).toFixed(2) : "BELUM DISEMAK";
 
         document.getElementById('issueCardId').value = card.ID_KAD;
         document.getElementById('issueCardDisplay').value = `${card.NO_KAD_DISPLAY || card.NO_KAD} (${card.ID_KAD})`;
         document.getElementById('issueVehicleReg').value = regNo;
         document.getElementById('issueVehicleId').value = vehicle.ID_KENDERAAN;
-        document.getElementById('issueCardBalance').value = balTxt;
 
         const status = String(card.STATUS_KAD).toUpperCase();
         if (status === 'DALAM SIMPANAN') {
@@ -915,7 +848,6 @@
         document.getElementById('issueCardDisplay').value = 'Tiada Kad TNG Ditetapkan';
         document.getElementById('issueVehicleReg').value = vehicle.NO_PENDAFTARAN;
         document.getElementById('issueVehicleId').value = vehicle.ID_KENDERAAN;
-        document.getElementById('issueCardBalance').value = 'BELUM DISEMAK';
 
         warningDiv.innerText = `Amaran: Kenderaan ${vehicle.NO_PENDAFTARAN} belum dipadankan dengan mana-mana Kad Touch 'n Go.`;
         warningDiv.classList.remove('hidden');
@@ -925,7 +857,6 @@
         document.getElementById('issueCardDisplay').value = '';
         document.getElementById('issueVehicleReg').value = '';
         document.getElementById('issueVehicleId').value = '';
-        document.getElementById('issueCardBalance').value = '';
         warningDiv.classList.add('hidden');
         submitBtn.disabled = true;
       }
@@ -937,16 +868,9 @@
       const submitBtn = document.getElementById('btnSubmitReturn');
 
       if (card) {
-        const rawBal = card.BAKI_SEMASA;
-        const balTxt = (rawBal !== "" && rawBal !== null && String(rawBal).toUpperCase() !== 'BELUM DISEMAK' && !isNaN(parseFloat(rawBal))) ? 
-          "RM " + parseFloat(rawBal).toFixed(2) : "BELUM DISEMAK";
-
         document.getElementById('returnHolderName').value = card.PEMEGANG_SEMASA || '-';
-        document.getElementById('returnOriginalBalance').value = balTxt;
-        
         document.getElementById('returnTollAmount').value = "0.00";
         document.getElementById('returnParkingAmount').value = "0.00";
-        calculateReturnBalance();
 
         const isCurrentHolder = currentUser && (
           String(currentUser.NAMA_PENGGUNA).trim().toUpperCase() === String(card.PEMEGANG_SEMASA).trim().toUpperCase() || 
@@ -961,24 +885,6 @@
           submitBtn.disabled = false;
           submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
-      }
-    }
-
-    function calculateReturnBalance() {
-      const id = document.getElementById('returnCardId').value;
-      const card = dbData.cards.find(c => String(c.ID_KAD) === String(id));
-      if (!card) return;
-
-      const rawBal = card.BAKI_SEMASA;
-      const tollAmt = parseFloat(document.getElementById('returnTollAmount').value) || 0;
-      const parkAmt = parseFloat(document.getElementById('returnParkingAmount').value) || 0;
-
-      if (rawBal !== "" && rawBal !== null && String(rawBal).toUpperCase() !== 'BELUM DISEMAK' && !isNaN(parseFloat(rawBal))) {
-        const origBal = parseFloat(rawBal);
-        const newBal = origBal - (tollAmt + parkAmt);
-        document.getElementById('returnCalculatedBalance').value = "RM " + newBal.toFixed(2);
-      } else {
-        document.getElementById('returnCalculatedBalance').value = "BELUM DISEMAK";
       }
     }
 
