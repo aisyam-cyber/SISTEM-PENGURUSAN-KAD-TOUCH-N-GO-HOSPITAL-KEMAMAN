@@ -17,7 +17,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbyRY_ll181j4_hd1mcfOlOZJ6kprSHhmVhsTDNn6oTNaIQHKfhn-Q0p6PtqSE2JtaF3/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbwzWIo7ZC5kWVPL0oGI5uX2LEaP2WYrLvzR5DKbAQGsub4rtGBMk1mvxWnY7AU9jsI1hA/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -164,7 +164,7 @@
             </div>
           </div>
 
-          <!-- BAHARU: SENARAI REKOD PENGGUNAAN KAD TERKINI (PAGINATION 10/PAGE) -->
+          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (PAGINATION 10/PAGE) -->
           <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex items-center justify-between text-white">
               <div class="flex items-center gap-3">
@@ -268,7 +268,7 @@
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
               <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perjalanan</p>
               <p class="text-2xl font-bold text-sky-600 mt-1" id="anaTotalTrips">0 Perjalanan</p>
-              <span class="text-[11px] text-sky-500">Keluar / Masuk Kad</span>
+              <span class="text-[11px] text-sky-500">Pemulangan Kad Disahkan</span>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
               <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Kos Tol</p>
@@ -564,7 +564,7 @@
       renderPendingCardsPage();
     }
 
-    // FUNGSI PENYEDIAAN LIST PENGGUNAAN KAD (HANYA AMBIL TRANSAKSI PEMULANGAN / PENGGUNAAN)
+    // FUNGSI PENYEDIAAN LIST PENGGUNAAN KAD (HANYA AMBIL TRANSAKSI PEMULANGAN)
     function prepareUsageCardsList() {
       usageCardsList = [];
       (dbData.issues || []).forEach(iss => {
@@ -573,8 +573,17 @@
           const txt = String(iss.TUJUAN || "");
           
           let regNo = '-';
-          const vehMatch = txt.match(/\[(.*?)\]/);
-          if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
+          const cardObj = (dbData.cards || []).find(c => String(c.ID_KAD) === String(iss.ID_KAD));
+          if (cardObj) {
+            const vehObj = (dbData.vehicles || []).find(v => String(v.ID_KENDERAAN) === String(cardObj.ID_KENDERAAN));
+            if (vehObj) regNo = vehObj.NO_PENDAFTARAN;
+            else if (cardObj.NO_PENDAFTARAN) regNo = cardObj.NO_PENDAFTARAN;
+          }
+
+          if (regNo === '-' || !regNo) {
+            const vehMatch = txt.match(/\[(.*?)\]/);
+            if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
+          }
 
           let tollAmt = 0.00, parkAmt = 0.00;
           const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
@@ -667,6 +676,7 @@
       });
     }
 
+    // FUNGSI ANALITIK TERPERKEMAS (CARTA KENDERAAN DIPANDU DARI ID_KAD & VEHICLES)
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -677,6 +687,10 @@
 
       (dbData.issues || []).forEach(iss => {
         if (!iss.TIMESTAMP) return;
+
+        // TAPIS HANYA TRANSAKSI PEMULANGAN SAHAJA (1 Perjalanan = 1 Pemulangan)
+        if (String(iss.JENIS_TRANSAKSI).toUpperCase() !== 'PEMULANGAN') return;
+
         const parts = String(iss.TIMESTAMP).split('/');
         if (parts.length >= 3) {
           const m = parts[1].padStart(2, '0');
@@ -685,17 +699,32 @@
           if ((selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear) {
             totalTrips++;
 
+            // 1. Dapatkan Nama Pemandu
             const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
             driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
 
-            const txt = String(iss.TUJUAN || "");
-            const vehMatch = txt.match(/\[(.*?)\]/);
-            
-            if (vehMatch && vehMatch[1] && vehMatch[1].trim() !== '-' && vehMatch[1].trim() !== '') {
-              const regNo = vehMatch[1].trim();
+            // 2. Dapatkan No Kenderaan berdasarkan ID_KAD
+            let regNo = '-';
+            const cardObj = (dbData.cards || []).find(c => String(c.ID_KAD) === String(iss.ID_KAD));
+            if (cardObj) {
+              const vehObj = (dbData.vehicles || []).find(v => String(v.ID_KENDERAAN) === String(cardObj.ID_KENDERAAN));
+              if (vehObj) regNo = vehObj.NO_PENDAFTARAN;
+              else if (cardObj.NO_PENDAFTARAN) regNo = cardObj.NO_PENDAFTARAN;
+            }
+
+            // Jika tidak jumpa melalui cardObj, baca kurungan [...] dari TUJUAN
+            if (regNo === '-' || !regNo) {
+              const txt = String(iss.TUJUAN || "");
+              const vehMatch = txt.match(/\[(.*?)\]/);
+              if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
+            }
+
+            if (regNo !== '-' && regNo !== '') {
               vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
             }
 
+            // 3. Pengiraan Tol & Parkir
+            const txt = String(iss.TUJUAN || "");
             const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
             const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
 
@@ -753,7 +782,7 @@
       const driverKeys = Object.keys(driverTripCounts);
 
       if (driverKeys.length === 0) {
-        driverBody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada pergerakan direkodkan untuk tempoh ini</td></tr>';
+        driverBody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada rekod pemandu</td></tr>';
       } else {
         driverKeys.forEach(drv => {
           const userObj = (dbData.users || []).find(u => u.NAMA_PENGGUNA === drv);
