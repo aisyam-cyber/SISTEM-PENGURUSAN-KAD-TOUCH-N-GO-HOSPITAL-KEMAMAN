@@ -676,7 +676,7 @@
       });
     }
 
-    // FUNGSI ANALITIK TERPERKEMAS (CARTA KENDERAAN DIPANDU DARI ID_KAD & VEHICLES)
+    // FUNGSI ANALITIK TERPERKEMAS
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -814,6 +814,7 @@
         });
       }
 
+      // 1. DROPDOWN PENYELIA: HANYA PENYELIA & ADMIN
       const supervisorSelect = document.getElementById('issueSupervisorId');
       if (supervisorSelect) {
         supervisorSelect.innerHTML = '<option value="">-- Pilih Nama Penyelia --</option>';
@@ -826,10 +827,20 @@
         });
       }
 
+      // 2. DROPDOWN PEMANDU: HANYA KAKITANGAN BERJAWATAN/PERANAN PEMANDU SAHAJA
       const userSelect = document.getElementById('issueUserId');
       if (userSelect) {
         userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
-        (dbData.users || []).filter(u => String(u.STATUS).toUpperCase() === 'AKTIF').forEach(u => {
+        
+        const driversOnly = (dbData.users || []).filter(u => {
+          const isAktif = String(u.STATUS).toUpperCase() === 'AKTIF';
+          const isPemanduJawatan = String(u.JAWATAN || "").toUpperCase().includes('PEMANDU');
+          const isPemanduPeranan = String(u.PERANAN || "").toUpperCase().includes('PEMANDU') || String(u.PERANAN || "").toUpperCase() === 'USER';
+          
+          return isAktif && (isPemanduJawatan || isPemanduPeranan);
+        });
+
+        driversOnly.forEach(u => {
           userSelect.innerHTML += `<option value="${u.ID_PENGGUNA}">${u.NAMA_PENGGUNA} (${u.ID_PENGGUNA})</option>`;
         });
         
