@@ -17,7 +17,8 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbwzWIo7ZC5kWVPL0oGI5uX2LEaP2WYrLvzR5DKbAQGsub4rtGBMk1mvxWnY7AU9jsI1hA/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbwzWIo7ZC5kWVPL0oGI5uX2LEaP2WYrLvzR5DKbAQGsub4rtGBMk1mvxWnY7AU9jsI1hA/exec
+";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -164,9 +165,9 @@
             </div>
           </div>
 
-          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (PAGINATION 10/PAGE) -->
+          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (DENGAN FILTER BULAN & TAHUN + PAGINATION 10/PAGE) -->
           <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
-            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold"><i class="fa-solid fa-receipt text-lg"></i></div>
                 <div>
@@ -174,7 +175,36 @@
                   <p class="text-xs text-sky-200">Sejarah penggunaan tol, parkir, pemandu dan tujuan tugasan</p>
                 </div>
               </div>
-              <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/20" id="badgeUsageCount">0 Rekod</span>
+              
+              <!-- DROPDOWN FILTER BULAN & TAHUN -->
+              <div class="flex flex-wrap items-center gap-2">
+                <select id="dashUsageMonth" onchange="filterDashUsageList()" class="px-3 py-1.5 bg-white/10 text-white rounded-xl text-xs font-semibold border border-white/20 outline-none cursor-pointer focus:bg-hospital-900">
+                  <option value="ALL" class="text-slate-800">-- Semua Bulan --</option>
+                  <option value="01" class="text-slate-800">Januari</option>
+                  <option value="02" class="text-slate-800">Februari</option>
+                  <option value="03" class="text-slate-800">Mac</option>
+                  <option value="04" class="text-slate-800">April</option>
+                  <option value="05" class="text-slate-800">Mei</option>
+                  <option value="06" class="text-slate-800">Jun</option>
+                  <option value="07" class="text-slate-800">Julai</option>
+                  <option value="08" class="text-slate-800">Ogos</option>
+                  <option value="09" class="text-slate-800">September</option>
+                  <option value="10" class="text-slate-800">Oktober</option>
+                  <option value="11" class="text-slate-800">November</option>
+                  <option value="12" class="text-slate-800">Disember</option>
+                </select>
+
+                <select id="dashUsageYear" onchange="filterDashUsageList()" class="px-3 py-1.5 bg-white/10 text-white rounded-xl text-xs font-semibold border border-white/20 outline-none cursor-pointer focus:bg-hospital-900">
+                  <option value="2026" class="text-slate-800">2026</option>
+                  <option value="2025" class="text-slate-800">2025</option>
+                </select>
+
+                <button onclick="resetDashUsageFilter()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-semibold transition" title="Reset Filter">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+
+                <span class="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-xl text-xs font-bold text-white border border-white/20 ml-1" id="badgeUsageCount">0 Rekod</span>
+              </div>
             </div>
 
             <div class="p-4 overflow-x-auto">
@@ -403,10 +433,11 @@
     const pendingPageSize = 10;
     let pendingCardsList = [];
 
-    // VARIABEL PAGINATION REKOD PENGGUNAAN KAD (MAKSIMUM 10 REKOD PER PAGE)
+    // VARIABEL PAGINATION REKOD PENGGUNAAN KAD (DENGAN FILTER)
     let usageCurrentPage = 1;
     const usagePageSize = 10;
-    let usageCardsList = [];
+    let allUsageCardsList = [];
+    let filteredUsageCardsList = [];
 
     function callApi(action, payload = {}) {
       showLoading();
@@ -507,8 +538,7 @@
 
       // RENDERING REKOD PENGGUNAAN KAD
       prepareUsageCardsList();
-      usageCurrentPage = 1;
-      renderUsageCardsPage();
+      filterDashUsageList();
     }
 
     function renderPendingCardsPage() {
@@ -564,9 +594,9 @@
       renderPendingCardsPage();
     }
 
-    // FUNGSI PENYEDIAAN LIST PENGGUNAAN KAD (HANYA AMBIL TRANSAKSI PEMULANGAN)
+    // FUNGSI PENYEDIAAN KESELURUHAN LIST PENGGUNAAN KAD
     function prepareUsageCardsList() {
-      usageCardsList = [];
+      allUsageCardsList = [];
       (dbData.issues || []).forEach(iss => {
         if (String(iss.JENIS_TRANSAKSI).toUpperCase() === 'PEMULANGAN') {
           const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
@@ -594,7 +624,7 @@
 
           const totalUsage = tollAmt + parkAmt;
 
-          usageCardsList.push({
+          allUsageCardsList.push({
             timestamp: iss.TIMESTAMP || '-',
             driver: driverName,
             vehicleReg: regNo,
@@ -606,8 +636,33 @@
           });
         }
       });
+    }
 
-      document.getElementById('badgeUsageCount').innerText = usageCardsList.length + " Rekod";
+    // FUNGSI FILTER REKOD PENGGUNAAN BERDASARKAN BULAN & TAHUN TERPILIH
+    function filterDashUsageList() {
+      const selectedMonth = document.getElementById('dashUsageMonth').value;
+      const selectedYear = document.getElementById('dashUsageYear').value;
+
+      filteredUsageCardsList = allUsageCardsList.filter(item => {
+        if (!item.timestamp || item.timestamp === '-') return false;
+        const parts = String(item.timestamp).split('/');
+        if (parts.length >= 3) {
+          const m = parts[1].padStart(2, '0');
+          const y = parts[2].split(',')[0].trim();
+          return (selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear;
+        }
+        return false;
+      });
+
+      document.getElementById('badgeUsageCount').innerText = filteredUsageCardsList.length + " Rekod";
+      usageCurrentPage = 1;
+      renderUsageCardsPage();
+    }
+
+    function resetDashUsageFilter() {
+      document.getElementById('dashUsageMonth').value = 'ALL';
+      document.getElementById('dashUsageYear').value = '2026';
+      filterDashUsageList();
     }
 
     // FUNGSI RENDERING PAGINATION REKOD PENGGUNAAN KAD (MAKSIMUM 10 REKOD)
@@ -615,9 +670,9 @@
       const tbody = document.getElementById('dashUsageCardsBody');
       tbody.innerHTML = '';
 
-      const total = usageCardsList.length;
+      const total = filteredUsageCardsList.length;
       if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod penggunaan kad ditemui.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod penggunaan kad ditemui bagi tempoh ini.</td></tr>';
         document.getElementById('usagePageInfo').innerText = "Menunjukkan 0 daripada 0 rekod";
         document.getElementById('btnUsagePrev').disabled = true;
         document.getElementById('btnUsageNext').disabled = true;
@@ -630,7 +685,7 @@
 
       const start = (usageCurrentPage - 1) * usagePageSize;
       const end = Math.min(start + usagePageSize, total);
-      const currentItems = usageCardsList.slice(start, end);
+      const currentItems = filteredUsageCardsList.slice(start, end);
 
       currentItems.forEach(u => {
         tbody.innerHTML += `
