@@ -9,14 +9,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
-    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Poppins', 'sans-serif'] }, colors: { hospital: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 800: '#075985', 900: '#0c4a6e' }, navy: { 800: '#1e293b', 900: '#0f172a' } } } } }
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Poppins', 'sans-serif'] },
+          colors: {
+            hospital: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 800: '#075985', 900: '#0c4a6e' },
+            navy: { 800: '#1e293b', 900: '#0f172a' }
+          }
+        }
+      }
+    };
   </script>
   <style>
-    .custom-scrollbar::-webkit-scrollbar{width:6px}
-    .custom-scrollbar::-webkit-scrollbar-track{background:#f1f1f1}
-    .custom-scrollbar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-    /* GAYA KHAS FORMAT CETAKAN AUDIT RASMI */
     @media print {
       body { background: white !important; color: black !important; padding: 0 !important; font-size: 9pt !important; }
       #sidebar, header, #loginScreen, #loadingOverlay, #toastContainer, .no-print,
@@ -304,7 +313,6 @@
 
         <!-- PAPARAN ANALISIS & LAPORAN AUDIT MESRA JURUAUDIT -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
-          <!-- HEADER CETAKAN AUDIT (HANYA KELIHATAN PADA CETAKAN) -->
           <div class="audit-print-header hidden">
             <h1 class="text-xl font-bold uppercase tracking-wider">HOSPITAL KEMAMAN</h1>
             <h2 class="text-sm font-semibold uppercase text-slate-700">PENYATA AUDIT & REKOD PERBELANJAAN KAD TOUCH 'N GO</h2>
@@ -394,7 +402,7 @@
           <div class="chart-container grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm md:col-span-2">
               <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-chart-line text-hospital-500 mr-2"></i>Trend Perbelanjaan Bulanan Sepanjang Tahun (RM)</h4>
-              <canvas id="chartMonthlyTrend" class="max-h-56"></canvas>
+              <div class="h-56 relative"><canvas id="chartMonthlyTrend"></canvas></div>
             </div>
 
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
@@ -406,7 +414,7 @@
           <div class="chart-container grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
               <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-truck-medical text-sky-500 mr-2"></i>Kekerapan Perjalanan Mengikut Kenderaan</h4>
-              <canvas id="chartTopVehicles" class="max-h-52"></canvas>
+              <div class="h-52 relative"><canvas id="chartTopVehicles"></canvas></div>
             </div>
 
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
@@ -940,7 +948,7 @@
       });
     }
 
-    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP
+    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP (PADANAN LAJUR H: NAMA_PEGAWAI_PENYERAH)
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -961,7 +969,6 @@
           const y = parts[2].split(',')[0].trim();
           const monthIdx = parseInt(m, 10) - 1;
 
-          // Kiraan amaun tol dan parkir
           const txt = String(iss.TUJUAN || "");
           const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
           const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
@@ -971,12 +978,10 @@
           const itemPark = parkMatch ? parseFloat(parkMatch[1]) || 0 : 0;
           const itemBaki = bakiMatch ? parseFloat(bakiMatch[1]) || 0 : 0;
 
-          // Kumpul data trend tahunan (berdasarkan tahun yang dipilih)
           if (y === selectedYear && monthIdx >= 0 && monthIdx < 12) {
             monthlyExpenseTotals[monthIdx] += (itemToll + itemPark);
           }
 
-          // Tapis data bagi bulan dan tahun audit
           if ((selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear) {
             totalTrips++;
             totalToll += itemToll;
@@ -1002,7 +1007,7 @@
               vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
             }
 
-            // Dapatkan Pegawai Penyerah (Penyelia) & Destinasi dari rekod PENGELUARAN asal
+            // PADANAN TEPAT: Membaca lajur H (NAMA_PEGAWAI_PENYERAH) dari tab ISSUES
             let supervisorName = '-';
             let destinasi = 'Tugasan Rasmi';
             const origIssue = (dbData.issues || []).find(o => 
@@ -1012,7 +1017,7 @@
             );
 
             if (origIssue) {
-              supervisorName = origIssue.CATATAN || origIssue.ID_PENGGUNA || 'Penyelia Bertugas';
+              supervisorName = origIssue.NAMA_PEGAWAI_PENYERAH || origIssue.PEGAWAI_PENYERAH || origIssue.ID_PEGAWAI_PENYERAH || 'Penyelia Bertugas';
               if (origIssue.TUJUAN) destinasi = String(origIssue.TUJUAN).replace(/\[.*?\]/, '').trim();
             }
 
@@ -1030,7 +1035,6 @@
         }
       });
 
-      // Kiraan baki keseluruhan kad hospital (Float Balance)
       let fleetTotalBalance = 0;
       (dbData.cards || []).forEach(c => {
         fleetTotalBalance += (parseFloat(c.BAKI_SEMASA) || 0);
@@ -1039,7 +1043,6 @@
       const grandTotal = totalToll + totalPark;
       const avgCostPerTrip = totalTrips > 0 ? (grandTotal / totalTrips) : 0;
 
-      // Papar pada Kad KPI Eksekutif
       document.getElementById('anaTotalCost').innerText = "RM " + grandTotal.toFixed(2);
       document.getElementById('anaTotalTrips').innerText = totalTrips.toString();
       document.getElementById('anaAvgCost').innerText = "RM " + avgCostPerTrip.toFixed(2);
@@ -1047,7 +1050,7 @@
       document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
       document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
 
-      // CARTA 1: TREND BULANAN SEPANJANG TAHUN (LINE CHART)
+      // CARTA 1: TREND BULANAN SEPANJANG TAHUN
       const ctxTrend = document.getElementById('chartMonthlyTrend').getContext('2d');
       if (chartTrendInstance) chartTrendInstance.destroy();
       chartTrendInstance = new Chart(ctxTrend, {
@@ -1073,7 +1076,7 @@
         }
       });
 
-      // CARTA 2: NISBAH BELANJA (DOUGHNUT)
+      // CARTA 2: NISBAH BELANJA
       const ctxPie = document.getElementById('chartCostBreakdown').getContext('2d');
       if (chartPieInstance) chartPieInstance.destroy();
       chartPieInstance = new Chart(ctxPie, {
@@ -1088,7 +1091,7 @@
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
 
-      // CARTA 3: KEKERAPAN KENDERAAN (BAR CHART)
+      // CARTA 3: KEKERAPAN KENDERAAN
       const vehLabels = Object.keys(vehicleTripCounts);
       const vehData = Object.values(vehicleTripCounts);
       const ctxVeh = document.getElementById('chartTopVehicles').getContext('2d');
@@ -1137,7 +1140,7 @@
       document.getElementById('auditRowCount').innerText = `${auditTrailRecords.length} Transaksi Disahkan`;
 
       if (auditTrailRecords.length === 0) {
-        auditTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod perbelanjaan ditemui bagi tempoh audit ini.</td></tr>';
+        auditTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod audit ditemui bagi tempoh audit ini.</td></tr>';
       } else {
         auditTrailRecords.forEach(r => {
           auditTbody.innerHTML += `
@@ -1145,7 +1148,7 @@
               <td class="p-2.5 text-slate-500 font-medium">${r.timestamp}</td>
               <td class="p-2.5 font-bold text-slate-800">${r.vehicleCard}</td>
               <td class="p-2.5 font-semibold text-slate-700">${r.driver}</td>
-              <td class="p-2.5 text-slate-600">${r.supervisor}</td>
+              <td class="p-2.5 text-slate-800 font-medium">${r.supervisor}</td>
               <td class="p-2.5 text-slate-600 max-w-xs truncate">${r.destination}</td>
               <td class="p-2.5 text-right font-semibold text-emerald-600">RM ${r.toll.toFixed(2)}</td>
               <td class="p-2.5 text-right font-semibold text-amber-600">RM ${r.parking.toFixed(2)}</td>
@@ -1156,7 +1159,6 @@
       }
     }
 
-    // FUNGSI CETAK LAPORAN AUDIT RASMI (LENGKAP COP & TANDATANGAN)
     function printOfficialAuditReport() {
       const monthSelect = document.getElementById('filterMonth');
       const yearSelect = document.getElementById('filterYear');
@@ -1337,8 +1339,13 @@
       };
 
       const res = await callApi('issueCard', payload);
-      if (res.success) { showSuccess(res.message); refreshData(); switchTab('dashboard'); }
-      else showError(res.message);
+      if (res.success) {
+        showSuccess(res.message);
+        refreshData();
+        switchTab('dashboard');
+      } else {
+        showError(res.message);
+      }
     }
 
     async function handleReturnCardSubmit(e) {
@@ -1359,8 +1366,13 @@
       };
 
       const res = await callApi('returnCard', payload);
-      if (res.success) { showSuccess(res.message); refreshData(); switchTab('dashboard'); }
-      else showError(res.message);
+      if (res.success) {
+        showSuccess(res.message);
+        refreshData();
+        switchTab('dashboard');
+      } else {
+        showError(res.message);
+      }
     }
 
     function switchTab(tabId) {
