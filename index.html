@@ -11,7 +11,24 @@
   <script>
     tailwind.config = { theme: { extend: { fontFamily: { sans: ['Poppins', 'sans-serif'] }, colors: { hospital: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 800: '#075985', 900: '#0c4a6e' }, navy: { 800: '#1e293b', 900: '#0f172a' } } } } }
   </script>
-  <style>.custom-scrollbar::-webkit-scrollbar{width:6px}.custom-scrollbar::-webkit-scrollbar-track{background:#f1f1f1}.custom-scrollbar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}</style>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar{width:6px}
+    .custom-scrollbar::-webkit-scrollbar-track{background:#f1f1f1}
+    .custom-scrollbar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+
+    /* GAYA KHAS UNTUK CETAKAN BULANAN (PRINT STYLES) */
+    @media print {
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      #sidebar, header, #loginScreen, #loadingOverlay, #toastContainer, .no-print,
+      #view-cards, #view-bakiKad, #view-analytics, #view-issueCard, #view-returnCard,
+      .bg-gradient-to-r, .grid { display: none !important; }
+      #printAreaUsage { border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+      #printAreaUsage table { width: 100% !important; border-collapse: collapse !important; font-size: 10pt !important; }
+      #printAreaUsage th, #printAreaUsage td { border: 1px solid #999 !important; padding: 6px 8px !important; color: black !important; }
+      #printAreaUsage thead { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+      #printHeaderTitle { display: block !important; margin-bottom: 12px; }
+    }
+  </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -166,14 +183,20 @@
             </div>
           </div>
 
-          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI -->
-          <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
-            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
+          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (DENGAN DESTINASI & BUTANG CETAK BULANAN) -->
+          <div id="printAreaUsage" class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
+            <!-- HEADER KHAS CETAKAN (HANYA KELIHATAN SEMASA CETAK PDF) -->
+            <div id="printHeaderTitle" class="hidden text-center p-4 border-b">
+              <h2 class="text-base font-bold text-slate-900">HOSPITAL KEMAMAN - REKOD PENGGUNAAN KAD TOUCH 'N GO</h2>
+              <p class="text-xs text-slate-600" id="printSubTitle">Laporan Penggunaan Tol, Parkir & Baki Terkini</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white no-print">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold"><i class="fa-solid fa-receipt text-lg"></i></div>
                 <div>
                   <h3 class="font-bold text-sm uppercase tracking-wide">Rekod Penggunaan Kad & Perbelanjaan</h3>
-                  <p class="text-xs text-sky-200">Sejarah penggunaan tol, parkir, pemandu dan baki terkini</p>
+                  <p class="text-xs text-sky-200">Sejarah penggunaan tol, parkir, pemandu, destinasi dan baki</p>
                 </div>
               </div>
               
@@ -203,6 +226,11 @@
                   <i class="fa-solid fa-rotate-left"></i>
                 </button>
 
+                <!-- BUTANG CETAK BULANAN -->
+                <button onclick="printMonthlyUsageReport()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow" title="Cetak Rekod Bulan Ini">
+                  <i class="fa-solid fa-print"></i> Cetak Laporan
+                </button>
+
                 <span class="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-xl text-xs font-bold text-white border border-white/20 ml-1" id="badgeUsageCount">0 Rekod</span>
               </div>
             </div>
@@ -213,8 +241,8 @@
                   <tr>
                     <th class="p-3">Tarikh & Masa</th>
                     <th class="p-3">Pemandu</th>
-                    <th class="p-3">Kenderaan / ID Kad</th>
-                    <th class="p-3">Tujuan Tugasan</th>
+                    <th class="p-3">Kenderaan</th>
+                    <th class="p-3">Destinasi Tugasan</th>
                     <th class="p-3 text-right">Tol (RM)</th>
                     <th class="p-3 text-right">Parkir (RM)</th>
                     <th class="p-3 text-right">Baki Kad (RM)</th>
@@ -226,7 +254,7 @@
               </table>
             </div>
 
-            <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500">
+            <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500 no-print">
               <span id="usagePageInfo">Menunjukkan 0 daripada 0 rekod</span>
               <div class="flex gap-2">
                 <button onclick="changeUsagePage(-1)" id="btnUsagePrev" disabled class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">Sebelumnya</button>
@@ -408,7 +436,7 @@
                 <input type="text" id="issuePurpose" required placeholder="Contoh: Tugasan Rasmi ke HSB" class="w-full p-2.5 bg-slate-50 border rounded-xl text-sm">
               </div>
 
-              <button type="submit" id="btnSubmitIssue" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition">Ambil Kad</button>
+              <button type="submit" id="btnSubmitIssue" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition">Serahkan Kad</button>
             </form>
           </div>
         </section>
@@ -464,7 +492,7 @@
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
     let chartPieInstance = null, chartVehicleInstance = null;
 
-    let initialCardBalance = 0; // Pembolehubah menyimpan baki asal kad sebelum tolak
+    let initialCardBalance = 0;
 
     let pendingCurrentPage = 1;
     const pendingPageSize = 10;
@@ -634,6 +662,7 @@
       renderPendingCardsPage();
     }
 
+    // FUNGSI PENYEDIAAN LIST PENGGUNAAN KAD (DENGAN DESTINASI TUGASAN)
     function prepareUsageCardsList() {
       allUsageCardsList = [];
       (dbData.issues || []).forEach(iss => {
@@ -663,12 +692,27 @@
           if (parkMatch) parkAmt = parseFloat(parkMatch[1]) || 0;
           if (bakiMatch) bakiAmt = parseFloat(bakiMatch[1]) || 0;
 
+          // Dapatkan Destinasi daripada rekod Pengeluaran yang berkaitan
+          let destinationText = '-';
+          const issueMatch = (dbData.issues || []).find(orig => 
+            String(orig.ID_KAD) === String(iss.ID_KAD) && 
+            String(orig.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN' &&
+            String(orig.NAMA_PENGGUNA) === String(iss.NAMA_PENGGUNA)
+          );
+
+          if (issueMatch && issueMatch.TUJUAN) {
+            destinationText = String(issueMatch.TUJUAN).replace(/\[.*?\]/, '').trim();
+          } else {
+            destinationText = txt.replace(/Pemulangan kad/i, '').replace(/\(Tol:.*?\)/i, '').replace(/\[.*?\]/, '').trim();
+          }
+          if (!destinationText || destinationText === '') destinationText = 'Tugasan Rasmi';
+
           allUsageCardsList.push({
             timestamp: iss.TIMESTAMP || '-',
             driver: driverName,
             vehicleReg: regNo,
             cardId: iss.ID_KAD || '-',
-            purpose: txt.replace(/\(Tol:.*?\)/, '').trim(),
+            destination: destinationText,
             toll: tollAmt,
             parking: parkAmt,
             balance: bakiAmt
@@ -730,7 +774,7 @@
             <td class="p-3 text-slate-500 font-medium">${u.timestamp}</td>
             <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-user-gear text-hospital-500 mr-2"></i>${u.driver}</td>
             <td class="p-3 font-semibold text-slate-700">${u.vehicleReg} <span class="text-slate-400 text-[10px]">(${u.cardId})</span></td>
-            <td class="p-3 text-slate-600 max-w-xs truncate">${u.purpose}</td>
+            <td class="p-3 text-slate-700 font-medium max-w-xs truncate" title="${u.destination}">${u.destination}</td>
             <td class="p-3 text-right font-semibold text-emerald-600">RM ${u.toll.toFixed(2)}</td>
             <td class="p-3 text-right font-semibold text-amber-600">RM ${u.parking.toFixed(2)}</td>
             <td class="p-3 text-right font-bold text-hospital-900">RM ${u.balance.toFixed(2)}</td>
@@ -745,6 +789,46 @@
 
     function changeUsagePage(dir) {
       usageCurrentPage += dir;
+      renderUsageCardsPage();
+    }
+
+    // FUNGSI KHAS CETAK REKOD BULANAN
+    function printMonthlyUsageReport() {
+      const monthSelect = document.getElementById('dashUsageMonth');
+      const yearSelect = document.getElementById('dashUsageYear');
+      const monthName = monthSelect.options[monthSelect.selectedIndex].text;
+      const yearVal = yearSelect.value;
+
+      document.getElementById('printSubTitle').innerText = `Laporan Bulan: ${monthName} ${yearVal} (Hospital Kemaman)`;
+
+      // Paparkan SEMUA rekod bulan ini semasa cetak (bukan terhad 10 rekod pagination)
+      const tbody = document.getElementById('dashUsageCardsBody');
+      const originalHTML = tbody.innerHTML;
+
+      if (filteredUsageCardsList.length === 0) {
+        showError("Tiada rekod untuk dicetak bagi bulan ini.");
+        return;
+      }
+
+      tbody.innerHTML = '';
+      filteredUsageCardsList.forEach(u => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${u.timestamp}</td>
+            <td><b>${u.driver}</b></td>
+            <td>${u.vehicleReg} (${u.cardId})</td>
+            <td>${u.destination}</td>
+            <td style="text-align:right;">RM ${u.toll.toFixed(2)}</td>
+            <td style="text-align:right;">RM ${u.parking.toFixed(2)}</td>
+            <td style="text-align:right;"><b>RM ${u.balance.toFixed(2)}</b></td>
+          </tr>
+        `;
+      });
+
+      window.print();
+
+      // Kembalikan paparan asal pagination selepas cetak
+      tbody.innerHTML = originalHTML;
       renderUsageCardsPage();
     }
 
@@ -1076,13 +1160,12 @@
       }
     }
 
-    // FUNGSI AUTO-KIRA BAKI BAHARU (Baki Terakhir - Tol - Parkir)
     function autoCalculateBalance() {
       const tollAmt = parseFloat(document.getElementById('returnTollAmount').value) || 0;
       const parkAmt = parseFloat(document.getElementById('returnParkingAmount').value) || 0;
 
       let newBalance = initialCardBalance - (tollAmt + parkAmt);
-      if (newBalance < 0) newBalance = 0; // Elak baki menjadi negatif secara automatik
+      if (newBalance < 0) newBalance = 0;
 
       document.getElementById('returnCardBalance').value = newBalance.toFixed(2);
     }
