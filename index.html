@@ -16,17 +16,20 @@
     .custom-scrollbar::-webkit-scrollbar-track{background:#f1f1f1}
     .custom-scrollbar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
 
-    /* GAYA KHAS UNTUK CETAKAN BULANAN (PRINT STYLES) */
+    /* GAYA KHAS FORMAT CETAKAN AUDIT RASMI */
     @media print {
-      body { background: white !important; color: black !important; padding: 0 !important; }
+      body { background: white !important; color: black !important; padding: 0 !important; font-size: 9pt !important; }
       #sidebar, header, #loginScreen, #loadingOverlay, #toastContainer, .no-print,
-      #view-cards, #view-bakiKad, #view-analytics, #view-issueCard, #view-returnCard,
-      .bg-gradient-to-r, .grid { display: none !important; }
-      #printAreaUsage { border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-      #printAreaUsage table { width: 100% !important; border-collapse: collapse !important; font-size: 10pt !important; }
-      #printAreaUsage th, #printAreaUsage td { border: 1px solid #999 !important; padding: 6px 8px !important; color: black !important; }
-      #printAreaUsage thead { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
-      #printHeaderTitle { display: block !important; margin-bottom: 12px; }
+      #view-dashboard, #view-cards, #view-bakiKad, #view-issueCard, #view-returnCard,
+      .filter-container, .chart-container { display: none !important; }
+      #view-analytics { display: block !important; padding: 0 !important; }
+      .audit-print-header { display: block !important; text-align: center; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+      .audit-table { width: 100% !important; border-collapse: collapse !important; margin-top: 10px !important; }
+      .audit-table th, .audit-table td { border: 1px solid #444 !important; padding: 5px 6px !important; color: black !important; }
+      .audit-table thead { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+      .audit-kpi-summary { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; margin-bottom: 15px !important; }
+      .audit-kpi-card { border: 1px solid #888 !important; padding: 8px !important; text-align: center !important; }
+      .audit-signature-box { display: flex !important; justify-content: space-between !important; margin-top: 35px !important; page-break-inside: avoid; }
     }
   </style>
 </head>
@@ -87,7 +90,7 @@
           <button onclick="switchTab('issueCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="issueCard"><i class="fa-solid fa-hand-holding w-5 text-emerald-400"></i> Ambil Kad</button>
           <button onclick="switchTab('returnCard')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="returnCard"><i class="fa-solid fa-box-archive w-5 text-amber-400"></i> Pulangkan Kad</button>
           <button onclick="switchTab('bakiKad')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="bakiKad"><i class="fa-solid fa-wallet w-5 text-emerald-400"></i> Semak Baki Kad</button>
-          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-chart-line w-5 text-sky-400"></i> Laporan Penggunaan</button>
+          <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-left" data-tab="analytics"><i class="fa-solid fa-file-invoice-dollar w-5 text-sky-400"></i> Laporan Audit & Kos</button>
         </nav>
       </div>
       <div class="p-4 border-t border-slate-800">
@@ -96,7 +99,7 @@
     </aside>
 
     <div class="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
-      <header class="bg-white border-b px-6 py-4 flex items-center justify-between shadow-sm z-10">
+      <header class="bg-white border-b px-6 py-4 flex items-center justify-between shadow-sm z-10 no-print">
         <div class="flex items-center gap-4">
           <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-600"><i class="fa-solid fa-bars text-xl"></i></button>
           <h1 id="pageTitle" class="text-lg font-bold text-slate-800">Dashboard Utama</h1>
@@ -183,15 +186,9 @@
             </div>
           </div>
 
-          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (DENGAN DESTINASI & BUTANG CETAK BULANAN) -->
-          <div id="printAreaUsage" class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
-            <!-- HEADER KHAS CETAKAN (HANYA KELIHATAN SEMASA CETAK PDF) -->
-            <div id="printHeaderTitle" class="hidden text-center p-4 border-b">
-              <h2 class="text-base font-bold text-slate-900">HOSPITAL KEMAMAN - REKOD PENGGUNAAN KAD TOUCH 'N GO</h2>
-              <p class="text-xs text-slate-600" id="printSubTitle">Laporan Penggunaan Tol, Parkir & Baki Terkini</p>
-            </div>
-
-            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white no-print">
+          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI -->
+          <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold"><i class="fa-solid fa-receipt text-lg"></i></div>
                 <div>
@@ -226,11 +223,6 @@
                   <i class="fa-solid fa-rotate-left"></i>
                 </button>
 
-                <!-- BUTANG CETAK BULANAN -->
-                <button onclick="printMonthlyUsageReport()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow" title="Cetak Rekod Bulan Ini">
-                  <i class="fa-solid fa-print"></i> Cetak Laporan
-                </button>
-
                 <span class="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-xl text-xs font-bold text-white border border-white/20 ml-1" id="badgeUsageCount">0 Rekod</span>
               </div>
             </div>
@@ -254,7 +246,7 @@
               </table>
             </div>
 
-            <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500 no-print">
+            <div class="bg-slate-50 px-6 py-3 border-t flex items-center justify-between text-xs text-slate-500">
               <span id="usagePageInfo">Menunjukkan 0 daripada 0 rekod</span>
               <div class="flex gap-2">
                 <button onclick="changeUsagePage(-1)" id="btnUsagePrev" disabled class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">Sebelumnya</button>
@@ -310,12 +302,22 @@
           </div>
         </section>
 
-        <!-- LAPORAN VIEW -->
+        <!-- PAPARAN ANALISIS & LAPORAN AUDIT MESRA JURUAUDIT -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
-          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <!-- HEADER CETAKAN AUDIT (HANYA KELIHATAN PADA CETAKAN) -->
+          <div class="audit-print-header hidden">
+            <h1 class="text-xl font-bold uppercase tracking-wider">HOSPITAL KEMAMAN</h1>
+            <h2 class="text-sm font-semibold uppercase text-slate-700">PENYATA AUDIT & REKOD PERBELANJAAN KAD TOUCH 'N GO</h2>
+            <p class="text-xs text-slate-500" id="printAuditMeta">Bulan: Keseluruhan | Dicetak Pada: 2026</p>
+          </div>
+
+          <!-- BAR FILTER & BUTANG CETAK LAPORAN AUDIT -->
+          <div class="filter-container bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
             <div>
-              <h3 class="text-base font-bold text-slate-800">Laporan Analisis Perbelanjaan Kad</h3>
-              <p class="text-xs text-slate-500">Saringan penggunaan Tol & Parkir mengikut bulan kewangan</p>
+              <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-file-shield text-hospital-500"></i> Laporan Audit & Penyesuaian Kad
+              </h3>
+              <p class="text-xs text-slate-500">Penyesuaian transaksi perbelanjaan, penyerahan kad dan aliran tunai apungan</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
               <select id="filterMonth" onchange="renderAnalyticsCharts()" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
@@ -342,55 +344,132 @@
               <button onclick="resetAnalyticsFilter()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition">
                 <i class="fa-solid fa-rotate-left mr-1"></i> Reset
               </button>
+
+              <button onclick="printOfficialAuditReport()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+                <i class="fa-solid fa-print"></i> Cetak Laporan Audit
+              </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perbelanjaan</p>
-              <p class="text-2xl font-bold text-hospital-900 mt-1" id="anaTotalCost">RM 0.00</p>
-              <span class="text-[11px] text-slate-400">Tol + Parkir Bulanan</span>
+          <!-- 6 KAD KPI AUDIT & KAWALAN KEWANGAN -->
+          <div class="audit-kpi-summary grid grid-cols-2 md:grid-cols-6 gap-3">
+            <div class="audit-kpi-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-[11px] font-semibold text-slate-500 uppercase">Jumlah Belanja</p>
+              <p class="text-xl font-bold text-hospital-900 mt-1" id="anaTotalCost">RM 0.00</p>
+              <span class="text-[10px] text-slate-400">Tol + Parkir</span>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Perjalanan</p>
-              <p class="text-2xl font-bold text-sky-600 mt-1" id="anaTotalTrips">0 Perjalanan</p>
-              <span class="text-[11px] text-sky-500">Pemulangan Kad Disahkan</span>
+
+            <div class="audit-kpi-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-[11px] font-semibold text-slate-500 uppercase">Perjalanan Disahkan</p>
+              <p class="text-xl font-bold text-sky-600 mt-1" id="anaTotalTrips">0</p>
+              <span class="text-[10px] text-sky-500">Kad Telah Pulang</span>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Kos Tol</p>
-              <p class="text-2xl font-bold text-emerald-600 mt-1" id="anaTollCost">RM 0.00</p>
-              <span class="text-[11px] text-emerald-500">Penggunaan Lebuhraya</span>
+
+            <div class="audit-kpi-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-[11px] font-semibold text-slate-500 uppercase">Purata Kos / Trip</p>
+              <p class="text-xl font-bold text-indigo-600 mt-1" id="anaAvgCost">RM 0.00</p>
+              <span class="text-[10px] text-indigo-500">Kecekapan Laluan</span>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <p class="text-xs font-semibold text-slate-500 uppercase">Jumlah Kos Parkir</p>
-              <p class="text-2xl font-bold text-amber-600 mt-1" id="anaParkingCost">RM 0.00</p>
-              <span class="text-[11px] text-amber-500">Bayaran Parkir</span>
+
+            <div class="audit-kpi-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-[11px] font-semibold text-slate-500 uppercase">Baki Apungan Kad</p>
+              <p class="text-xl font-bold text-teal-600 mt-1" id="anaFleetBalance">RM 0.00</p>
+              <span class="text-[10px] text-teal-500">Nilai Semasa Kad</span>
+            </div>
+
+            <div class="audit-kpi-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-[11px] font-semibold text-slate-500 uppercase">Kos Tol</p>
+              <p class="text-xl font-bold text-emerald-600 mt-1" id="anaTollCost">RM 0.00</p>
+              <span class="text-[10px] text-emerald-500">Lebuhraya</span>
+            </div>
+
+            <div class="audit-kpi-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <p class="text-[11px] font-semibold text-slate-500 uppercase">Kos Parkir</p>
+              <p class="text-xl font-bold text-amber-600 mt-1" id="anaParkingCost">RM 0.00</p>
+              <span class="text-[10px] text-amber-500">Bayaran Premis</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4"><i class="fa-solid fa-truck-medical text-hospital-500 mr-2"></i>Kenderaan Paling Banyak Bergerak (Bil. Perjalanan)</h4>
-              <canvas id="chartTopVehicles"></canvas>
+          <!-- CARTA ANALISIS KECEKAPAN AUDIT -->
+          <div class="chart-container grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm md:col-span-2">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-chart-line text-hospital-500 mr-2"></i>Trend Perbelanjaan Bulanan Sepanjang Tahun (RM)</h4>
+              <canvas id="chartMonthlyTrend" class="max-h-56"></canvas>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h4 class="text-xs font-bold text-slate-700 uppercase mb-4"><i class="fa-solid fa-chart-pie text-amber-500 mr-2"></i>Nisbah Perbelanjaan (Tol vs Parkir)</h4>
-              <div class="max-w-xs mx-auto"><canvas id="chartCostBreakdown"></canvas></div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-chart-pie text-amber-500 mr-2"></i>Nisbah Perbelanjaan</h4>
+              <div class="max-w-[190px] mx-auto"><canvas id="chartCostBreakdown"></canvas></div>
             </div>
           </div>
 
-          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h4 class="text-xs font-bold text-slate-700 uppercase border-b pb-2"><i class="fa-solid fa-users text-purple-500 mr-2"></i>Statistik Penggunaan Kad Mengikut Pemandu</h4>
-            <div class="overflow-x-auto max-h-48 custom-scrollbar">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-500 font-semibold">
-                  <tr><th class="p-2">Nama Pemandu</th><th class="p-2">ID Pemandu</th><th class="p-2 text-center">Jumlah Perjalanan</th></tr>
+          <div class="chart-container grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-truck-medical text-sky-500 mr-2"></i>Kekerapan Perjalanan Mengikut Kenderaan</h4>
+              <canvas id="chartTopVehicles" class="max-h-52"></canvas>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-user-check text-purple-500 mr-2"></i>Rekod Pemandu Berdaftar</h4>
+              <div class="overflow-x-auto max-h-52 custom-scrollbar">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-50 text-slate-500 font-semibold">
+                    <tr><th class="p-2">Nama Pemandu</th><th class="p-2">ID Pemandu</th><th class="p-2 text-center">Jumlah Perjalanan</th></tr>
+                  </thead>
+                  <tbody id="anaDriverTableBody">
+                    <tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada rekod pemandu</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- JADUAL PENYESUAIAN JEJAK AUDIT & RANTAIAN MILIKAN (CHAIN OF CUSTODY) -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-center border-b pb-3 no-print">
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 uppercase"><i class="fa-solid fa-list-check text-emerald-600 mr-2"></i>Jejak Audit Transaksi & Penyerahan Kad (*Audit Trail*)</h4>
+                <p class="text-xs text-slate-500">Mengesahkan pegawai penyerah, pemandu yang mengambil tanggungjawab, destinasi rasmi, dan baki akhir.</p>
+              </div>
+              <span class="text-xs font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg" id="auditRowCount">0 Transaksi Disahkan</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="audit-table w-full text-left text-xs text-slate-700">
+                <thead class="bg-slate-50 uppercase font-bold text-slate-800 border-b">
+                  <tr>
+                    <th class="p-2.5">Tarikh/Masa</th>
+                    <th class="p-2.5">Kenderaan / No Kad</th>
+                    <th class="p-2.5">Pemandu (Penerima)</th>
+                    <th class="p-2.5">Penyelia (Penyerah)</th>
+                    <th class="p-2.5">Destinasi / Tujuan</th>
+                    <th class="p-2.5 text-right">Tol (RM)</th>
+                    <th class="p-2.5 text-right">Parkir (RM)</th>
+                    <th class="p-2.5 text-right">Baki Akhir (RM)</th>
+                  </tr>
                 </thead>
-                <tbody id="anaDriverTableBody">
-                  <tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada rekod pemandu</td></tr>
+                <tbody id="auditTableBody">
+                  <tr><td colspan="8" class="p-4 text-center text-slate-400">Tiada rekod audit ditemui bagi tapisan ini.</td></tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- RUANGAN TANDATANGAN DAN PENGESAHAN CETAKAN AUDIT -->
+            <div class="audit-signature-box hidden">
+              <div class="text-center w-64">
+                <p class="text-xs font-bold uppercase mb-16">Disediakan Oleh (Penyelia Pengangkutan):</p>
+                <div class="border-t border-slate-800 pt-1">
+                  <p class="text-xs font-bold">(..........................................................)</p>
+                  <p class="text-[10px] text-slate-500">Tarikh: ________________________</p>
+                </div>
+              </div>
+              <div class="text-center w-64">
+                <p class="text-xs font-bold uppercase mb-16">Disemak & Disahkan Oleh (Pengarah / Pentadbir):</p>
+                <div class="border-t border-slate-800 pt-1">
+                  <p class="text-xs font-bold">(..........................................................)</p>
+                  <p class="text-[10px] text-slate-500">Cop Jawatan: ____________________</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -490,7 +569,7 @@
   <script>
     let currentUser = null;
     let dbData = { cards: [], vehicles: [], users: [], holders: [], issues: [] };
-    let chartPieInstance = null, chartVehicleInstance = null;
+    let chartPieInstance = null, chartVehicleInstance = null, chartTrendInstance = null;
 
     let initialCardBalance = 0;
 
@@ -662,7 +741,6 @@
       renderPendingCardsPage();
     }
 
-    // FUNGSI PENYEDIAAN LIST PENGGUNAAN KAD (DENGAN DESTINASI TUGASAN)
     function prepareUsageCardsList() {
       allUsageCardsList = [];
       (dbData.issues || []).forEach(iss => {
@@ -692,7 +770,6 @@
           if (parkMatch) parkAmt = parseFloat(parkMatch[1]) || 0;
           if (bakiMatch) bakiAmt = parseFloat(bakiMatch[1]) || 0;
 
-          // Dapatkan Destinasi daripada rekod Pengeluaran yang berkaitan
           let destinationText = '-';
           const issueMatch = (dbData.issues || []).find(orig => 
             String(orig.ID_KAD) === String(iss.ID_KAD) && 
@@ -792,46 +869,6 @@
       renderUsageCardsPage();
     }
 
-    // FUNGSI KHAS CETAK REKOD BULANAN
-    function printMonthlyUsageReport() {
-      const monthSelect = document.getElementById('dashUsageMonth');
-      const yearSelect = document.getElementById('dashUsageYear');
-      const monthName = monthSelect.options[monthSelect.selectedIndex].text;
-      const yearVal = yearSelect.value;
-
-      document.getElementById('printSubTitle').innerText = `Laporan Bulan: ${monthName} ${yearVal} (Hospital Kemaman)`;
-
-      // Paparkan SEMUA rekod bulan ini semasa cetak (bukan terhad 10 rekod pagination)
-      const tbody = document.getElementById('dashUsageCardsBody');
-      const originalHTML = tbody.innerHTML;
-
-      if (filteredUsageCardsList.length === 0) {
-        showError("Tiada rekod untuk dicetak bagi bulan ini.");
-        return;
-      }
-
-      tbody.innerHTML = '';
-      filteredUsageCardsList.forEach(u => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${u.timestamp}</td>
-            <td><b>${u.driver}</b></td>
-            <td>${u.vehicleReg} (${u.cardId})</td>
-            <td>${u.destination}</td>
-            <td style="text-align:right;">RM ${u.toll.toFixed(2)}</td>
-            <td style="text-align:right;">RM ${u.parking.toFixed(2)}</td>
-            <td style="text-align:right;"><b>RM ${u.balance.toFixed(2)}</b></td>
-          </tr>
-        `;
-      });
-
-      window.print();
-
-      // Kembalikan paparan asal pagination selepas cetak
-      tbody.innerHTML = originalHTML;
-      renderUsageCardsPage();
-    }
-
     function renderCardsTable() {
       const tbody = document.getElementById('cardsTableBody');
       if (!tbody) return;
@@ -903,6 +940,7 @@
       });
     }
 
+    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -910,19 +948,39 @@
       let totalToll = 0, totalPark = 0, totalTrips = 0;
       const vehicleTripCounts = {};
       const driverTripCounts = {};
+      const monthlyExpenseTotals = Array(12).fill(0);
+      const auditTrailRecords = [];
 
       (dbData.issues || []).forEach(iss => {
         if (!iss.TIMESTAMP) return;
-
         if (String(iss.JENIS_TRANSAKSI).toUpperCase() !== 'PEMULANGAN') return;
 
         const parts = String(iss.TIMESTAMP).split('/');
         if (parts.length >= 3) {
           const m = parts[1].padStart(2, '0');
           const y = parts[2].split(',')[0].trim();
+          const monthIdx = parseInt(m, 10) - 1;
 
+          // Kiraan amaun tol dan parkir
+          const txt = String(iss.TUJUAN || "");
+          const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
+          const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
+          const bakiMatch = txt.match(/Baki:\s*RM\s*([\d\.]+)/i);
+
+          const itemToll = tollMatch ? parseFloat(tollMatch[1]) || 0 : 0;
+          const itemPark = parkMatch ? parseFloat(parkMatch[1]) || 0 : 0;
+          const itemBaki = bakiMatch ? parseFloat(bakiMatch[1]) || 0 : 0;
+
+          // Kumpul data trend tahunan (berdasarkan tahun yang dipilih)
+          if (y === selectedYear && monthIdx >= 0 && monthIdx < 12) {
+            monthlyExpenseTotals[monthIdx] += (itemToll + itemPark);
+          }
+
+          // Tapis data bagi bulan dan tahun audit
           if ((selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear) {
             totalTrips++;
+            totalToll += itemToll;
+            totalPark += itemPark;
 
             const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
             driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
@@ -936,7 +994,6 @@
             }
 
             if (regNo === '-' || !regNo) {
-              const txt = String(iss.TUJUAN || "");
               const vehMatch = txt.match(/\[(.*?)\]/);
               if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
             }
@@ -945,45 +1002,78 @@
               vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
             }
 
-            const txt = String(iss.TUJUAN || "");
-            const tollMatch = txt.match(/Tol:\s*RM\s*([\d\.]+)/i);
-            const parkMatch = txt.match(/Parkir:\s*RM\s*([\d\.]+)/i);
+            // Dapatkan Pegawai Penyerah (Penyelia) & Destinasi dari rekod PENGELUARAN asal
+            let supervisorName = '-';
+            let destinasi = 'Tugasan Rasmi';
+            const origIssue = (dbData.issues || []).find(o => 
+              String(o.ID_KAD) === String(iss.ID_KAD) && 
+              String(o.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN' &&
+              String(o.NAMA_PENGGUNA) === String(iss.NAMA_PENGGUNA)
+            );
 
-            if (tollMatch) totalToll += parseFloat(tollMatch[1]) || 0;
-            if (parkMatch) totalPark += parseFloat(parkMatch[1]) || 0;
+            if (origIssue) {
+              supervisorName = origIssue.CATATAN || origIssue.ID_PENGGUNA || 'Penyelia Bertugas';
+              if (origIssue.TUJUAN) destinasi = String(origIssue.TUJUAN).replace(/\[.*?\]/, '').trim();
+            }
+
+            auditTrailRecords.push({
+              timestamp: iss.TIMESTAMP,
+              vehicleCard: `${regNo} (${iss.ID_KAD})`,
+              driver: driverName,
+              supervisor: supervisorName,
+              destination: destinasi,
+              toll: itemToll,
+              parking: itemPark,
+              balance: itemBaki
+            });
           }
         }
       });
 
+      // Kiraan baki keseluruhan kad hospital (Float Balance)
+      let fleetTotalBalance = 0;
+      (dbData.cards || []).forEach(c => {
+        fleetTotalBalance += (parseFloat(c.BAKI_SEMASA) || 0);
+      });
+
       const grandTotal = totalToll + totalPark;
+      const avgCostPerTrip = totalTrips > 0 ? (grandTotal / totalTrips) : 0;
+
+      // Papar pada Kad KPI Eksekutif
       document.getElementById('anaTotalCost').innerText = "RM " + grandTotal.toFixed(2);
-      document.getElementById('anaTotalTrips').innerText = totalTrips + " Perjalanan";
+      document.getElementById('anaTotalTrips').innerText = totalTrips.toString();
+      document.getElementById('anaAvgCost').innerText = "RM " + avgCostPerTrip.toFixed(2);
+      document.getElementById('anaFleetBalance').innerText = "RM " + fleetTotalBalance.toFixed(2);
       document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
       document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
 
-      const vehLabels = Object.keys(vehicleTripCounts);
-      const vehData = Object.values(vehicleTripCounts);
-
-      const ctxVeh = document.getElementById('chartTopVehicles').getContext('2d');
-      if (chartVehicleInstance) chartVehicleInstance.destroy();
-      chartVehicleInstance = new Chart(ctxVeh, {
-        type: 'bar',
+      // CARTA 1: TREND BULANAN SEPANJANG TAHUN (LINE CHART)
+      const ctxTrend = document.getElementById('chartMonthlyTrend').getContext('2d');
+      if (chartTrendInstance) chartTrendInstance.destroy();
+      chartTrendInstance = new Chart(ctxTrend, {
+        type: 'line',
         data: {
-          labels: vehLabels.length ? vehLabels : ['Tiada Pergerakan Kenderaan'],
+          labels: ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'],
           datasets: [{
-            label: 'Kekerapan Perjalanan',
-            data: vehData.length ? vehData : [0],
-            backgroundColor: '#0284c7',
-            borderRadius: 6
+            label: `Perbelanjaan Tahun ${selectedYear} (RM)`,
+            data: monthlyExpenseTotals,
+            borderColor: '#0284c7',
+            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2,
+            pointRadius: 4
           }]
         },
-        options: { 
-          responsive: true, 
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+          scales: { y: { beginAtZero: true } }
         }
       });
 
+      // CARTA 2: NISBAH BELANJA (DOUGHNUT)
       const ctxPie = document.getElementById('chartCostBreakdown').getContext('2d');
       if (chartPieInstance) chartPieInstance.destroy();
       chartPieInstance = new Chart(ctxPie, {
@@ -998,10 +1088,34 @@
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
 
+      // CARTA 3: KEKERAPAN KENDERAAN (BAR CHART)
+      const vehLabels = Object.keys(vehicleTripCounts);
+      const vehData = Object.values(vehicleTripCounts);
+      const ctxVeh = document.getElementById('chartTopVehicles').getContext('2d');
+      if (chartVehicleInstance) chartVehicleInstance.destroy();
+      chartVehicleInstance = new Chart(ctxVeh, {
+        type: 'bar',
+        data: {
+          labels: vehLabels.length ? vehLabels : ['Tiada Pergerakan'],
+          datasets: [{
+            label: 'Bil. Perjalanan',
+            data: vehData.length ? vehData : [0],
+            backgroundColor: '#0284c7',
+            borderRadius: 6
+          }]
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+
+      // JADUAL RINGKASAN PEMANDU
       const driverBody = document.getElementById('anaDriverTableBody');
       driverBody.innerHTML = '';
       const driverKeys = Object.keys(driverTripCounts);
-
       if (driverKeys.length === 0) {
         driverBody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-slate-400">Tiada rekod pemandu</td></tr>';
       } else {
@@ -1016,6 +1130,41 @@
           `;
         });
       }
+
+      // JADUAL PENYESUAIAN JEJAK AUDIT
+      const auditTbody = document.getElementById('auditTableBody');
+      auditTbody.innerHTML = '';
+      document.getElementById('auditRowCount').innerText = `${auditTrailRecords.length} Transaksi Disahkan`;
+
+      if (auditTrailRecords.length === 0) {
+        auditTbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod perbelanjaan ditemui bagi tempoh audit ini.</td></tr>';
+      } else {
+        auditTrailRecords.forEach(r => {
+          auditTbody.innerHTML += `
+            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+              <td class="p-2.5 text-slate-500 font-medium">${r.timestamp}</td>
+              <td class="p-2.5 font-bold text-slate-800">${r.vehicleCard}</td>
+              <td class="p-2.5 font-semibold text-slate-700">${r.driver}</td>
+              <td class="p-2.5 text-slate-600">${r.supervisor}</td>
+              <td class="p-2.5 text-slate-600 max-w-xs truncate">${r.destination}</td>
+              <td class="p-2.5 text-right font-semibold text-emerald-600">RM ${r.toll.toFixed(2)}</td>
+              <td class="p-2.5 text-right font-semibold text-amber-600">RM ${r.parking.toFixed(2)}</td>
+              <td class="p-2.5 text-right font-bold text-hospital-900">RM ${r.balance.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    // FUNGSI CETAK LAPORAN AUDIT RASMI (LENGKAP COP & TANDATANGAN)
+    function printOfficialAuditReport() {
+      const monthSelect = document.getElementById('filterMonth');
+      const yearSelect = document.getElementById('filterYear');
+      const monthName = monthSelect.options[monthSelect.selectedIndex].text;
+      const yearVal = yearSelect.value;
+
+      document.getElementById('printAuditMeta').innerText = `Penyata Tempoh: ${monthName} ${yearVal} | Unit Pengangkutan Hospital Kemaman`;
+      window.print();
     }
 
     function resetAnalyticsFilter() {
@@ -1050,12 +1199,10 @@
       const userSelect = document.getElementById('issueUserId');
       if (userSelect) {
         userSelect.innerHTML = '<option value="">-- Pilih Pemandu --</option>';
-        
         const driversOnly = (dbData.users || []).filter(u => {
           const isAktif = String(u.STATUS).toUpperCase() === 'AKTIF';
           const isPemanduJawatan = String(u.JAWATAN || "").toUpperCase().includes('PEMANDU');
           const isPemanduPeranan = String(u.PERANAN || "").toUpperCase().includes('PEMANDU') || String(u.PERANAN || "").toUpperCase() === 'USER';
-          
           return isAktif && (isPemanduJawatan || isPemanduPeranan);
         });
 
