@@ -27,18 +27,19 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
     @media print {
-      body { background: white !important; color: black !important; padding: 0 !important; font-size: 9pt !important; }
+      body { background: white !important; color: black !important; padding: 0 !important; font-size: 8.5pt !important; }
       #sidebar, header, #loginScreen, #loadingOverlay, #toastContainer, .no-print,
       #view-dashboard, #view-cards, #view-bakiKad, #view-issueCard, #view-returnCard,
       .filter-container, .chart-container { display: none !important; }
       #view-analytics { display: block !important; padding: 0 !important; }
-      .audit-print-header { display: block !important; text-align: center; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-      .audit-table { width: 100% !important; border-collapse: collapse !important; margin-top: 10px !important; }
-      .audit-table th, .audit-table td { border: 1px solid #444 !important; padding: 5px 6px !important; color: black !important; }
+      .audit-print-header { display: block !important; text-align: center; margin-bottom: 12px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+      .audit-table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; }
+      .audit-table th, .audit-table td { border: 1px solid #444 !important; padding: 4px 6px !important; color: black !important; }
       .audit-table thead { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
-      .audit-kpi-summary { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; margin-bottom: 15px !important; }
-      .audit-kpi-card { border: 1px solid #888 !important; padding: 8px !important; text-align: center !important; }
-      .audit-signature-box { display: flex !important; justify-content: space-between !important; margin-top: 35px !important; page-break-inside: avoid; }
+      .audit-kpi-summary { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; margin-bottom: 12px !important; }
+      .audit-kpi-card { border: 1px solid #888 !important; padding: 6px !important; text-align: center !important; }
+      .audit-signature-box { display: flex !important; justify-content: space-between !important; margin-top: 25px !important; page-break-inside: avoid; }
+      .page-break { page-break-before: always; }
     }
   </style>
 </head>
@@ -195,7 +196,7 @@
             </div>
           </div>
 
-          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (DENGAN FILTER BULAN, TAHUN & NO PLAT) -->
+          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI -->
           <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
               <div class="flex items-center gap-3">
@@ -228,7 +229,6 @@
                   <option value="2025" class="text-slate-800">2025</option>
                 </select>
 
-                <!-- FILTER BARU: NO. PLAT KENDERAAN -->
                 <select id="dashUsageVehicle" onchange="filterDashUsageList()" class="px-3 py-1.5 bg-white/10 text-white rounded-xl text-xs font-semibold border border-white/20 outline-none cursor-pointer focus:bg-hospital-900">
                   <option value="ALL" class="text-slate-800">-- Semua Kenderaan --</option>
                 </select>
@@ -316,7 +316,7 @@
           </div>
         </section>
 
-        <!-- PAPARAN ANALISIS & LAPORAN AUDIT MESRA JURUAUDIT -->
+        <!-- PAPARAN ANALISIS & LAPORAN AUDIT MESRA JURUAUDIT & PENGARAH -->
         <section id="view-analytics" class="tab-view hidden space-y-6">
           <div class="audit-print-header hidden">
             <h1 class="text-xl font-bold uppercase tracking-wider">HOSPITAL KEMAMAN</h1>
@@ -330,7 +330,7 @@
               <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-file-shield text-hospital-500"></i> Laporan Audit & Penyesuaian Kad
               </h3>
-              <p class="text-xs text-slate-500">Penyesuaian transaksi perbelanjaan, penyerahan kad dan aliran tunai apungan</p>
+              <p class="text-xs text-slate-500">Penyesuaian transaksi perbelanjaan, penyerahan kad dan kos penggunaan mengikut kenderaan</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
               <select id="filterMonth" onchange="renderAnalyticsCharts()" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
@@ -403,6 +403,38 @@
             </div>
           </div>
 
+          <!-- JADUAL KEHENDAK PENGARAH: KOS & USAGE PENGGUNAAN MENGIKUT NO. PLAT KENDERAAN -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-center border-b pb-3">
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
+                  <i class="fa-solid fa-car-side text-hospital-500"></i> Ringkasan Kos Penggunaan Mengikut No. Plat Kenderaan
+                </h4>
+                <p class="text-xs text-slate-500">Jumlah amaun kos tol, parkir, dan baki semasa pada kad mengikut setiap aset kenderaan hospital</p>
+              </div>
+              <span class="text-xs font-bold px-3 py-1 bg-sky-50 text-hospital-800 border border-sky-200 rounded-lg" id="vehicleCostCount">0 Kenderaan Terlibat</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="audit-table w-full text-left text-xs text-slate-700">
+                <thead class="bg-sky-50/70 uppercase font-bold text-hospital-900 border-b">
+                  <tr>
+                    <th class="p-2.5">No. Plat Kenderaan</th>
+                    <th class="p-2.5">ID Kad Padanan</th>
+                    <th class="p-2.5 text-center">Bil. Perjalanan</th>
+                    <th class="p-2.5 text-right">Jumlah Tol (RM)</th>
+                    <th class="p-2.5 text-right">Jumlah Parkir (RM)</th>
+                    <th class="p-2.5 text-right">Jumlah Kos Digunakan (RM)</th>
+                    <th class="p-2.5 text-right">Baki Kad Terkini (RM)</th>
+                  </tr>
+                </thead>
+                <tbody id="vehicleCostSummaryBody">
+                  <tr><td colspan="7" class="p-4 text-center text-slate-400">Tiada rekod penggunaan kenderaan bagi tempoh ini.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <!-- CARTA ANALISIS KECEKAPAN AUDIT -->
           <div class="chart-container grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm md:col-span-2">
@@ -418,7 +450,7 @@
 
           <div class="chart-container grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-              <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-truck-medical text-sky-500 mr-2"></i>Kekerapan Perjalanan Mengikut Kenderaan</h4>
+              <h4 class="text-xs font-bold text-slate-700 uppercase mb-3"><i class="fa-solid fa-money-bill-trend-up text-sky-500 mr-2"></i>Jumlah Kos Perbelanjaan Mengikut Kenderaan (RM)</h4>
               <div class="h-52 relative"><canvas id="chartTopVehicles"></canvas></div>
             </div>
 
@@ -811,7 +843,6 @@
       });
     }
 
-    // FUNGSI PENAPIS PENGGUNAAN KAD (BULAN, TAHUN & NO PLAT)
     function filterDashUsageList() {
       const selectedMonth = document.getElementById('dashUsageMonth').value;
       const selectedYear = document.getElementById('dashUsageYear').value;
@@ -961,13 +992,13 @@
       });
     }
 
-    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP
+    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP (TERMASUK KOS MENGIKUT NO PLAT KENDERAAN)
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
 
       let totalToll = 0, totalPark = 0, totalTrips = 0;
-      const vehicleTripCounts = {};
+      const vehicleStats = {}; // Menyimpan trips, toll, parkir, dan kos keseluruhan mengikut kenderaan
       const driverTripCounts = {};
       const monthlyExpenseTotals = Array(12).fill(0);
       const auditTrailRecords = [];
@@ -1004,6 +1035,7 @@
             driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
 
             let regNo = '-';
+            let cardId = iss.ID_KAD || '-';
             const cardObj = (dbData.cards || []).find(c => String(c.ID_KAD) === String(iss.ID_KAD));
             if (cardObj) {
               const vehObj = (dbData.vehicles || []).find(v => String(v.ID_KENDERAAN) === String(cardObj.ID_KENDERAAN));
@@ -1016,10 +1048,25 @@
               if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
             }
 
+            // KUMPULKAN STATISTIK & KOS MENGIKUT NO. PLAT KENDERAAN
             if (regNo !== '-' && regNo !== '') {
-              vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
+              if (!vehicleStats[regNo]) {
+                vehicleStats[regNo] = {
+                  cardId: cardId,
+                  trips: 0,
+                  toll: 0,
+                  parking: 0,
+                  totalCost: 0,
+                  currentCardBalance: cardObj ? (parseFloat(cardObj.BAKI_SEMASA) || 0) : 0
+                };
+              }
+              vehicleStats[regNo].trips += 1;
+              vehicleStats[regNo].toll += itemToll;
+              vehicleStats[regNo].parking += itemPark;
+              vehicleStats[regNo].totalCost += (itemToll + itemPark);
             }
 
+            // PADANAN TEPAT: Membaca lajur H (NAMA_PEGAWAI_PENYERAH) dari tab ISSUES
             let supervisorName = '-';
             let destinasi = 'Tugasan Rasmi';
             const origIssue = (dbData.issues || []).find(o => 
@@ -1062,6 +1109,34 @@
       document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
       document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
 
+      // PAPARAN JADUAL KOS MENGIKUT NO. PLAT KENDERAAN (KEHENDAK PENGARAH)
+      const vehCostTbody = document.getElementById('vehicleCostSummaryBody');
+      vehCostTbody.innerHTML = '';
+      const vehPlates = Object.keys(vehicleStats);
+      document.getElementById('vehicleCostCount').innerText = `${vehPlates.length} Kenderaan Terlibat`;
+
+      if (vehPlates.length === 0) {
+        vehCostTbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400 font-semibold">Tiada rekod penggunaan kenderaan bagi tempoh ini.</td></tr>';
+      } else {
+        // Susun kenderaan daripada kos tertinggi ke terendah
+        vehPlates.sort((a, b) => vehicleStats[b].totalCost - vehicleStats[a].totalCost);
+
+        vehPlates.forEach(plate => {
+          const v = vehicleStats[plate];
+          vehCostTbody.innerHTML += `
+            <tr class="border-b border-slate-100 hover:bg-sky-50/40 transition">
+              <td class="p-2.5 font-bold text-slate-800"><i class="fa-solid fa-car text-hospital-500 mr-2"></i>${plate}</td>
+              <td class="p-2.5 font-mono text-slate-600">${v.cardId}</td>
+              <td class="p-2.5 text-center font-bold text-slate-700">${v.trips} kali</td>
+              <td class="p-2.5 text-right font-semibold text-emerald-600">RM ${v.toll.toFixed(2)}</td>
+              <td class="p-2.5 text-right font-semibold text-amber-600">RM ${v.parking.toFixed(2)}</td>
+              <td class="p-2.5 text-right font-bold text-hospital-900 bg-sky-50/50">RM ${v.totalCost.toFixed(2)}</td>
+              <td class="p-2.5 text-right font-bold text-emerald-700">RM ${v.currentCardBalance.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+      }
+
       // CARTA 1: TREND BULANAN SEPANJANG TAHUN
       const ctxTrend = document.getElementById('chartMonthlyTrend').getContext('2d');
       if (chartTrendInstance) chartTrendInstance.destroy();
@@ -1103,18 +1178,17 @@
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
 
-      // CARTA 3: KEKERAPAN KENDERAAN
-      const vehLabels = Object.keys(vehicleTripCounts);
-      const vehData = Object.values(vehicleTripCounts);
+      // CARTA 3: KOS PERBELANJAAN MENGIKUT KENDERAAN (BAR CHART)
+      const vehCostData = vehPlates.map(p => vehicleStats[p].totalCost);
       const ctxVeh = document.getElementById('chartTopVehicles').getContext('2d');
       if (chartVehicleInstance) chartVehicleInstance.destroy();
       chartVehicleInstance = new Chart(ctxVeh, {
         type: 'bar',
         data: {
-          labels: vehLabels.length ? vehLabels : ['Tiada Pergerakan'],
+          labels: vehPlates.length ? vehPlates : ['Tiada Pergerakan'],
           datasets: [{
-            label: 'Bil. Perjalanan',
-            data: vehData.length ? vehData : [0],
+            label: 'Jumlah Kos (RM)',
+            data: vehCostData.length ? vehCostData : [0],
             backgroundColor: '#0284c7',
             borderRadius: 6
           }]
@@ -1123,7 +1197,7 @@
           responsive: true, 
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+          scales: { y: { beginAtZero: true } }
         }
       });
 
@@ -1198,7 +1272,6 @@
         });
       }
 
-      // DROPDOWN FILTER KENDERAAN PADA DASHBOARD
       const dashVehFilter = document.getElementById('dashUsageVehicle');
       if (dashVehFilter) {
         const currentVal = dashVehFilter.value;
