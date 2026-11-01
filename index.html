@@ -46,7 +46,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbyntijJcQHXcu-vGdr0mjYtdcz2g-ygjAN4v1RLoSQJgX4UhgST4FGng1VbqsOcg_v7/exec";
+    const API_URL = "https://script.google.com/a/macros/moh/gov.my/s/AKfycbzIk5OhGArGOPaGPuv_ryjSLJFPs2FtRougoW1pvGjl2Soyyk-317wj95COT3BeEGTjqA/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -195,7 +195,7 @@
             </div>
           </div>
 
-          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI -->
+          <!-- SENARAI REKOD PENGGUNAAN KAD TERKINI (DENGAN FILTER BULAN, TAHUN & NO PLAT) -->
           <div class="bg-white rounded-3xl border border-sky-200 shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-hospital-800 via-hospital-900 to-navy-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
               <div class="flex items-center gap-3">
@@ -226,6 +226,11 @@
                 <select id="dashUsageYear" onchange="filterDashUsageList()" class="px-3 py-1.5 bg-white/10 text-white rounded-xl text-xs font-semibold border border-white/20 outline-none cursor-pointer focus:bg-hospital-900">
                   <option value="2026" class="text-slate-800">2026</option>
                   <option value="2025" class="text-slate-800">2025</option>
+                </select>
+
+                <!-- FILTER BARU: NO. PLAT KENDERAAN -->
+                <select id="dashUsageVehicle" onchange="filterDashUsageList()" class="px-3 py-1.5 bg-white/10 text-white rounded-xl text-xs font-semibold border border-white/20 outline-none cursor-pointer focus:bg-hospital-900">
+                  <option value="ALL" class="text-slate-800">-- Semua Kenderaan --</option>
                 </select>
 
                 <button onclick="resetDashUsageFilter()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-semibold transition" title="Reset Filter">
@@ -657,9 +662,9 @@
         const res = await callApi('getInitialData', {});
         if (res.success) {
           dbData = res.data;
+          populateDropdowns();
           renderDashboard();
           renderCardsTable();
-          populateDropdowns();
           renderAnalyticsCharts();
         }
       } catch (e) {
@@ -806,9 +811,11 @@
       });
     }
 
+    // FUNGSI PENAPIS PENGGUNAAN KAD (BULAN, TAHUN & NO PLAT)
     function filterDashUsageList() {
       const selectedMonth = document.getElementById('dashUsageMonth').value;
       const selectedYear = document.getElementById('dashUsageYear').value;
+      const selectedVehicle = document.getElementById('dashUsageVehicle').value;
 
       filteredUsageCardsList = allUsageCardsList.filter(item => {
         if (!item.timestamp || item.timestamp === '-') return false;
@@ -816,7 +823,12 @@
         if (parts.length >= 3) {
           const m = parts[1].padStart(2, '0');
           const y = parts[2].split(',')[0].trim();
-          return (selectedMonth === 'ALL' || m === selectedMonth) && y === selectedYear;
+
+          const matchMonth = (selectedMonth === 'ALL' || m === selectedMonth);
+          const matchYear = (y === selectedYear);
+          const matchVehicle = (selectedVehicle === 'ALL' || String(item.vehicleReg).trim().toUpperCase() === String(selectedVehicle).trim().toUpperCase());
+
+          return matchMonth && matchYear && matchVehicle;
         }
         return false;
       });
@@ -829,6 +841,7 @@
     function resetDashUsageFilter() {
       document.getElementById('dashUsageMonth').value = 'ALL';
       document.getElementById('dashUsageYear').value = '2026';
+      document.getElementById('dashUsageVehicle').value = 'ALL';
       filterDashUsageList();
     }
 
@@ -948,7 +961,7 @@
       });
     }
 
-    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP (PADANAN LAJUR H: NAMA_PEGAWAI_PENYERAH)
+    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -1007,7 +1020,6 @@
               vehicleTripCounts[regNo] = (vehicleTripCounts[regNo] || 0) + 1;
             }
 
-            // PADANAN TEPAT: Membaca lajur H (NAMA_PEGAWAI_PENYERAH) dari tab ISSUES
             let supervisorName = '-';
             let destinasi = 'Tugasan Rasmi';
             const origIssue = (dbData.issues || []).find(o => 
@@ -1134,7 +1146,7 @@
         });
       }
 
-      // JADUAL PENYESUAIAN JEJAK AUDIT
+      // PAPARAN JADUAL JEJAK AUDIT
       const auditTbody = document.getElementById('auditTableBody');
       auditTbody.innerHTML = '';
       document.getElementById('auditRowCount').innerText = `${auditTrailRecords.length} Transaksi Disahkan`;
@@ -1184,6 +1196,19 @@
           const vName = v.NAMA_KENDERAAN || '';
           vehicleSelect.innerHTML += `<option value="${v.ID_KENDERAAN}">${regNo} ${vName ? ' - ' + vName : ''}</option>`;
         });
+      }
+
+      // DROPDOWN FILTER KENDERAAN PADA DASHBOARD
+      const dashVehFilter = document.getElementById('dashUsageVehicle');
+      if (dashVehFilter) {
+        const currentVal = dashVehFilter.value;
+        dashVehFilter.innerHTML = '<option value="ALL" class="text-slate-800">-- Semua Kenderaan --</option>';
+        (dbData.vehicles || []).forEach(v => {
+          if (v.NO_PENDAFTARAN) {
+            dashVehFilter.innerHTML += `<option value="${v.NO_PENDAFTARAN}" class="text-slate-800">${v.NO_PENDAFTARAN}</option>`;
+          }
+        });
+        dashVehFilter.value = currentVal || 'ALL';
       }
 
       const supervisorSelect = document.getElementById('issueSupervisorId');
