@@ -46,7 +46,7 @@
 
   <script>
     // ⚠️ GANTIKAN DENGAN WEB APP URL GOOGLE APPS SCRIPT SEBENAR ANDA
-    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbzIk5OhGArGOPaGPuv_ryjSLJFPs2FtRougoW1pvGjl2Soyyk-317wj95COT3BeEGTjqA/exec";
+    const API_URL = "https://script.google.com/a/macros/moh.gov.my/s/AKfycbylphTJLo-mvSazdxMuZJMVxVFLfzpCfGAArCR8bSUjF2UwDn0t1Rge3K1zsJ-xa57e8Q/exec";
   </script>
 
   <!-- OVERLAY LOADING & NOTIFIKASI -->
@@ -323,7 +323,7 @@
             <p class="text-xs text-slate-500" id="printAuditMeta">Penyata Tempoh: Keseluruhan</p>
           </div>
 
-          <!-- BAR FILTER LENGKAP: BULAN/TAHUN ATAU JULAT TARIKH (DARI - HINGGA) -->
+          <!-- BAR FILTER LENGKAP -->
           <div class="filter-container bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4 no-print">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-3">
               <div>
@@ -338,7 +338,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-              <!-- OPSI 1: PENAPIS BULAN & TAHUN -->
               <div class="md:col-span-2">
                 <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Bulan</label>
                 <select id="filterMonth" onchange="clearCustomDatesAndRender()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
@@ -366,7 +365,6 @@
                 </select>
               </div>
 
-              <!-- OPSI 2: JULAT TARIKH (DARI - HINGGA) PILIHAN PENGARAH -->
               <div class="md:col-span-3">
                 <label class="block text-[11px] font-bold text-hospital-800 uppercase mb-1 flex items-center gap-1">
                   <i class="fa-regular fa-calendar"></i> Dari Tarikh (Mula)
@@ -432,7 +430,7 @@
             </div>
           </div>
 
-          <!-- JADUAL KHAS PERMINTAAN PENGARAH: KOS PENGGUNAAN MENGIKUT NO PLAT KENDERAAN -->
+          <!-- JADUAL KOS PENGGUNAAN MENGIKUT NO PLAT KENDERAAN -->
           <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
             <div class="flex justify-between items-center border-b pb-3">
               <div>
@@ -636,6 +634,38 @@
     let allUsageCardsList = [];
     let filteredUsageCardsList = [];
 
+    // FUNGSI PENUKAR FORMAT TARIKH MALAYSIA KE TIMESTAMP (MS)
+    function parseMyDateTime(str) {
+      if (!str || str === '-') return 0;
+      try {
+        const parts = str.split(',');
+        if (parts.length < 2) return 0;
+        const dParts = parts[0].trim().split('/');
+        if (dParts.length < 3) return 0;
+        
+        let day = parseInt(dParts[0], 10);
+        let month = parseInt(dParts[1], 10) - 1;
+        let year = parseInt(dParts[2], 10);
+
+        let timeStr = parts[1].trim();
+        let isPM = timeStr.includes('PTG') || timeStr.includes('MLM') || timeStr.includes('PM');
+        let isAM = timeStr.includes('PG') || timeStr.includes('AM');
+
+        let cleanTime = timeStr.replace(/(PG|PTG|MLM|AM|PM)/gi, '').trim();
+        let tParts = cleanTime.split(':');
+        let hour = parseInt(tParts[0], 10);
+        let minute = parseInt(tParts[1] || '0', 10);
+        let second = parseInt(tParts[2] || '0', 10);
+
+        if (isPM && hour < 12) hour += 12;
+        if (isAM && hour === 12) hour = 0;
+
+        return new Date(year, month, day, hour, minute, second).getTime();
+      } catch (e) {
+        return 0;
+      }
+    }
+
     function callApi(action, payload = {}) {
       showLoading();
       return new Promise((resolve, reject) => {
@@ -795,6 +825,7 @@
       renderPendingCardsPage();
     }
 
+    // PENYEDIAAN REKOD PENGGUNAAN DENGAN PADANAN GARIS MASA TEPAT (CHRONOLOGICAL PAIRING)
     function prepareUsageCardsList() {
       allUsageCardsList = [];
       (dbData.issues || []).forEach(iss => {
@@ -824,16 +855,26 @@
           if (parkMatch) parkAmt = parseFloat(parkMatch[1]) || 0;
           if (bakiMatch) bakiAmt = parseFloat(bakiMatch[1]) || 0;
 
+          // CARI PENGELUARAN YANG PALING HAMPIR SEBELUM TARIKH/MASA PEMULANGAN INI
+          const returnMs = parseMyDateTime(iss.TIMESTAMP);
           let destinationText = '-';
-          const issueMatch = (dbData.issues || []).find(orig => 
+
+          const candidates = (dbData.issues || []).filter(orig => 
             String(orig.ID_KAD) === String(iss.ID_KAD) && 
             String(orig.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN' &&
-            String(orig.NAMA_PENGGUNA) === String(iss.NAMA_PENGGUNA)
+            String(orig.NAMA_PENGGUNA).trim().toUpperCase() === String(iss.NAMA_PENGGUNA).trim().toUpperCase() &&
+            parseMyDateTime(orig.TIMESTAMP) <= returnMs
           );
 
-          if (issueMatch && issueMatch.TUJUAN) {
-            destinationText = String(issueMatch.TUJUAN).replace(/\[.*?\]/, '').trim();
-          } else {
+          if (candidates.length > 0) {
+            candidates.sort((a, b) => parseMyDateTime(b.TIMESTAMP) - parseMyDateTime(a.TIMESTAMP));
+            const matchedIssue = candidates[0];
+            if (matchedIssue && matchedIssue.TUJUAN) {
+              destinationText = String(matchedIssue.TUJUAN).replace(/\[.*?\]/, '').trim();
+            }
+          }
+
+          if (destinationText === '-' || !destinationText) {
             destinationText = txt.replace(/Pemulangan kad/i, '').replace(/\(Tol:.*?\)/i, '').replace(/\[.*?\]/, '').trim();
           }
           if (!destinationText || destinationText === '') destinationText = 'Tugasan Rasmi';
@@ -1007,7 +1048,7 @@
       renderAnalyticsCharts();
     }
 
-    // FUNGSI ANALISIS LENGKAP: MENYOKONG PENAPIS JULAT TARIKH (DARI - HINGGA) ATAU BULAN/TAHUN
+    // FUNGSI ANALISIS & LAPORAN AUDIT LENGKAP DENGAN PADANAN GARIS MASA
     function renderAnalyticsCharts() {
       const selectedMonth = document.getElementById('filterMonth').value;
       const selectedYear = document.getElementById('filterYear').value;
@@ -1027,8 +1068,7 @@
       }
 
       let totalToll = 0, totalPark = 0, totalTrips = 0;
-      const vehicleStats = {}; // Menyimpan kos terperinci per kenderaan
-      const driverTripCounts = {};
+      const vehicleStats = {};
       const monthlyExpenseTotals = Array(12).fill(0);
       const auditTrailRecords = [];
 
@@ -1036,7 +1076,6 @@
         if (!iss.TIMESTAMP) return;
         if (String(iss.JENIS_TRANSAKSI).toUpperCase() !== 'PEMULANGAN') return;
 
-        // Memecahkan format tarikh: DD/MM/YYYY
         const parts = String(iss.TIMESTAMP).split('/');
         if (parts.length >= 3) {
           const d = parts[0].padStart(2, '0');
@@ -1055,12 +1094,10 @@
           const itemPark = parkMatch ? parseFloat(parkMatch[1]) || 0 : 0;
           const itemBaki = bakiMatch ? parseFloat(bakiMatch[1]) || 0 : 0;
 
-          // Kumpul data trend tahunan untuk graf garisan
           if (y === selectedYear && monthIdx >= 0 && monthIdx < 12) {
             monthlyExpenseTotals[monthIdx] += (itemToll + itemPark);
           }
 
-          // PENENTUAN SYARAT TAPISAN (SAMA ADA JULAT TARIKH ATAU BULAN/TAHUN)
           let isMatch = false;
           if (hasCustomDateRange) {
             isMatch = (recordDateObj >= startObj && recordDateObj <= endObj);
@@ -1074,7 +1111,6 @@
             totalPark += itemPark;
 
             const driverName = iss.NAMA_PENGGUNA || 'Pemandu Tidak Dinyatakan';
-            driverTripCounts[driverName] = (driverTripCounts[driverName] || 0) + 1;
 
             let regNo = '-';
             let vName = '-';
@@ -1094,7 +1130,6 @@
               if (vehMatch && vehMatch[1]) regNo = vehMatch[1].trim();
             }
 
-            // Kumpul Pengiraan Kos Mengikut No. Plat Kenderaan
             if (regNo !== '-' && regNo !== '') {
               if (!vehicleStats[regNo]) {
                 const cBaki = cardObj ? parseFloat(cardObj.BAKI_SEMASA || 0) : 0;
@@ -1114,16 +1149,21 @@
               vehicleStats[regNo].grandTotal += (itemToll + itemPark);
             }
 
-            // Pegawai Penyerah & Destinasi
+            // PADANAN PENGELUARAN YANG TEPAT IKUT MASA
+            const returnMs = parseMyDateTime(iss.TIMESTAMP);
             let supervisorName = '-';
             let destinasi = 'Tugasan Rasmi';
-            const origIssue = (dbData.issues || []).find(o => 
-              String(o.ID_KAD) === String(iss.ID_KAD) && 
-              String(o.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN' &&
-              String(o.NAMA_PENGGUNA) === String(iss.NAMA_PENGGUNA)
+
+            const candidates = (dbData.issues || []).filter(orig => 
+              String(orig.ID_KAD) === String(iss.ID_KAD) && 
+              String(orig.JENIS_TRANSAKSI).toUpperCase() === 'PENGELUARAN' &&
+              String(orig.NAMA_PENGGUNA).trim().toUpperCase() === String(iss.NAMA_PENGGUNA).trim().toUpperCase() &&
+              parseMyDateTime(orig.TIMESTAMP) <= returnMs
             );
 
-            if (origIssue) {
+            if (candidates.length > 0) {
+              candidates.sort((a, b) => parseMyDateTime(b.TIMESTAMP) - parseMyDateTime(a.TIMESTAMP));
+              const origIssue = candidates[0];
               supervisorName = origIssue.NAMA_PEGAWAI_PENYERAH || origIssue.PEGAWAI_PENYERAH || origIssue.ID_PEGAWAI_PENYERAH || 'Penyelia Bertugas';
               if (origIssue.TUJUAN) destinasi = String(origIssue.TUJUAN).replace(/\[.*?\]/, '').trim();
             }
@@ -1157,7 +1197,7 @@
       document.getElementById('anaTollCost').innerText = "RM " + totalToll.toFixed(2);
       document.getElementById('anaParkingCost').innerText = "RM " + totalPark.toFixed(2);
 
-      // RENDERING JADUAL KOS PENUH MENGIKUT NO PLAT KENDERAAN
+      // JADUAL PECAHAN KOS MENGIKUT NO. PLAT
       const vehTableBody = document.getElementById('vehicleCostTableBody');
       vehTableBody.innerHTML = '';
       const vehicleKeys = Object.keys(vehicleStats);
@@ -1225,7 +1265,7 @@
         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
 
-      // JADUAL PENYESUAIAN JEJAK AUDIT
+      // JADUAL JEJAK AUDIT
       const auditTbody = document.getElementById('auditTableBody');
       auditTbody.innerHTML = '';
       document.getElementById('auditRowCount').innerText = `${auditTrailRecords.length} Transaksi Disahkan`;
